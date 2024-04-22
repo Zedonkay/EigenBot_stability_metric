@@ -12,8 +12,9 @@ Various tactics include understanding the "shakiness" (via FFT/Power Sensitivity
 
 ## Installation
 
-Following are dependencies for 'frequency_metric.py':
-'import argparse
+Following are dependencies for `frequency_metric.py`:
+```
+import argparse
 import glob
 import pandas as pd
 import numpy as np
@@ -23,13 +24,14 @@ from scipy.signal import welch
 from scipy.signal import find_peaks
 import os
 import natsort
-import ipdb'
+import ipdb
+```
 
 ## Usage
 
-To run 'frequency_metric.py'
+To run `frequency_metric.py`
 
-'python3 frequency_metric.py --centralized_file_path "sample_data/centralised/*.csv" --decentralized_file_path "sample_data/distributed/*.csv"'
+`python3 frequency_metric.py --centralized_file_path "sample_data/centralised/*.csv" --decentralized_file_path "sample_data/distributed/*.csv"`
 
 
 ## Contact
