@@ -3,15 +3,18 @@ import glob
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import mplcursors
 from scipy.fftpack import fft
 from scipy.signal import welch
 from scipy.signal import find_peaks
 import os
 import natsort
+import tkinter as tk
 import ipdb
+from matplotlib.widgets import Button
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-inspection_var_label = 'Acceleration in Y'
-inspection_var = 'ay'
+inspection_var = 'ax'
 terrain_type = 'Flat Terrain'
 type_left = 'Centralized Controller'
 type_right = 'Distributed Controller'
@@ -40,31 +43,96 @@ def plot_box_psd(collection_dfs, columns, collection_fs, collection_filenames):
         
     axs[0].set_title(type_left)
     axs[1].set_title(type_right)
-    title = f'PSD Distribution for {inspection_var_label} on {terrain_type} over Update Rates'
+    title = f'PSD Distribution for {inspection_var} on {terrain_type} over Update Rates'
     plt.suptitle(title)
     plt.tight_layout()
     plt.show(block=False)
 
+def plot_time_series(input_variable, collection_filenames, collection_dfs):
+    fig, axs = plt.subplots(2, 1, sharex=True)
 
+    annotations = []
 
-# def plot_box_psd(dfs, columns, fs, file_names):
-#     fig, axs = plt.subplots(1, number_of_dfs, figsize=(10, 6))
-#     psd_tuples = []
-#     psd_labels = []
-    
-#     for i, df in enumerate(dfs):
-#         for j, col in enumerate(columns):
-#             # ipdb.set_trace()
-#             freq, psd = welch(df[col], fs[i])
-#             psd_tuples.append(psd)
-#             psd_labels.append(f'{col}_{file_names[i]}')
-            
-#     axs.boxplot(psd_tuples)
-#     axs.set_xticklabels(psd_labels, rotation=45, ha='right')
-#     axs.set_xlabel('PSD Variable')
-#     axs.set_ylabel('PSD Units')
-#     plt.tight_layout()
-#     plt.show(block=False)
+    # Plot centralized_dfs
+    for i, df in enumerate(collection_dfs[0]):
+        line, = axs[0].plot(df['trunc_local_time'], df[input_variable], label=collection_filenames[0][i])
+        cursor = mplcursors.cursor(line)
+        cursor.connect("add", lambda sel, i=i: (annotations.append(sel.annotation), sel.annotation.set_text(collection_filenames[0][i] + ": " + str(sel.target[1]))))
+    axs[0].legend(bbox_to_anchor=(1.05, 1), loc='upper left', prop={'size':6}, ncol =2)
+    axs[0].set_title('Centralized')
+    axs[0].set_xlabel('Time [s]')
+    axs[0].set_ylabel(input_variable[0])
+
+    # Plot decentralized_dfs
+    for i, df in enumerate(collection_dfs[1]):
+        line, = axs[1].plot(df['trunc_local_time'], df[input_variable], label=collection_filenames[1][i])
+        cursor = mplcursors.cursor(line)
+        cursor.connect("add", lambda sel, i=i: (annotations.append(sel.annotation), sel.annotation.set_text(collection_filenames[1][i] + ": " + str(sel.target[1]))))
+    axs[1].legend(bbox_to_anchor=(1.05, 1), loc='upper left', prop={'size':6}, ncol = 2)
+    axs[1].set_title('Decentralized')
+    axs[1].set_xlabel('Time [s]')
+    axs[1].set_ylabel(input_variable[0])
+
+    # Add a button for clearing the cursors
+    button_ax = plt.axes([0.8, 0.025, 0.1, 0.04])
+    button = Button(button_ax, 'Clear Cursors', hovercolor='0.975')
+    def clear_cursors(event):
+        for annotation in annotations:
+            annotation.set_visible(False)
+        annotations.clear()
+        fig.canvas.draw()
+    button.on_clicked(clear_cursors)
+    title = f'{input_variable[0]} vs. Time on {terrain_type}'
+    plt.suptitle(title)
+    plt.tight_layout()
+    plt.show(block=False)
+
+def plot_FFT(input_variable, collection_filenames, collection_dfs):
+    fig, axs = plt.subplots(2, 1, sharex=True)
+
+    annotations = []
+
+    # Plot centralized_dfs
+    for i, df in enumerate(collection_dfs[0]):
+        # Compute FFT
+        yf = np.fft.fft(df[input_variable])
+        xf = np.fft.fftfreq(df['trunc_local_time'].size, df['trunc_local_time'][1] - df['trunc_local_time'][0])
+        
+        line, = axs[0].semilogy(xf, np.abs(yf), label=collection_filenames[0][i])
+        cursor = mplcursors.cursor(line)
+        cursor.connect("add", lambda sel, i=i: (annotations.append(sel.annotation), sel.annotation.set_text(collection_filenames[0][i] + ": " + str(sel.target[1]))))
+    axs[0].legend(bbox_to_anchor=(1.05, 1), loc='upper left', prop={'size':6}, ncol =2)
+    axs[0].set_title('Centralized')
+    axs[0].set_xlabel('Frequency [Hz]')
+    axs[0].set_ylabel('FFT of ' + input_variable[0])
+
+    # Plot decentralized_dfs
+    for i, df in enumerate(collection_dfs[1]):
+        # Compute FFT
+        yf = np.fft.fft(df[input_variable])
+        xf = np.fft.fftfreq(df['trunc_local_time'].size, df['trunc_local_time'][1] - df['trunc_local_time'][0])
+        
+        line, = axs[1].semilogy(xf, np.abs(yf), label=collection_filenames[1][i])
+        cursor = mplcursors.cursor(line)
+        cursor.connect("add", lambda sel, i=i: (annotations.append(sel.annotation), sel.annotation.set_text(collection_filenames[1][i] + ": " + str(sel.target[1]))))
+    axs[1].legend(bbox_to_anchor=(1.05, 1), loc='upper left', prop={'size':6}, ncol = 2)
+    axs[1].set_title('Decentralized')
+    axs[1].set_xlabel('Frequency [Hz]')
+    axs[1].set_ylabel('FFT of ' + input_variable[0])
+
+    # Add a button for clearing the cursors
+    button_ax = plt.axes([0.8, 0.025, 0.1, 0.04])
+    button = Button(button_ax, 'Clear Cursors', hovercolor='0.975')
+    def clear_cursors(event):
+        for annotation in annotations:
+            annotation.set_visible(False)
+        annotations.clear()
+        fig.canvas.draw()
+    button.on_clicked(clear_cursors)
+    title = f'FFT of {input_variable[0]} vs. Frequency'
+    plt.suptitle(title)
+    plt.tight_layout()
+    plt.show(block=False)
 
 def process_file(file_path):
     # Load data
@@ -97,24 +165,6 @@ def process_file(file_path):
     df['pitchRate'] = np.gradient(df['pitch'], df['trunc_local_time'])
     df['yawRate'] = np.gradient(df['yaw'], df['trunc_local_time'])
 
-    # Use the helper function to plot the data
-    # plot_data(df['trunc_local_time'], {'px': df['px'], 'py': df['py'], 'pz': df['pz']}, 'Position Subplots', 'Time (s)', 'Position (m)')
-    # plot_data(df['trunc_local_time'], {'vx': df['vx'], 'vy': df['vy'], 'vz': df['vz']}, 'Velocity Subplots', 'Time (s)', 'Velocity (m/s)')
-    # plot_data(df['trunc_local_time'], {'roll': df['roll'], 'pitch': df['pitch'], 'yaw': df['yaw']}, 'Orientation Subplots', 'Time (s)', 'Orientation (rad)')
-    # plot_data(df['trunc_local_time'], {'rollRate': df['rollRate'], 'pitchRate': df['pitchRate'], 'yawRate': df['yawRate']}, 'Angular Velocity Subplots', 'Time (s)', 'Angular Velocity (rad/s)')
-
-    # plot_fft_subplots(df['trunc_local_time'].values, {'px': df['px'].values, 'py': df['py'].values, 'pz': df['pz'].values}, 'Position FFT Subplots')
-    # plot_fft_subplots(df['trunc_local_time'].values, {'vx': df['vx'].values, 'vy': df['vy'].values, 'vz': df['vz'].values}, 'Velocity FFT Subplots')
-    # plot_fft_subplots(df['trunc_local_time'].values, {'roll': df['roll'].values, 'pitch': df['pitch'].values, 'yaw': df['yaw'].values}, 'Orientation FFT Subplots')
-    # plot_fft_subplots(df['trunc_local_time'].values, {'rollRate': df['rollRate'].values, 'pitchRate': df['pitchRate'].values, 'yawRate': df['yawRate'].values}, 'Angular Velocity FFT Subplots')
-
-    # Use the helper function to plot the PSDs
-    # plot_psd_subplots(df['trunc_local_time'].values, {'px': df['px'].values, 'py': df['py'].values, 'pz': df['pz'].values}, 'Position PSD Subplots', fs)
-    # plot_psd_subplots(df['trunc_local_time'].values, {'vx': df['vx'].values, 'vy': df['vy'].values, 'vz': df['vz'].values}, 'Velocity PSD Subplots', fs)
-    # plot_psd_subplots(df['trunc_local_time'].values, {'roll': df['roll'].values, 'pitch': df['pitch'].values, 'yaw': df['yaw'].values}, 'Orientation PSD Subplots', fs)
-    # plot_psd_subplots(df['trunc_local_time'].values, {'rollRate': df['rollRate'].values, 'pitchRate': df['pitchRate'].values, 'yawRate': df['yawRate'].values}, 'Angular Velocity PSD Subplots', fs)
-    
-
     #df is a matrix with rows being time and columns being the features
     return df, fs
 
@@ -141,7 +191,9 @@ def main(args):
     collection_dfs = [centralized_dfs, decentralized_dfs]
     collection_fs = [centralized_fs_list, decentralized_fs_list]
     collection_filenames = [centralized_file_names, decentralized_file_names]
-    plot_box_psd(collection_dfs, [inspection_var], collection_fs, collection_filenames)
+    plot_time_series([inspection_var], collection_filenames, collection_dfs)
+    plot_FFT([inspection_var], collection_filenames, collection_dfs)
+    #plot_box_psd(collection_dfs, [inspection_var], collection_fs, collection_filenames)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Frequency Metric for Centralized and Decentralized Data.')
