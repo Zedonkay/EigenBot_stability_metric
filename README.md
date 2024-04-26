@@ -33,6 +33,9 @@ To run `frequency_metric.py`
 
 `python3 frequency_metric.py --centralized_file_path "sample_data/centralised/*.csv" --decentralized_file_path "sample_data/distributed/*.csv"`
 
+For the clean dataset
+
+`python3 frequency_metric.py --centralized_file_path "clean_data/centralised/*.csv" --decentralized_file_path "clean_data/distributed/*.csv"`
 
 ## Contact
 Repository created 4/22/24
