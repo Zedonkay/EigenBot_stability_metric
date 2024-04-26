@@ -14,7 +14,7 @@ import ipdb
 from matplotlib.widgets import Button
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-inspection_var = 'ax'
+inspection_var = 'az'
 terrain_type = 'Flat Terrain'
 type_left = 'Centralized Controller'
 type_right = 'Distributed Controller'
@@ -87,6 +87,35 @@ def plot_time_series(input_variable, collection_filenames, collection_dfs):
     plt.tight_layout()
     plt.show(block=False)
 
+def plot_individual_time_series(input_variable, collection_filenames, collection_dfs):
+    for collection_index, dfs in enumerate(collection_dfs):
+        fig, axs = plt.subplots(len(dfs), 1, sharex=True)
+        annotations = []
+
+        for df_index, df in enumerate(dfs):
+            line, = axs[df_index].plot(df['trunc_local_time'], df[input_variable], label=collection_filenames[collection_index][df_index])
+            cursor = mplcursors.cursor(line)
+            cursor.connect("add", lambda sel, i=df_index: (annotations.append(sel.annotation), sel.annotation.set_text(collection_filenames[collection_index][i] + ": " + str(sel.target[1]))))
+            axs[df_index].legend(bbox_to_anchor=(1.05, 1), loc='upper left', prop={'size':6}, ncol =2)
+            axs[df_index].set_xlabel('Time [s]')
+            axs[df_index].set_ylabel(input_variable[0])
+            control_type = 'Centralized' if collection_index == 0 else 'Decentralized'
+            title = f'{control_type} {input_variable[0]} vs. Time on {terrain_type}'
+            plt.suptitle(title)
+
+        # Add a button for clearing the cursors
+        button_ax = plt.axes([0.8, 0.025, 0.1, 0.04])
+        button = Button(button_ax, 'Clear Cursors', hovercolor='0.975')
+        def clear_cursors(event):
+            for annotation in annotations:
+                annotation.set_visible(False)
+            annotations.clear()
+            fig.canvas.draw()
+        button.on_clicked(clear_cursors)
+
+        plt.tight_layout()
+        plt.show(block=False)
+
 def plot_FFT(input_variable, collection_filenames, collection_dfs):
     fig, axs = plt.subplots(2, 1, sharex=True)
 
@@ -140,7 +169,7 @@ def process_file(file_path):
 
     # Create local_time
     df['local_time'] = df['timestamp'] - df['timestamp'][0]
-
+    
     # Define offsets
     front_offset = 0
     df = df.loc[(df['local_time'] >= front_offset)]
@@ -192,8 +221,9 @@ def main(args):
     collection_fs = [centralized_fs_list, decentralized_fs_list]
     collection_filenames = [centralized_file_names, decentralized_file_names]
     plot_time_series([inspection_var], collection_filenames, collection_dfs)
+    plot_individual_time_series([inspection_var], collection_filenames, collection_dfs)
     plot_FFT([inspection_var], collection_filenames, collection_dfs)
-    #plot_box_psd(collection_dfs, [inspection_var], collection_fs, collection_filenames)
+    plot_box_psd(collection_dfs, [inspection_var], collection_fs, collection_filenames)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Frequency Metric for Centralized and Decentralized Data.')
