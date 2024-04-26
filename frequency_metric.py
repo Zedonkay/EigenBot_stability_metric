@@ -48,6 +48,34 @@ def plot_box_psd(collection_dfs, columns, collection_fs, collection_filenames):
     plt.tight_layout()
     plt.show(block=False)
 
+def plot_box_fft(collection_dfs, columns, collection_fs, collection_filenames):
+    fig, axs = plt.subplots(1, len(collection_dfs), figsize=(10, 6))
+    
+    for i, dfs in enumerate(collection_dfs):
+        fs_list = collection_fs[i]
+        file_names = collection_filenames[i]
+        fft_tuples = []
+        fft_labels = []
+        
+        for j, df in enumerate(dfs):
+            for k, col in enumerate(columns):
+                yf = np.fft.fft(df[col])
+                #ipdb.set_trace()
+                fft_tuples.append(np.abs(yf[0:(int(fs_list[j]/2))])) #only plot positive frequencies
+                fft_labels.append(f'{file_names[j]}')
+                
+        axs[i].boxplot(fft_tuples)
+        axs[i].set_xticklabels(fft_labels, rotation=45, ha='right')
+        axs[i].set_xlabel('Update Rate [Hz]')
+        axs[i].set_ylabel('Fast Fourier Transform (FFT)')
+        axs[i].set_ylim([0, 560])
+    axs[0].set_title(type_left)
+    axs[1].set_title(type_right)
+    title = f'FFT Distribution for {inspection_var} on {terrain_type} over Update Rates'
+    plt.suptitle(title)
+    plt.tight_layout()
+    plt.show(block=False)
+
 def plot_time_series(input_variable, collection_filenames, collection_dfs):
     fig, axs = plt.subplots(2, 1, sharex=True)
 
@@ -224,6 +252,7 @@ def main(args):
     plot_individual_time_series([inspection_var], collection_filenames, collection_dfs)
     plot_FFT([inspection_var], collection_filenames, collection_dfs)
     plot_box_psd(collection_dfs, [inspection_var], collection_fs, collection_filenames)
+    plot_box_fft(collection_dfs, [inspection_var], collection_fs, collection_filenames)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Frequency Metric for Centralized and Decentralized Data.')
