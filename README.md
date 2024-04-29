@@ -37,6 +37,9 @@ For the clean dataset
 
 `python3 frequency_metric.py --centralized_file_path "clean_data/centralised/*.csv" --decentralized_file_path "clean_data/distributed/*.csv"`
 
+For neural v predefined dataset
+`python3 frequency_metric.py --centralized_file_path "raw_predefined_v_neural_data/predefined/*.csv" --decentralized_file_path "raw_predefined_v_neural_data/neural/*.csv"`
+
 ## Contact
 Repository created 4/22/24
 hkou@andrew.cmu.edu
