@@ -29,7 +29,7 @@ def rosenstein_method(data, m, tau, num_iterations):
 
             # Normalize the vector
             v /= np.linalg.norm(v)
-
+       
         # Calculate the average sum of logarithms of distances
         lyap_exponents[i] = sum_ / (n - tau * num_iterations)
 
@@ -47,9 +47,9 @@ def plot_lyapunov_exponents(lyap_exponents):
 
 def main():
     # Load time series data from CSV
-    data = pd.read_csv('time_series_data.csv').values
-
-    
+    df = pd.read_csv("clean_data/centralised/220Hz.csv")
+    pdata = df[['px', 'py', 'pz']]
+    data=pdata.values
 
 
     # Define parameters
@@ -58,10 +58,11 @@ def main():
     num_iterations = 100  # Number of iterations
     
     # Calculate Lyapunov exponents using the Rosenstein method
-    #lyap_exponents = rosenstein_method(data, m, tau, num_iterations)
+    lyap_exponents = rosenstein_method(data, m, tau, num_iterations)
 
     # Print the calculated Lyapunov exponents
     print("Lyapunov Exponents:")
+    
     for i, exponent in enumerate(lyap_exponents):
         print(f"Exponent {i+1}: {exponent}")
 
