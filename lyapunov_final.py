@@ -99,8 +99,8 @@ def exponent(tau,m,epsilon,filename,xval, exponents, xvalues):
     xvalues.append(xval)
 def main():
     #parameters
-    tau = 1
-    m = 15
+    tau = 3
+    m = 3
     epsilon = 0.01
 
     #initialize lists
