@@ -39,6 +39,11 @@ def kantz_lyapunov(reconstructed_data,epsilon):
                 if epsilon_space[j]!=0:
                     epsilon_space[j] = np.log(epsilon_space_next[j]/epsilon_space[j])
             plot_data.append([np.mean(epsilon_space)])
+    plot_data = np.array(plot_data)
+    plot_data = plot_data[~np.isnan(plot_data)]
+    plot_data = plot_data[plot_data>-1e308]
+    plot_data = plot_data[plot_data<1e308]
+    plot_data = np.reshape(plot_data,(1,-1))[0]
     return plot_data
 def rosenstein_lyapunov(reconstructed_data,min_step):
     neighbors = []
@@ -102,9 +107,7 @@ def exponent(tau,m,epsilon,min_steps, filename,xval, exponents, xvalues):
 
     data = kantz_lyapunov(reconstructed_data,epsilon)
     plot_growth_factors(data)
-   # data = np.array(data)
-    #data = np.reshape(data,1,-1)[0]
-   #plot_lyapunov_exponents_kantz(data)
+   
 
     #append exponent of this data set to the list of exponents
     #exponents.append(exponent[0])
