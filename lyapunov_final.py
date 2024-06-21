@@ -94,7 +94,7 @@ def exponent(tau,m,epsilon,min_steps, filename,xval, exponents, xvalues):
     #reconstruction through time delay
     reconstructed_data = reconstruction(data,tau,m)
     print("data has been reconstructed")
-    #calculate lyapunov exponents with rosenstein method 
+    #calculate lyapunov exponents with rosenstein metscphod 
     # exponent = rosenstein_lyapunov(reconstructed_data,min_steps)
     # plot_growth_factors(exponent)
     # print(np.polyfit(exponent,range(len(exponent)),1))
