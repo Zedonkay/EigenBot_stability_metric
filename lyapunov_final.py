@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import state_space as ss
+
 def reconstruction(data,tau,m):
     d = len(data)
     d = d - (m-1)*tau
@@ -14,6 +16,7 @@ def reconstruction(data,tau,m):
 def kantz_lyapunov(reconstructed_data,epsilon):
     plot_data = []
     for i in range(len(reconstructed_data)):
+        print(i)
         epsilon_space=[]
         vector_locations = []
         epsilon_space_next = []
@@ -37,18 +40,10 @@ def kantz_lyapunov(reconstructed_data,epsilon):
                     epsilon_space[j] = np.log(epsilon_space_next[j]/epsilon_space[j])
             plot_data.append([np.mean(epsilon_space)])
     return plot_data
-def plot_lyapunov_exponents_kantz(lyap_exponents):
-    """Plot Lyapunov exponents."""
-    plt.figure(figsize=(10, 10))
-    plt.plot(lyap_exponents, color='skyblue')
-    #plt.bar(range(len(lyap_exponents)), lyap_exponents, color='skyblue')
-    plt.xlabel('time')
-    plt.ylabel('log of mean value of stretching factor')
-    plt.show()
-
 def rosenstein_lyapunov(reconstructed_data,min_step):
     neighbors = []
     for i in range(len(reconstructed_data)):
+        print(i)
         closest_dist = -1
         for j in range(len(reconstructed_data)):
            if(i!=j and abs(j-i)>min_step):
@@ -66,7 +61,18 @@ def rosenstein_lyapunov(reconstructed_data,min_step):
     neighbors=neighbors[~np.isnan(neighbors)]
     neighbors = neighbors[neighbors>-1e308]
     neighbors = neighbors[neighbors<1e308]
-    return np.polyfit(neighbors,range(len(neighbors)),1)
+    return neighbors
+    
+    
+
+def plot_growth_factors(lyap_exponents):
+    """Plot Lyapunov exponents."""
+    plt.figure(figsize=(10, 10))
+    plt.plot(lyap_exponents, color='skyblue')
+    #plt.bar(range(len(lyap_exponents)), lyap_exponents, color='skyblue')
+    plt.xlabel('time')
+    plt.ylabel('log of mean value of stretching factor')
+    plt.show()
 def plot_lyapunov_exponents(frequencies_centralised,exponents_centralised,frequencies_distributed,exponents_distributed):
     plt.figure(figsize=(10, 10))
     plt.plot(frequencies_centralised,exponents_centralised, 'bo',label="centralised")
@@ -78,30 +84,39 @@ def plot_lyapunov_exponents(frequencies_centralised,exponents_centralised,freque
     plt.legend(loc="upper left")
     plt.axhline(0, color='grey')
     plt.show()
-def exponent(tau,m,epsilon,filename,xval, exponents, xvalues):
+
+def exponent(tau,m,epsilon,min_steps, filename,xval, exponents, xvalues):
     #load data and format
     df = pd.read_csv(filename)
-    pdata = df[['pz']]
+    pdata = df[['px','py','pz']]
     data=pdata.values
 
     #reconstruction through time delay
     reconstructed_data = reconstruction(data,tau,m)
-    #calculate lyapunov exponents
-    exponent = rosenstein_lyapunov(reconstructed_data,5)
-    #data = kantz_lyapunov(reconstructed_data,epsilon)
+    print("data has been reconstructed")
+    #calculate lyapunov exponents with rosenstein method 
+    # exponent = rosenstein_lyapunov(reconstructed_data,min_steps)
+    # plot_growth_factors(exponent)
+    # print(np.polyfit(exponent,range(len(exponent)),1))
+    
+
+    data = kantz_lyapunov(reconstructed_data,epsilon)
+    plot_growth_factors(data)
    # data = np.array(data)
     #data = np.reshape(data,1,-1)[0]
    #plot_lyapunov_exponents_kantz(data)
 
-
     #append exponent of this data set to the list of exponents
-    exponents.append(exponent[0])
-    xvalues.append(xval)
+    #exponents.append(exponent[0])
+    #xvalues.append(xval)
+    print(exponent)
 def main():
     #parameters
     tau = 3
     m = 3
     epsilon = 0.01
+    min_steps = 10
+    
 
     #initialize lists
     exponents_centralised=[]
@@ -110,50 +125,52 @@ def main():
     exponents_distributed = []
     frequencies_distributed = []
 
-    # #load data and format for centralsed control
-    print("Centralised")
-    exponent(tau,m,epsilon, "clean_data/centralised/140Hz.csv", 140,exponents_centralised,frequencies_centralised)
-    print("140Hz")
-    exponent(tau,m,epsilon ,"clean_data/centralised/220Hz.csv", 220,exponents_centralised,frequencies_centralised)
-    print("220Hz")
-    exponent(tau,m,epsilon, "clean_data/centralised/350Hz.csv", 350,exponents_centralised,frequencies_centralised)
-    print("350Hz")
-    exponent(tau,m,epsilon, "clean_data/centralised/370Hz.csv", 370,exponents_centralised,frequencies_centralised)
-    print("370Hz")
-    exponent(tau,m,epsilon, "clean_data/centralised/400Hz.csv", 400,exponents_centralised,frequencies_centralised)
-    print("400Hz")
+    exponent(tau,m,epsilon,min_steps, "lorentz_data.csv", 140,exponents_centralised,frequencies_centralised)
     
-    #load data and format for distributed control
-    print("Distributed")
-    exponent(tau,m,epsilon, "clean_data/distributed/140Hz.csv", 140,exponents_distributed,frequencies_distributed)
-    print("140Hz")
-    exponent(tau,m,epsilon, "clean_data/distributed/220Hz.csv", 220,exponents_distributed,frequencies_distributed)
-    print("220Hz")
-    exponent(tau,m,epsilon, "clean_data/distributed/350Hz.csv", 350,exponents_distributed,frequencies_distributed)
-    print("350Hz")
-    exponent(tau,m,epsilon, "clean_data/distributed/370Hz.csv", 370,exponents_distributed,frequencies_distributed)
-    print("370Hz")
-    exponent(tau,m,epsilon ,"clean_data/distributed/400Hz.csv", 400,exponents_distributed,frequencies_distributed)
-    print("400Hz")
-    exponent(tau,m,epsilon, "clean_data/distributed/500Hz.csv", 500,exponents_distributed,frequencies_distributed)
-    print("500Hz")
-    exponent(tau,m,epsilon, "clean_data/distributed/600Hz.csv", 600,exponents_distributed,frequencies_distributed)
-    print("600Hz")
-    exponent(tau,m,epsilon, "clean_data/distributed/800Hz.csv", 800,exponents_distributed,frequencies_distributed)
-    print("800Hz")
-    exponent(tau,m,epsilon, "clean_data/distributed/1000Hz.csv", 1000,exponents_distributed,frequencies_distributed)
-    print("1000Hz")
-    exponent(tau,m,epsilon ,"clean_data/distributed/1120Hz.csv", 1120,exponents_distributed,frequencies_distributed)
-    print("1120Hz")
-    exponent(tau,m,epsilon, "clean_data/distributed/1200Hz.csv", 1200,exponents_distributed,frequencies_distributed)
-    print("1200Hz")
-    exponent(tau,m,epsilon, "clean_data/distributed/1440Hz.csv", 1440,exponents_distributed,frequencies_distributed)
-    print("1440Hz")
-    exponent(tau,m,epsilon, "clean_data/distributed/1800Hz.csv", 1800,exponents_distributed,frequencies_distributed)
-    print("1800Hz")
-    exponent(tau,m,epsilon, "clean_data/distributed/2000Hz.csv", 2000,exponents_distributed,frequencies_distributed)
-    print("2000Hz")
+    # #load data and format for centralsed control
+    #print("Centralised")
+    #exponent(tau,m,epsilon,min_steps, "clean_data/centralised/140Hz.csv", 140,exponents_centralised,frequencies_centralised)
+    #print("140Hz")
+    # exponent(tau,m,epsilon,min_steps ,"clean_data/centralised/220Hz.csv", 220,exponents_centralised,frequencies_centralised)
+    # print("220Hz")
+    # exponent(tau,m,epsilon,min_steps, "clean_data/centralised/350Hz.csv", 350,exponents_centralised,frequencies_centralised)
+    # print("350Hz")
+    # exponent(tau,m,epsilon,min_steps, "clean_data/centralised/370Hz.csv", 370,exponents_centralised,frequencies_centralised)
+    # print("370Hz")
+    # exponent(tau,m,epsilon,min_steps, "clean_data/centralised/400Hz.csv", 400,exponents_centralised,frequencies_centralised)
+    # print("400Hz")
+    
+    # #load data and format for distributed control
+    # print("Distributed")
+    # exponent(tau,m,epsilon,min_steps, "clean_data/distributed/140Hz.csv", 140,exponents_distributed,frequencies_distributed)
+    # print("140Hz")
+    # exponent(tau,m,epsilon,min_steps, "clean_data/distributed/220Hz.csv", 220,exponents_distributed,frequencies_distributed)
+    # print("220Hz")
+    # exponent(tau,m,epsilon,min_steps, "clean_data/distributed/350Hz.csv", 350,exponents_distributed,frequencies_distributed)
+    # print("350Hz")
+    # exponent(tau,m,epsilon,min_steps, "clean_data/distributed/370Hz.csv", 370,exponents_distributed,frequencies_distributed)
+    # print("370Hz")
+    # exponent(tau,m,epsilon,min_steps ,"clean_data/distributed/400Hz.csv", 400,exponents_distributed,frequencies_distributed)
+    # print("400Hz")
+    # exponent(tau,m,epsilon,min_steps, "clean_data/distributed/500Hz.csv", 500,exponents_distributed,frequencies_distributed)
+    # print("500Hz")
+    # exponent(tau,m,epsilon,min_steps, "clean_data/distributed/600Hz.csv", 600,exponents_distributed,frequencies_distributed)
+    # print("600Hz")
+    # exponent(tau,m,epsilon,min_steps, "clean_data/distributed/800Hz.csv", 800,exponents_distributed,frequencies_distributed)
+    # print("800Hz")
+    # exponent(tau,m,epsilon,min_steps, "clean_data/distributed/1000Hz.csv", 1000,exponents_distributed,frequencies_distributed)
+    # print("1000Hz")
+    # exponent(tau,m,epsilon,min_steps ,"clean_data/distributed/1120Hz.csv", 1120,exponents_distributed,frequencies_distributed)
+    # print("1120Hz")
+    # exponent(tau,m,epsilon,min_steps, "clean_data/distributed/1200Hz.csv", 1200,exponents_distributed,frequencies_distributed)
+    # print("1200Hz")
+    # exponent(tau,m,epsilon,min_steps, "clean_data/distributed/1440Hz.csv", 1440,exponents_distributed,frequencies_distributed)
+    # print("1440Hz")
+    # exponent(tau,m,epsilon,min_steps, "clean_data/distributed/1800Hz.csv", 1800,exponents_distributed,frequencies_distributed)
+    # print("1800Hz")
+    # exponent(tau,m,epsilon,min_steps, "clean_data/distributed/2000Hz.csv", 2000,exponents_distributed,frequencies_distributed)
+    # print("2000Hz")
 
-    plot_lyapunov_exponents(frequencies_centralised,exponents_centralised,frequencies_distributed,exponents_distributed)
+    #plot_lyapunov_exponents(frequencies_centralised,exponents_centralised,frequencies_distributed,exponents_distributed)
 if __name__ == "__main__":
     main()  

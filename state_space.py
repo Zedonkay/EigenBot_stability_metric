@@ -151,8 +151,7 @@ def plot_3d_euler_state_space(timestamps, roll, pitch, yaw):
     ax.set_title('3D Euler State Space Plot')
     plt.show()
 
-def main():
-    file_path = 'sample_data/odometry_data_distributed_test_370hz_1.csv'
+def main(file_path):
 
     # Import data
     timestamps, pos_x, pos_y, pos_z, quaternion = import_data(file_path)
@@ -172,4 +171,4 @@ def main():
     plot_3d_euler_state_space(timestamps, roll, pitch, yaw)
 
 if __name__ == "__main__":
-    main()
+    main('sample_data/odometry_data_distributed_test_370hz_1.csv')
