@@ -9,7 +9,7 @@ def welch_method(data):
     f, Pxx = welch(time_series)
     w = Pxx / np.sum(Pxx)
     mean_frequency = np.average(f, weights=w)
-    print(mean_frequency)
+    
     return 1 / mean_frequency
 
 def reconstruction(data,tau,m):
@@ -17,9 +17,9 @@ def reconstruction(data,tau,m):
     d = len(data)
     d = d - (m-1)*tau
     if(len(data.shape)==1):
-        reconstructed_data=np.zeros((d,m))
+        reconstructed_data=np.empty((d,m))
     else:
-        reconstructed_data = np.zeros((d,m*len(data[0])))
+        reconstructed_data = np.empty((d,m*len(data[0])))
     for i in range(d):
         for j in range(m):
             if(len(data.shape)==1):
@@ -31,7 +31,7 @@ def reconstruction(data,tau,m):
 
 
 
-def find_closest_vectors(reconstructed_data,min_step):
+def find_closest_vectors(reconstructed_data,min_step,t_f):
     #find closest vectors for rosenstein method
     neighbors = []
     avg_dist = []
@@ -40,7 +40,7 @@ def find_closest_vectors(reconstructed_data,min_step):
         print("checking for vector closest to vector ",i)
         closest_dist = -1
         ind = -1
-        for j in range(len(reconstructed_data)):
+        for j in range(len(reconstructed_data)-t_f):
            if(i!=j and abs(j-i)>min_step):
                dist = np.linalg.norm(reconstructed_data[i]-reconstructed_data[j])
                if closest_dist == -1 or dist < closest_dist:
@@ -56,13 +56,21 @@ def find_closest_vectors(reconstructed_data,min_step):
         else:
             print(closest_dist)
             neighbors_index.append(-500)
-    neighbors_index = np.array(neighbors_index)
     return neighbors_index
 
 
-def dist(i, reconstructed_data,neighbors_index):
-    d_neighbors_indexi = np.array([np.linalg.norm(reconstructed_data[neighbors_index[k] + i], reconstructed_data[k + i]) for k in range(len(reconstructed_data) - i)])
-    return np.mean(np.log(d_neighbors_indexi))
+def expected_log_distance(reconstructed_data,neighbors_index,i) -> float:
+    d_ji = []
+    for j in range(len(reconstructed_data)-i):
+        if(neighbors_index[j]==-500):
+            print("error")
+        else:
+            if j+i<len(reconstructed_data) and neighbors_index[j]+i<len(reconstructed_data):
+                d_ji.append(np.linalg.norm(reconstructed_data[neighbors_index[j] + i]- reconstructed_data[j + i]))
+            else:
+                print(j,i)
+    d_ji = np.array(d_ji)
+    return np.mean(np.log(d_ji))
 def rosenstein_lyapunov(data,tau,m, min_steps, t_0, t_f,delta_t,force_minsteps):
     # rosenstein method for lyapunov exponents
 
@@ -77,18 +85,28 @@ def rosenstein_lyapunov(data,tau,m, min_steps, t_0, t_f,delta_t,force_minsteps):
                 min_steps = int(min_steps)
 
 
-    print(min_steps)
+    
     #find closest vectors
-    neighbors_index = find_closest_vectors(reconstructed_data,min_steps)
-    print(j)
-    mean_log_distance = np.array([dist(i, reconstructed_data, neighbors_index) for i in range(t_0, t_f)])
-    times = np.arange(t_0, t_f)*delta_t
-    print(np.polyfit(times,mean_log_distance,1))
+    neighbors_index = find_closest_vectors(reconstructed_data,min_steps,t_f)
+   
+    #calculate mean distance
+    mean_log_distance = []
+    times = []
+    for i in range(t_0,t_f):
+        mean_log_distance.append(expected_log_distance(reconstructed_data,neighbors_index,i))
+        times.append(i*delta_t)
+    mean_log_distance = np.array(mean_log_distance)
+    times = np.array(times)
+    #calculate lyapunov exponents
     return times, mean_log_distance
     
 def plot_growth_factors(times, lyap_exponents):
     """Plot Lyapunov exponents."""
-    ax = plt.plot(lyap_exponents,label="Average divergence", color="blue")
+    ax = plt.plot(times,lyap_exponents,label="Average divergence", color="blue")
+    coef=np.polyfit(times,lyap_exponents,1)
+    poly1d_fn = np.poly1d(coef)
+    plt.plot(times, poly1d_fn(times),label=f"Least Squares Line", color="red")
+    plt.legend()
     plt.xlabel("Time")
     plt.ylabel("Average divergence")
     plt.show()
@@ -115,10 +133,9 @@ def main():
     delta_t = 0.01
     min_steps = 100
     force_minsteps = False
-    t_0 =0
+    t_0 =50
 
-    # must be greater than t_0 and less than the length of the data reconstructed length
-    # length of reconsturctd data = len(data) - (m-1)*tau
+    
     t_f =150
     #solve for given file
     exponent(tau,m,min_steps, t_0,t_f,delta_t,filename, force_minsteps) 
