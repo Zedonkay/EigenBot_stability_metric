@@ -47,7 +47,7 @@ def plot_lyapunov_exponents(lyap_exponents):
 
 def main():
     # Load time series data from CSV
-    df = pd.read_csv("clean_data/centralised/220Hz.csv")
+    df = pd.read_csv("lorentz_data.csv")
     pdata = df[['px', 'py', 'pz']]
     data=pdata.values
 
