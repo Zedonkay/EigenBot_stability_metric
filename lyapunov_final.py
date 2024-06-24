@@ -29,15 +29,12 @@ def reconstruction(data,tau,m):
                     reconstructed_data[i][j*len(data[0])+k] = data[i+j*tau][k]
     return reconstructed_data
 
-
-
 def find_closest_vectors(reconstructed_data,min_step,t_f):
     #find closest vectors for rosenstein method
     neighbors = []
     avg_dist = []
     neighbors_index = []
     for i in range(len(reconstructed_data)):
-        print("checking for vector closest to vector ",i)
         closest_dist = -1
         ind = -1
         for j in range(len(reconstructed_data)-t_f):
@@ -76,7 +73,6 @@ def rosenstein_lyapunov(data,tau,m, min_steps, t_0, t_f,delta_t,force_minsteps):
 
     #reconstruction through time delay
     reconstructed_data = reconstruction(data,tau,m)
-    print("data has been reconstructed")
     if not force_minsteps:
             min_steps = welch_method(data)
             if min_steps%1 != 0:
@@ -100,44 +96,116 @@ def rosenstein_lyapunov(data,tau,m, min_steps, t_0, t_f,delta_t,force_minsteps):
     #calculate lyapunov exponents
     return times, mean_log_distance
     
-def plot_growth_factors(times, lyap_exponents):
+def plot_growth_factors(times, lyap_exponents,fn,control_type,frequency):
     """Plot Lyapunov exponents."""
     ax = plt.plot(times,lyap_exponents,label="Average divergence", color="blue")
-    coef=np.polyfit(times,lyap_exponents,1)
-    poly1d_fn = np.poly1d(coef)
-    plt.plot(times, poly1d_fn(times),label=f"Least Squares Line", color="red")
+    plt.plot(times, fn(times),label=f"Least Squares Line", color="red")
     plt.legend()
     plt.xlabel("Time")
     plt.ylabel("Average divergence")
+    plt.savefig('6_Eigenbot/'+control_type+"/"+str(frequency)+"Hz/"+str(frequency)+"Hz_plot.png")
+    plt.clf()
+def plot_exponents(centralised_frequencies,centralised_exponents,distributed_frequencies,distributed_exponents):
+    ay = plt.plot(centralised_frequencies,centralised_exponents,label="Centralised")
+    plt.plot(distributed_frequencies,distributed_exponents,label="Distributed")
+    plt.xlabel("Frequency")
+    plt.ylabel("Lyapunov Exponent")
+    plt.legend()
     plt.show()
-
-def exponent(tau,m,min_steps, t_0,t_f,delta_t,filename, force_minsteps):
+    plt.clf()
+def exponent(tau,m,min_steps, t_0,t_f,delta_t, force_minsteps,filename,frequency, frequencies,exponents,control_type):
     #load data and format
     df = pd.read_csv(filename)
     pdata = df[['pz']]
     data=pdata.values
-    
-    
 
-    
     #calculate lyapunov exponents with rosenstein method and plot growth
     times, data = rosenstein_lyapunov(data,tau,m,min_steps,t_0,t_f,delta_t,force_minsteps)
-    plot_growth_factors(times, data)
-   
+    coef=np.polyfit(times,data,1)
+    poly1d_fn = np.poly1d(coef)
+    plot_growth_factors(times, data,poly1d_fn,control_type,frequency)
+
+    #track exponents and frequencies
+    exponents.append(coef[0])
+    frequencies.append(frequency)
+
+    #store times and data in csv
+    data = pd.DataFrame(data,index=times,columns=['lyapunov_exponent'])
+    data.to_csv("6_Eigenbot/"+control_type+"/"+str(frequency)+"Hz/lyapunovdata.csv",index=True)
 
 def main():
     #parameters
-    filename = "1_clean_data/centralised/140Hz.csv"
     tau = 11
     m = 18
     delta_t = 0.01
     min_steps = 100
     force_minsteps = False
-    t_0 =50
-
-    
+    t_0 =80
     t_f =150
-    #solve for given file
-    exponent(tau,m,min_steps, t_0,t_f,delta_t,filename, force_minsteps) 
+
+
+    #track centralised exponents
+    centralised_exponents = []
+    centralised_frequencies = []
+
+    #track distributed exponents 
+    distributed_exponents = []
+    distributed_frequencies = []
+
+    #centralised data
+    print("Calculating centralised data")
+    exponent(tau,m,min_steps, t_0,t_f,delta_t,force_minsteps,"1_clean_data/centralised/140Hz.csv",140,centralised_frequencies,centralised_exponents,"centralised")
+    print("140Hz done")
+    exponent(tau,m,min_steps, t_0,t_f,delta_t,force_minsteps,"1_clean_data/centralised/220Hz.csv",220,centralised_frequencies,centralised_exponents,"centralised")
+    print("220Hz done")
+    exponent(tau,m,min_steps, t_0,t_f,delta_t,force_minsteps,"1_clean_data/centralised/350Hz.csv",350,centralised_frequencies,centralised_exponents,"centralised")
+    print("350Hz done")
+    exponent(tau,m,min_steps, t_0,t_f,delta_t,force_minsteps,"1_clean_data/centralised/370Hz.csv",370,centralised_frequencies,centralised_exponents,"centralised")
+    print("370Hz done")
+    exponent(tau,m,min_steps, t_0,t_f,delta_t,force_minsteps,"1_clean_data/centralised/400Hz.csv",400,centralised_frequencies,centralised_exponents,"centralised")
+    print("400Hz done")
+    print("Centralised done")
+     
+    #distributed data
+    print("Calculating distributed data")
+    exponent(tau,m,min_steps, t_0,t_f,delta_t,force_minsteps,"1_clean_data/distributed/140Hz.csv",140,distributed_frequencies,distributed_exponents,"distributed")
+    print("140Hz done")
+    exponent(tau,m,min_steps, t_0,t_f,delta_t,force_minsteps,"1_clean_data/distributed/220Hz.csv",220,distributed_frequencies,distributed_exponents,"distributed")
+    print("220Hz done")
+    exponent(tau,m,min_steps, t_0,t_f,delta_t,force_minsteps,"1_clean_data/distributed/350Hz.csv",350,distributed_frequencies,distributed_exponents,"distributed")
+    print("350Hz done")
+    exponent(tau,m,min_steps, t_0,t_f,delta_t,force_minsteps,"1_clean_data/distributed/370Hz.csv",370,distributed_frequencies,distributed_exponents,"distributed")
+    print("370Hz done")
+    exponent(tau,m,min_steps, t_0,t_f,delta_t,force_minsteps,"1_clean_data/distributed/400Hz.csv",400,distributed_frequencies,distributed_exponents,"distributed")
+    print("400Hz done")
+    exponent(tau,m,min_steps, t_0,t_f,delta_t,force_minsteps,"1_clean_data/distributed/500Hz.csv",500,distributed_frequencies,distributed_exponents,"distributed")
+    print("500Hz done")
+    exponent(tau,m,min_steps, t_0,t_f,delta_t,force_minsteps,"1_clean_data/distributed/600Hz.csv",600,distributed_frequencies,distributed_exponents,"distributed")
+    print("600Hz done")
+    exponent(tau,m,min_steps, t_0,t_f,delta_t,force_minsteps,"1_clean_data/distributed/800Hz.csv",800,distributed_frequencies,distributed_exponents,"distributed")
+    print("800Hz done")
+    exponent(tau,m,min_steps, t_0,t_f,delta_t,force_minsteps,"1_clean_data/distributed/1000Hz.csv",1000,distributed_frequencies,distributed_exponents,"distributed")
+    print("1000Hz done")
+    exponent(tau,m,min_steps, t_0,t_f,delta_t,force_minsteps,"1_clean_data/distributed/1120Hz.csv",1120,distributed_frequencies,distributed_exponents,"distributed")
+    print("1120Hz done")
+    exponent(tau,m,min_steps, t_0,t_f,delta_t,force_minsteps,"1_clean_data/distributed/1200Hz.csv",1200,distributed_frequencies,distributed_exponents,"distributed")
+    print("1200Hz done")
+    exponent(tau,m,min_steps, t_0,t_f,delta_t,force_minsteps,"1_clean_data/distributed/1440Hz.csv",1440,distributed_frequencies,distributed_exponents,"distributed")
+    print("1440Hz done")
+    exponent(tau,m,min_steps, t_0,t_f,delta_t,force_minsteps,"1_clean_data/distributed/1800Hz.csv",1800,distributed_frequencies,distributed_exponents,"distributed")
+    print("1800Hz done")
+    exponent(tau,m,min_steps, t_0,t_f,delta_t,force_minsteps,"1_clean_data/distributed/2000Hz.csv",2000,distributed_frequencies,distributed_exponents,"distributed")
+    print("2000Hz done")
+
+
+    #plot exponents
+    plot_exponents(centralised_frequencies,centralised_exponents,distributed_frequencies,distributed_exponents)
+
+    #store exponents and frequencies in csv
+    data = pd.DataFrame(centralised_exponents,index=centralised_frequencies,columns=['lyapunov_exponent'])
+    data.to_csv("6_Eigenbot/centralised/centralised_exponents.csv",index=True)
+    data = pd.DataFrame(distributed_exponents,index=distributed_frequencies,columns=['lyapunov_exponent'])
+    data.to_csv("6_Eigenbot/distributed/distributed_exponents.csv",index=True)
+    
 if __name__ == "__main__":
     main()  
