@@ -10,7 +10,6 @@ def welch_method(data):
     w = Pxx / np.sum(Pxx)
     mean_frequency = np.average(f, weights=w)
     return 1 / mean_frequency
-
 def reconstruction(data,tau,m):
     d = len(data)
     d = d - (m-1)*tau
@@ -92,7 +91,52 @@ def rosenstein_lyapunov(data,tau,m, min_steps, t_0, t_f,delta_t,force_minsteps):
     times = np.array(times)
     #calculate lyapunov exponents
     return times, mean_log_distance
-    
+
+def kantz_mean_distance(vector_addresses,reconstructed_data,i):
+    #calculate mean distance for kantz method
+    mean_distance = []
+    for j in range(len(vector_addresses)-i):
+        dist =0
+        for k in vector_addresses[j]:
+            mean_distance += np.log(np.linalg.norm(reconstructed_data[k+i]-reconstructed_data[j+i]))
+        mean_distance.append(dist/len(vector_addresses[j]) if len(vector_addresses[j])>0 else 0)
+    return np.mean(mean_distance)
+def kantz_distance(vector_addresses,reconstructed_data, t_0, t_f, delta_t):
+    mean_distance = []
+    times = []
+    for i in range(t_0,t_f):
+        mean_distance.append(kantz_mean_distance(vector_addresses,reconstructed_data,i))
+        times.append(i*delta_t)
+    return times, mean_distance
+def find_epsilon_vectors(reconstructed_data,epsilon):
+    vector_addresses=[]
+    for i in range(len(reconstructed_data)):
+        print(i)
+        vector_locations = []
+        for j in range(len(reconstructed_data)):
+            if i != j:
+                dist = np.linalg.norm(reconstructed_data[i]-reconstructed_data[j])
+                if dist<epsilon: 
+                    vector_locations.append(j)
+        vector_addresses.append(vector_locations)
+    return vector_addresses
+def kantz_lyapunov(data,tau,m,t_0,t_f,delta_t,epsilon):
+    # kantz method for lyapunov exponents
+
+    #reconstruct data
+    reconstructed_data = reconstruction(data,tau,m)
+
+    #find vectors within epsilon distance of each vector
+    vector_addresses = find_epsilon_vectors(reconstructed_data,epsilon)
+
+    #calculate log distance
+    times, mean_distances = kantz_distance(vector_addresses,reconstructed_data,t_0,t_f,delta_t)
+    mean_distances = np.array(mean_distances)
+    times = np.array(times)
+        
+   
+    return times, mean_distances
+
 def plot_growth_factors(times, lyap_exponents,fn,control_type,frequency):
     """Plot Lyapunov exponents."""
     ax = plt.plot(times,lyap_exponents,label="Average divergence", color="blue")
