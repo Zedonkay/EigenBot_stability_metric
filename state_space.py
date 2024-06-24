@@ -18,14 +18,14 @@ def import_data(file_path):
     pos_z = df.iloc[:, 3]
     quaternion = df.iloc[:, 4:8].values
 
-    # Truncate arrays up to timestamps where timestamps = 4.53
-    begin_trunc_index = np.argmax(timestamps >= 5.31)
-    end_trunc_index = np.argmax(timestamps >= 20.0)
-    timestamps = timestamps[begin_trunc_index:end_trunc_index]
-    pos_x = pos_x[begin_trunc_index:end_trunc_index]
-    pos_y = pos_y[begin_trunc_index:end_trunc_index]
-    pos_z = pos_z[begin_trunc_index:end_trunc_index]
-    quaternion = quaternion[begin_trunc_index:end_trunc_index]
+    # # Truncate arrays up to timestamps where timestamps = 4.53
+    # begin_trunc_index = np.argmax(timestamps >= 5.31)
+    # end_trunc_index = np.argmax(timestamps >= 20.0)
+    # timestamps = timestamps[begin_trunc_index:end_trunc_index]
+    # pos_x = pos_x[begin_trunc_index:end_trunc_index]
+    # pos_y = pos_y[begin_trunc_index:end_trunc_index]
+    # pos_z = pos_z[begin_trunc_index:end_trunc_index]
+    # quaternion = quaternion[begin_trunc_index:end_trunc_index]
 
     # Print sizes of arrays after truncation
     print("Size of timestamps array after truncation:", timestamps.shape)
@@ -64,10 +64,9 @@ def quaternion_to_euler(quaternion):
     yaw = np.arctan2(2*(quaternion[:, 0]*quaternion[:, 3] + quaternion[:, 1]*quaternion[:, 2]), 1 - 2*(quaternion[:, 2]**2 + quaternion[:, 3]**2))
     return roll, pitch, yaw
 
-def plot_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, roll, pitch, yaw):
+def plot_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, roll, pitch, yaw,frequency,control_type):
     # Plot individual 2D plots for pos_x, pos_y, pos_z, roll, pitch, yaw
     fig, axs = plt.subplots(3, 3, figsize=(18, 10))
-
     axs[0, 0].plot(timestamps, pos_x)
     axs[0, 0].set_xlabel('Timestamp')
     axs[0, 0].set_ylabel('Position X')
@@ -115,10 +114,13 @@ def plot_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, roll, pitch, y
     axs[2, 2].set_title('Yaw vs. Timestamp')
 
     plt.tight_layout()
-    plt.show()
+    plt.savefig('6_Eigenbot/'+control_type+"/"+str(frequency)+"Hz/"+str(frequency)+"Hz_2d_state_space.png")
+    plt.clf()
+    plt.close()
+
 
 #plot 3D phase space plot for velocity
-def plot_3d_phase_space_vel(vel_x, vel_y, vel_z):
+def plot_3d_phase_space_vel(vel_x, vel_y, vel_z,frequency,control_type):
     # Plot 3D phase space plot
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
@@ -127,9 +129,10 @@ def plot_3d_phase_space_vel(vel_x, vel_y, vel_z):
     ax.set_ylabel('Velocity Y')
     ax.set_zlabel('Velocity Z')
     ax.set_title('3D Phase Space Plot')
-    plt.show()
+    plt.savefig('6_Eigenbot/'+control_type+"/"+str(frequency)+"Hz/"+str(frequency)+"Hz_3d_phase_space_vel.png")
+    plt.clf()
 
-def plot_3d_phase_space_pos(pos_x, pos_y, pos_z):
+def plot_3d_phase_space_pos(pos_x, pos_y, pos_z,frequency,control_type):
     # Plot 3D phase space plot
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
@@ -138,9 +141,10 @@ def plot_3d_phase_space_pos(pos_x, pos_y, pos_z):
     ax.set_ylabel('Position Y')
     ax.set_zlabel('Position Z')
     ax.set_title('3D Phase Space Plot')
-    plt.show()
+    plt.savefig('6_Eigenbot/'+control_type+"/"+str(frequency)+"Hz/"+str(frequency)+"Hz_3d_state_space.png")
+    plt.clf()
 
-def plot_3d_euler_state_space(timestamps, roll, pitch, yaw):
+def plot_3d_euler_state_space(timestamps, roll, pitch, yaw,frequency,control_type):
     # Plot 3D Euler state space plot
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
@@ -149,9 +153,10 @@ def plot_3d_euler_state_space(timestamps, roll, pitch, yaw):
     ax.set_ylabel('Pitch (rad)')
     ax.set_zlabel('Yaw (rad)')
     ax.set_title('3D Euler State Space Plot')
-    plt.show()
+    plt.savefig('6_Eigenbot/'+control_type+"/"+str(frequency)+"Hz/"+str(frequency)+"Hz_3d_euler_state_space.png")
+    plt.clf()
 
-def main(file_path):
+def main(file_path,frequency,control_type):
 
     # Import data
     timestamps, pos_x, pos_y, pos_z, quaternion = import_data(file_path)
@@ -161,14 +166,54 @@ def main(file_path):
     roll, pitch, yaw = quaternion_to_euler(quaternion)
 
     # Plot 2D positions and angles
-    plot_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, roll, pitch, yaw)
+    plot_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, roll, pitch, yaw, frequency,control_type)
 
     # Plot 3D phase space
-    plot_3d_phase_space_pos(pos_x, pos_y, pos_z)
-    plot_3d_phase_space_vel(vel_x, vel_y, vel_z)
+    plot_3d_phase_space_pos(pos_x, pos_y, pos_z,frequency,control_type)
+    plot_3d_phase_space_vel(vel_x, vel_y, vel_z,frequency,control_type)
 
     # Plot 3D Euler state space
-    plot_3d_euler_state_space(timestamps, roll, pitch, yaw)
+    plot_3d_euler_state_space(timestamps, roll, pitch, yaw,frequency,control_type)
 
 if __name__ == "__main__":
-    main('sample_data/odometry_data_distributed_test_370hz_1.csv')
+    print("Running for centralised data")
+    main("1_clean_data/centralised/140Hz.csv",140,"centralised")
+    print("140Hz done")
+    main("1_clean_data/centralised/220Hz.csv",220,"centralised")
+    print("220Hz done")
+    main("1_clean_data/centralised/350Hz.csv",350,"centralised")
+    print("350Hz done")
+    main("1_clean_data/centralised/370Hz.csv",370,"centralised")
+    print("370Hz done")
+    main("1_clean_data/centralised/400Hz.csv",400,"centralised")
+    print("400Hz done")
+
+    print("Running for distributed data")
+    main("1_clean_data/distributed/140Hz.csv",140,"distributed")
+    print("140Hz done")
+    main("1_clean_data/distributed/220Hz.csv",220,"distributed")
+    print("220Hz done")
+    main("1_clean_data/distributed/350Hz.csv",350,"distributed")
+    print("350Hz done")
+    main("1_clean_data/distributed/370Hz.csv",370,"distributed")
+    print("370Hz done")
+    main("1_clean_data/distributed/400Hz.csv",400,"distributed")
+    print("400Hz done")
+    main("1_clean_data/distributed/500Hz.csv",500,"distributed")
+    print("500Hz done")
+    main("1_clean_data/distributed/600Hz.csv",600,"distributed")
+    print("600Hz done")
+    main("1_clean_data/distributed/800Hz.csv",800,"distributed")
+    print("800Hz done")
+    main("1_clean_data/distributed/1000Hz.csv",1000,"distributed")
+    print("1000Hz done")
+    main("1_clean_data/distributed/1120Hz.csv",1120,"distributed")
+    print("1120Hz done")
+    main("1_clean_data/distributed/1200Hz.csv",1200,"distributed")
+    print("1200Hz done")
+    main("1_clean_data/distributed/1440Hz.csv",1440,"distributed")
+    print("1440Hz done")
+    main("1_clean_data/distributed/1800Hz.csv",1800,"distributed")
+    print("1800Hz done")
+    main("1_clean_data/distributed/2000Hz.csv",2000,"distributed")
+    print("2000Hz done")
