@@ -9,11 +9,9 @@ def welch_method(data):
     f, Pxx = welch(time_series)
     w = Pxx / np.sum(Pxx)
     mean_frequency = np.average(f, weights=w)
-    
     return 1 / mean_frequency
 
 def reconstruction(data,tau,m):
-
     d = len(data)
     d = d - (m-1)*tau
     if(len(data.shape)==1):
@@ -57,6 +55,7 @@ def find_closest_vectors(reconstructed_data,min_step,t_f):
 
 
 def expected_log_distance(reconstructed_data,neighbors_index,i) -> float:
+    #calculate expected log distance for rosenstein method
     d_ji = []
     for j in range(len(reconstructed_data)-i):
         if(neighbors_index[j]==-500):
@@ -79,8 +78,6 @@ def rosenstein_lyapunov(data,tau,m, min_steps, t_0, t_f,delta_t,force_minsteps):
                 min_steps = int(min_steps)+1
             else:
                 min_steps = int(min_steps)
-
-
     
     #find closest vectors
     neighbors_index = find_closest_vectors(reconstructed_data,min_steps,t_f)
