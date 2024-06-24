@@ -103,11 +103,11 @@ def plot_growth_factors(times, lyap_exponents,fn,control_type,frequency):
     plt.legend()
     plt.xlabel("Time")
     plt.ylabel("Average divergence")
-    plt.savefig('6_Eigenbot/'+control_type+"/"+str(frequency)+"Hz/"+str(frequency)+"Hz_plot.png")
+    plt.savefig('6_Results/'+control_type+"/"+str(frequency)+"Hz/"+str(frequency)+"Hz_plot.png")
     plt.clf()
 def plot_exponents(centralised_frequencies,centralised_exponents,distributed_frequencies,distributed_exponents):
-    ay = plt.plot(centralised_frequencies,centralised_exponents,label="Centralised")
-    plt.plot(distributed_frequencies,distributed_exponents,label="Distributed")
+    ay = plt.scatter(centralised_frequencies,centralised_exponents,label="Centralised")
+    plt.scatter(distributed_frequencies,distributed_exponents,label="Distributed")
     plt.xlabel("Frequency")
     plt.ylabel("Lyapunov Exponent")
     plt.legend()
@@ -131,7 +131,7 @@ def exponent(tau,m,min_steps, t_0,t_f,delta_t, force_minsteps,filename,frequency
 
     #store times and data in csv
     data = pd.DataFrame(data,index=times,columns=['lyapunov_exponent'])
-    data.to_csv("6_Eigenbot/"+control_type+"/"+str(frequency)+"Hz/lyapunovdata.csv",index=True)
+    data.to_csv("6_Results/"+control_type+"/"+str(frequency)+"Hz/lyapunovdata.csv",index=True)
 
 def main():
     #parameters
@@ -203,9 +203,9 @@ def main():
 
     #store exponents and frequencies in csv
     data = pd.DataFrame(centralised_exponents,index=centralised_frequencies,columns=['lyapunov_exponent'])
-    data.to_csv("6_Eigenbot/centralised/centralised_exponents.csv",index=True)
+    data.to_csv("6_Results/centralised/centralised_exponents.csv",index=True)
     data = pd.DataFrame(distributed_exponents,index=distributed_frequencies,columns=['lyapunov_exponent'])
-    data.to_csv("6_Eigenbot/distributed/distributed_exponents.csv",index=True)
+    data.to_csv("6_Results/distributed/distributed_exponents.csv",index=True)
     
 if __name__ == "__main__":
     main()  
