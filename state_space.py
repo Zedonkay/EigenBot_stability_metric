@@ -27,12 +27,12 @@ def import_data(file_path):
     # pos_z = pos_z[begin_trunc_index:end_trunc_index]
     # quaternion = quaternion[begin_trunc_index:end_trunc_index]
 
-    # Print sizes of arrays after truncation
-    print("Size of timestamps array after truncation:", timestamps.shape)
-    print("Size of pos_x array after truncation:", pos_x.shape)
-    print("Size of pos_y array after truncation:", pos_y.shape)
-    print("Size of pos_z array after truncation:", pos_z.shape)
-    print("Size of quaternion array after truncation:", quaternion.shape)
+    # # Print sizes of arrays after truncation
+    # print("Size of timestamps array after truncation:", timestamps.shape)
+    # print("Size of pos_x array after truncation:", pos_x.shape)
+    # print("Size of pos_y array after truncation:", pos_y.shape)
+    # print("Size of pos_z array after truncation:", pos_z.shape)
+    # print("Size of quaternion array after truncation:", quaternion.shape)
 
     return timestamps, pos_x, pos_y, pos_z, quaternion
 
@@ -64,7 +64,7 @@ def quaternion_to_euler(quaternion):
     yaw = np.arctan2(2*(quaternion[:, 0]*quaternion[:, 3] + quaternion[:, 1]*quaternion[:, 2]), 1 - 2*(quaternion[:, 2]**2 + quaternion[:, 3]**2))
     return roll, pitch, yaw
 
-def plot_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, roll, pitch, yaw,frequency,control_type):
+def plot_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, roll, pitch, yaw,frequency,control_type,test_number):
     # Plot individual 2D plots for pos_x, pos_y, pos_z, roll, pitch, yaw
     fig, axs = plt.subplots(3, 3, figsize=(18, 10))
     axs[0, 0].plot(timestamps, pos_x)
@@ -114,13 +114,13 @@ def plot_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, roll, pitch, y
     axs[2, 2].set_title('Yaw vs. Timestamp')
 
     plt.tight_layout()
-    plt.savefig('6_Eigenbot/'+control_type+"/"+str(frequency)+"Hz/"+str(frequency)+"Hz_2d_state_space.png")
+    plt.savefig('6_Results/raw_data/'+control_type+"/"+str(frequency)+"hz/"+str(frequency)+"Hz_test"+str(test_number)+"_2d_state_space.png")
     plt.clf()
     plt.close()
 
 
 #plot 3D phase space plot for velocity
-def plot_3d_phase_space_vel(vel_x, vel_y, vel_z,frequency,control_type):
+def plot_3d_phase_space_vel(vel_x, vel_y, vel_z,frequency,control_type, test_number):
     # Plot 3D phase space plot
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
@@ -129,10 +129,11 @@ def plot_3d_phase_space_vel(vel_x, vel_y, vel_z,frequency,control_type):
     ax.set_ylabel('Velocity Y')
     ax.set_zlabel('Velocity Z')
     ax.set_title('3D Phase Space Plot')
-    plt.savefig('6_Eigenbot/'+control_type+"/"+str(frequency)+"Hz/"+str(frequency)+"Hz_3d_phase_space_vel.png")
+    plt.savefig('6_Results/raw_data/'+control_type+"/"+str(frequency)+"hz/"+str(frequency)+"Hz_test"+str(test_number)+"_3d_phase_space_vel.png")
     plt.clf()
+    plt.close
 
-def plot_3d_phase_space_pos(pos_x, pos_y, pos_z,frequency,control_type):
+def plot_3d_phase_space_pos(pos_x, pos_y, pos_z,frequency,control_type, test_number):
     # Plot 3D phase space plot
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
@@ -141,10 +142,11 @@ def plot_3d_phase_space_pos(pos_x, pos_y, pos_z,frequency,control_type):
     ax.set_ylabel('Position Y')
     ax.set_zlabel('Position Z')
     ax.set_title('3D Phase Space Plot')
-    plt.savefig('6_Eigenbot/'+control_type+"/"+str(frequency)+"Hz/"+str(frequency)+"Hz_3d_state_space.png")
+    plt.savefig('6_Results/raw_data/'+control_type+"/"+str(frequency)+"hz/"+str(frequency)+"Hz_test"+str(test_number)+"_3d_state_space.png")
     plt.clf()
+    plt.close()
 
-def plot_3d_euler_state_space(timestamps, roll, pitch, yaw,frequency,control_type):
+def plot_3d_euler_state_space(timestamps, roll, pitch, yaw,frequency,control_type,test_number):
     # Plot 3D Euler state space plot
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
@@ -153,12 +155,12 @@ def plot_3d_euler_state_space(timestamps, roll, pitch, yaw,frequency,control_typ
     ax.set_ylabel('Pitch (rad)')
     ax.set_zlabel('Yaw (rad)')
     ax.set_title('3D Euler State Space Plot')
-    plt.savefig('6_Eigenbot/'+control_type+"/"+str(frequency)+"Hz/"+str(frequency)+"Hz_3d_euler_state_space.png")
+    plt.savefig('6_Results/raw_data/'+control_type+"/"+str(frequency)+"hz/"+str(frequency)+"Hz_test"+str(test_number)+"_3d_euler_state_space.png")
     plt.clf()
+    plt.close()
 
-def main(file_path,frequency,control_type):
-
-    # Import data
+def main(frequency,control_type,test_number):
+    file_path = "2_raw_data/official_tests/"+control_type+"/"+"odometry_data_"+control_type+"_test_"+str(frequency)+"hz_"+str(test_number)+".csv"
     timestamps, pos_x, pos_y, pos_z, quaternion = import_data(file_path)
 
     vel_x, vel_y, vel_z = compute_velocities(pos_x, pos_y, pos_z, timestamps)
@@ -166,54 +168,99 @@ def main(file_path,frequency,control_type):
     roll, pitch, yaw = quaternion_to_euler(quaternion)
 
     # Plot 2D positions and angles
-    plot_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, roll, pitch, yaw, frequency,control_type)
+    plot_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, roll, pitch, yaw, frequency,control_type,test_number)
 
     # Plot 3D phase space
-    plot_3d_phase_space_pos(pos_x, pos_y, pos_z,frequency,control_type)
-    plot_3d_phase_space_vel(vel_x, vel_y, vel_z,frequency,control_type)
+    plot_3d_phase_space_pos(pos_x, pos_y, pos_z,frequency,control_type,test_number)
+    plot_3d_phase_space_vel(vel_x, vel_y, vel_z,frequency,control_type,test_number)
 
     # Plot 3D Euler state space
-    plot_3d_euler_state_space(timestamps, roll, pitch, yaw,frequency,control_type)
+    plot_3d_euler_state_space(timestamps, roll, pitch, yaw,frequency,control_type,test_number)
 
 if __name__ == "__main__":
     print("Running for centralised data")
-    main("1_clean_data/centralised/140Hz.csv",140,"centralised")
-    print("140Hz done")
-    main("1_clean_data/centralised/220Hz.csv",220,"centralised")
-    print("220Hz done")
-    main("1_clean_data/centralised/350Hz.csv",350,"centralised")
-    print("350Hz done")
-    main("1_clean_data/centralised/370Hz.csv",370,"centralised")
-    print("370Hz done")
-    main("1_clean_data/centralised/400Hz.csv",400,"centralised")
-    print("400Hz done")
+    main(10,"centralised",1)
+    main(10,"centralised",2)
+    main(10,"centralised",3)
+    main(20,"centralised",1)
+    main(20,"centralised",2)
+    main(20,"centralised",3)
+    main(30,"centralised",1)
+    main(40,"centralised",1)
+    main(40,"centralised",2)
+    main(40,"centralised",3)
+    main(60,"centralised",1)
+    main(60,"centralised",2)
+    main(60,"centralised",3)
+    main(80,"centralised",1)
+    main(80,"centralised",2)
+    main(80,"centralised",3)
+    main(100,"centralised",1)
+    main(100,"centralised",2)
+    main(140,"centralised",1)
+    main(140,"centralised",2)
+    main(140,"centralised",3)
+    main(180,"centralised",1)
+    main(180,"centralised",2)
+    main(180,"centralised",3)
+    main(220,"centralised",1)
+    main(220,"centralised",2)
+    main(220,"centralised",3)
+    main(260,"centralised",1)
+    main(260,"centralised",2)
+    main(260,"centralised",3)
+    main(320,"centralised",1)
+    main(320,"centralised",2)
+    main(320,"centralised",3)
+    main(350,"centralised",1)
+    main(350,"centralised",2)
+    main(350,"centralised",3)
+    main(370,"centralised",1)
+    main(370,"centralised",2)
+    main(370,"centralised",3)
+    main(400,"centralised",1)
+    main(400,"centralised",2)
+    main(400,"centralised",3)
+    main(440,"centralised",1)
+    main(440,"centralised",2)
 
     print("Running for distributed data")
-    main("1_clean_data/distributed/140Hz.csv",140,"distributed")
-    print("140Hz done")
-    main("1_clean_data/distributed/220Hz.csv",220,"distributed")
-    print("220Hz done")
-    main("1_clean_data/distributed/350Hz.csv",350,"distributed")
-    print("350Hz done")
-    main("1_clean_data/distributed/370Hz.csv",370,"distributed")
-    print("370Hz done")
-    main("1_clean_data/distributed/400Hz.csv",400,"distributed")
-    print("400Hz done")
-    main("1_clean_data/distributed/500Hz.csv",500,"distributed")
-    print("500Hz done")
-    main("1_clean_data/distributed/600Hz.csv",600,"distributed")
-    print("600Hz done")
-    main("1_clean_data/distributed/800Hz.csv",800,"distributed")
-    print("800Hz done")
-    main("1_clean_data/distributed/1000Hz.csv",1000,"distributed")
-    print("1000Hz done")
-    main("1_clean_data/distributed/1120Hz.csv",1120,"distributed")
-    print("1120Hz done")
-    main("1_clean_data/distributed/1200Hz.csv",1200,"distributed")
-    print("1200Hz done")
-    main("1_clean_data/distributed/1440Hz.csv",1440,"distributed")
-    print("1440Hz done")
-    main("1_clean_data/distributed/1800Hz.csv",1800,"distributed")
-    print("1800Hz done")
-    main("1_clean_data/distributed/2000Hz.csv",2000,"distributed")
-    print("2000Hz done")
+    main(20,"distributed",1)
+    main(20,"distributed",2)
+    main(20,"distributed",3)
+    main(40,"distributed",1)
+    main(40,"distributed",2)
+    main(40,"distributed",3)
+    main(60,"distributed",1)
+    main(60,"distributed",2)
+    main(60,"distributed",3)
+    main(80,"distributed",1)
+    main(80,"distributed",2)
+    main(80,"distributed",3)
+    main(100,"distributed",1)
+    main(100,"distributed",2)
+    main(100,"distributed",3)
+    main(140,"distributed",1)
+    main(140,"distributed",2)
+    main(140,"distributed",3)
+    main(180,"distributed",1)
+    main(180,"distributed",2)
+    main(180,"distributed",3)
+    main(220,"distributed",1)
+    main(220,"distributed",2)
+    main(220,"distributed",3)
+    main(260,"distributed",1)
+    main(260,"distributed",2)
+    main(260,"distributed",3)
+    main(300,"distributed",1)
+    main(300,"distributed",2)
+    main(300,"distributed",3)
+    main(350,"distributed",1)
+    main(350,"distributed",2)
+    main(350,"distributed",3)
+    main(370,"distributed",1)
+    main(370,"distributed",2)
+    main(370,"distributed",3)
+    main(400,"distributed",1)
+    main(400,"distributed",2)
+    main(400,"distributed",3)
