@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from scipy.interpolate import interp1d
 import math
+import filename_generation as fg
 
 def import_data(file_path):
     # Read CSV file
@@ -64,7 +65,7 @@ def quaternion_to_euler(quaternion):
     yaw = np.arctan2(2*(quaternion[:, 0]*quaternion[:, 3] + quaternion[:, 1]*quaternion[:, 2]), 1 - 2*(quaternion[:, 2]**2 + quaternion[:, 3]**2))
     return roll, pitch, yaw
 
-def plot_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, roll, pitch, yaw,frequency,control_type,test_number):
+def plot_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, roll, pitch, yaw,frequency,test,control_type):
     # Plot individual 2D plots for pos_x, pos_y, pos_z, roll, pitch, yaw
     fig, axs = plt.subplots(3, 3, figsize=(18, 10))
     axs[0, 0].plot(timestamps, pos_x)
@@ -114,13 +115,13 @@ def plot_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, roll, pitch, y
     axs[2, 2].set_title('Yaw vs. Timestamp')
 
     plt.tight_layout()
-    plt.savefig('6_Results/raw_data/'+control_type+"/"+str(frequency)+"hz/"+str(frequency)+"Hz_test"+str(test_number)+"_2d_state_space.png")
+    plt.savefig(fg.store_raw_retest(frequency,test,control_type) +"2d_state_space.png")
     plt.clf()
     plt.close()
 
 
 #plot 3D phase space plot for velocity
-def plot_3d_phase_space_vel(vel_x, vel_y, vel_z,frequency,control_type, test_number):
+def plot_3d_phase_space_vel(vel_x, vel_y, vel_z,frequency,test, control_type):
     # Plot 3D phase space plot
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
@@ -129,11 +130,11 @@ def plot_3d_phase_space_vel(vel_x, vel_y, vel_z,frequency,control_type, test_num
     ax.set_ylabel('Velocity Y')
     ax.set_zlabel('Velocity Z')
     ax.set_title('3D Phase Space Plot')
-    plt.savefig('6_Results/raw_data/'+control_type+"/"+str(frequency)+"hz/"+str(frequency)+"Hz_test"+str(test_number)+"_3d_phase_space_vel.png")
+    plt.savefig(fg.store_raw_retest(frequency,test,control_type)+ "3d_phase_space_vel.png")
     plt.clf()
     plt.close
 
-def plot_3d_phase_space_pos(pos_x, pos_y, pos_z,frequency,control_type, test_number):
+def plot_3d_phase_space_pos(pos_x, pos_y, pos_z,frequency, test,control_type):
     # Plot 3D phase space plot
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
@@ -142,11 +143,11 @@ def plot_3d_phase_space_pos(pos_x, pos_y, pos_z,frequency,control_type, test_num
     ax.set_ylabel('Position Y')
     ax.set_zlabel('Position Z')
     ax.set_title('3D Phase Space Plot')
-    plt.savefig('6_Results/raw_data/'+control_type+"/"+str(frequency)+"hz/"+str(frequency)+"Hz_test"+str(test_number)+"_3d_state_space.png")
+    plt.savefig(fg.store_raw_retest(frequency,test,control_type)+"3d_state_space.png")
     plt.clf()
     plt.close()
 
-def plot_3d_euler_state_space(timestamps, roll, pitch, yaw,frequency,control_type,test_number):
+def plot_3d_euler_state_space(timestamps, roll, pitch, yaw,frequency,test,control_type):
     # Plot 3D Euler state space plot
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
@@ -155,12 +156,12 @@ def plot_3d_euler_state_space(timestamps, roll, pitch, yaw,frequency,control_typ
     ax.set_ylabel('Pitch (rad)')
     ax.set_zlabel('Yaw (rad)')
     ax.set_title('3D Euler State Space Plot')
-    plt.savefig('6_Results/raw_data/'+control_type+"/"+str(frequency)+"hz/"+str(frequency)+"Hz_test"+str(test_number)+"_3d_euler_state_space.png")
+    plt.savefig(fg.store_raw_retest(frequency,test,control_type)+"3d_euler_state_space.png")
     plt.clf()
     plt.close()
 
-def main(frequency,control_type,test_number):
-    file_path = "2_raw_data/official_tests/"+control_type+"/"+"odometry_data_"+control_type+"_test_"+str(frequency)+"hz_"+str(test_number)+".csv"
+def main(frequency,control_type,test):
+    file_path = fg.filename_raw_retest(frequency,test,control_type)
     timestamps, pos_x, pos_y, pos_z, quaternion = import_data(file_path)
 
     vel_x, vel_y, vel_z = compute_velocities(pos_x, pos_y, pos_z, timestamps)
@@ -168,99 +169,66 @@ def main(frequency,control_type,test_number):
     roll, pitch, yaw = quaternion_to_euler(quaternion)
 
     # Plot 2D positions and angles
-    plot_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, roll, pitch, yaw, frequency,control_type,test_number)
+    plot_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, roll, pitch, yaw, frequency,test,control_type)
 
     # Plot 3D phase space
-    plot_3d_phase_space_pos(pos_x, pos_y, pos_z,frequency,control_type,test_number)
-    plot_3d_phase_space_vel(vel_x, vel_y, vel_z,frequency,control_type,test_number)
+    plot_3d_phase_space_pos(pos_x, pos_y, pos_z,frequency,test,control_type)
+    plot_3d_phase_space_vel(vel_x, vel_y, vel_z,frequency,test,control_type)
 
     # Plot 3D Euler state space
-    plot_3d_euler_state_space(timestamps, roll, pitch, yaw,frequency,control_type,test_number)
+    plot_3d_euler_state_space(timestamps, roll, pitch, yaw,frequency,test,control_type)
 
 if __name__ == "__main__":
     print("Running for centralised data")
-    main(10,"centralised",1)
-    main(10,"centralised",2)
-    main(10,"centralised",3)
-    main(20,"centralised",1)
-    main(20,"centralised",2)
-    main(20,"centralised",3)
-    main(30,"centralised",1)
-    main(40,"centralised",1)
-    main(40,"centralised",2)
-    main(40,"centralised",3)
-    main(60,"centralised",1)
-    main(60,"centralised",2)
-    main(60,"centralised",3)
-    main(80,"centralised",1)
-    main(80,"centralised",2)
-    main(80,"centralised",3)
-    main(100,"centralised",1)
-    main(100,"centralised",2)
-    main(140,"centralised",1)
-    main(140,"centralised",2)
-    main(140,"centralised",3)
-    main(180,"centralised",1)
-    main(180,"centralised",2)
-    main(180,"centralised",3)
-    main(220,"centralised",1)
-    main(220,"centralised",2)
-    main(220,"centralised",3)
-    main(260,"centralised",1)
-    main(260,"centralised",2)
-    main(260,"centralised",3)
-    main(320,"centralised",1)
-    main(320,"centralised",2)
-    main(320,"centralised",3)
-    main(350,"centralised",1)
-    main(350,"centralised",2)
-    main(350,"centralised",3)
-    main(370,"centralised",1)
-    main(370,"centralised",2)
-    main(370,"centralised",3)
-    main(400,"centralised",1)
-    main(400,"centralised",2)
-    main(400,"centralised",3)
-    main(440,"centralised",1)
-    main(440,"centralised",2)
+    print("Calculating exponents for centralised control")
+    main(37,"centralised","1")
+    print("done for 37Hz")
+    main(40,"centralised","1")
+    print("done for 40Hz")
+    main(60,"centralised","1")
+    print("done for 60Hz")
+    main(100,"centralised","1")
+    print("done for 100Hz")
+    main(140,"centralised","1")
+    print("done for 140Hz")
+    main(180,"centralised","1")
+    print("done for 180Hz")
+    main(220,"centralised","1")
+    print("done for 220Hz")
+    main(260,"centralised","1")
+    print("done for 260Hz")
+    main(300,"centralised","1")
+    print("done for 300Hz")
+    main(330,"centralised","1")
+    print("done for 330Hz")
+    main(350,"centralised","1")   
+    print("done for 350Hz") 
+    main(400,"centralised","1")
+    print("done for 400Hz")
 
-    print("Running for distributed data")
-    main(20,"distributed",1)
-    main(20,"distributed",2)
-    main(20,"distributed",3)
-    main(40,"distributed",1)
-    main(40,"distributed",2)
-    main(40,"distributed",3)
-    main(60,"distributed",1)
-    main(60,"distributed",2)
-    main(60,"distributed",3)
-    main(80,"distributed",1)
-    main(80,"distributed",2)
-    main(80,"distributed",3)
-    main(100,"distributed",1)
-    main(100,"distributed",2)
-    main(100,"distributed",3)
-    main(140,"distributed",1)
-    main(140,"distributed",2)
-    main(140,"distributed",3)
-    main(180,"distributed",1)
-    main(180,"distributed",2)
-    main(180,"distributed",3)
-    main(220,"distributed",1)
-    main(220,"distributed",2)
-    main(220,"distributed",3)
-    main(260,"distributed",1)
-    main(260,"distributed",2)
-    main(260,"distributed",3)
-    main(300,"distributed",1)
-    main(300,"distributed",2)
-    main(300,"distributed",3)
-    main(350,"distributed",1)
-    main(350,"distributed",2)
-    main(350,"distributed",3)
-    main(370,"distributed",1)
-    main(370,"distributed",2)
-    main(370,"distributed",3)
-    main(400,"distributed",1)
-    main(400,"distributed",2)
-    main(400,"distributed",3)
+    #calculate exponents for distributed control
+    print("Calculating exponents for distributed control")
+    main(500,"distributed","1")
+    print("done for 500Hz")
+    main(600,"distributed","1")
+    print("done for 600Hz")
+    main(700,"distributed","1")
+    print("done for 700Hz")
+    main(800,"distributed","1")
+    print("done for 800Hz")
+    main(1000,"distributed","1")
+    print("done for 1000Hz")
+    main(1200,"distributed","1")
+    print("done for 1200Hz")
+    main(1400,"distributed","1")
+    print("done for 1400Hz")
+    main(1440,"distributed","1")
+    print("done for 1440Hz")
+    main(1480,"distributed","1")
+    print("done for 1480Hz")
+    main(1600,"distributed","1")
+    print("done for 1600Hz")
+    main(1800,"distributed","1")
+    print("done for 1800Hz")
+    main(2000,"distributed","1")
+    print("done for 2000Hz")
