@@ -5,6 +5,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from scipy.interpolate import interp1d
 import math
 import filename_generation as fg
+import truncate as tr
 
 def import_data(file_path):
     # Read CSV file
@@ -19,14 +20,14 @@ def import_data(file_path):
     pos_z = df.iloc[:, 3]
     quaternion = df.iloc[:, 4:8].values
 
-    # # Truncate arrays up to timestamps where timestamps = 4.53
-    # begin_trunc_index = np.argmax(timestamps >= 5.31)
-    # end_trunc_index = np.argmax(timestamps >= 20.0)
+    # Truncate arrays up to timestamps where timestamps = 4.53
+    
     # timestamps = timestamps[begin_trunc_index:end_trunc_index]
     # pos_x = pos_x[begin_trunc_index:end_trunc_index]
     # pos_y = pos_y[begin_trunc_index:end_trunc_index]
     # pos_z = pos_z[begin_trunc_index:end_trunc_index]
     # quaternion = quaternion[begin_trunc_index:end_trunc_index]
+
 
     # # Print sizes of arrays after truncation
     # print("Size of timestamps array after truncation:", timestamps.shape)
@@ -115,7 +116,7 @@ def plot_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, roll, pitch, y
     axs[2, 2].set_title('Yaw vs. Timestamp')
 
     plt.tight_layout()
-    plt.savefig(fg.store_raw_retest(frequency,test,control_type) +"2d_state_space.png")
+    plt.savefig(fg.store_clean_data(frequency,test,control_type) +"2d_state_space.png")
     plt.clf()
     plt.close()
 
@@ -130,7 +131,7 @@ def plot_3d_phase_space_vel(vel_x, vel_y, vel_z,frequency,test, control_type):
     ax.set_ylabel('Velocity Y')
     ax.set_zlabel('Velocity Z')
     ax.set_title('3D Phase Space Plot')
-    plt.savefig(fg.store_raw_retest(frequency,test,control_type)+ "3d_phase_space_vel.png")
+    plt.savefig(fg.store_clean_data(frequency,test,control_type)+ "3d_phase_space_vel.png")
     plt.clf()
     plt.close
 
@@ -143,7 +144,7 @@ def plot_3d_phase_space_pos(pos_x, pos_y, pos_z,frequency, test,control_type):
     ax.set_ylabel('Position Y')
     ax.set_zlabel('Position Z')
     ax.set_title('3D Phase Space Plot')
-    plt.savefig(fg.store_raw_retest(frequency,test,control_type)+"3d_state_space.png")
+    plt.savefig(fg.store_clean_data(frequency,test,control_type)+"3d_state_space.png")
     plt.clf()
     plt.close()
 
@@ -156,12 +157,12 @@ def plot_3d_euler_state_space(timestamps, roll, pitch, yaw,frequency,test,contro
     ax.set_ylabel('Pitch (rad)')
     ax.set_zlabel('Yaw (rad)')
     ax.set_title('3D Euler State Space Plot')
-    plt.savefig(fg.store_raw_retest(frequency,test,control_type)+"3d_euler_state_space.png")
+    plt.savefig(fg.store_clean_data(frequency,test,control_type)+"3d_euler_state_space.png")
     plt.clf()
     plt.close()
 
 def main(frequency,control_type,test):
-    file_path = fg.filename_raw_retest(frequency,test,control_type)
+    file_path = fg.filename_clean(frequency,test,control_type)
     timestamps, pos_x, pos_y, pos_z, quaternion = import_data(file_path)
 
     vel_x, vel_y, vel_z = compute_velocities(pos_x, pos_y, pos_z, timestamps)
@@ -178,57 +179,27 @@ def main(frequency,control_type,test):
     # Plot 3D Euler state space
     plot_3d_euler_state_space(timestamps, roll, pitch, yaw,frequency,test,control_type)
 
-if __name__ == "__main__":
-    print("Running for centralised data")
-    print("Calculating exponents for centralised control")
-    main(37,"centralised","1")
-    print("done for 37Hz")
-    main(40,"centralised","1")
-    print("done for 40Hz")
-    main(60,"centralised","1")
-    print("done for 60Hz")
-    main(100,"centralised","1")
-    print("done for 100Hz")
-    main(140,"centralised","1")
-    print("done for 140Hz")
-    main(180,"centralised","1")
-    print("done for 180Hz")
-    main(220,"centralised","1")
-    print("done for 220Hz")
-    main(260,"centralised","1")
-    print("done for 260Hz")
-    main(300,"centralised","1")
-    print("done for 300Hz")
-    main(330,"centralised","1")
-    print("done for 330Hz")
-    main(350,"centralised","1")   
-    print("done for 350Hz") 
-    main(400,"centralised","1")
-    print("done for 400Hz")
 
-    #calculate exponents for distributed control
-    print("Calculating exponents for distributed control")
-    main(500,"distributed","1")
-    print("done for 500Hz")
-    main(600,"distributed","1")
-    print("done for 600Hz")
-    main(700,"distributed","1")
-    print("done for 700Hz")
-    main(800,"distributed","1")
-    print("done for 800Hz")
-    main(1000,"distributed","1")
-    print("done for 1000Hz")
-    main(1200,"distributed","1")
-    print("done for 1200Hz")
-    main(1400,"distributed","1")
-    print("done for 1400Hz")
-    main(1440,"distributed","1")
-    print("done for 1440Hz")
-    main(1480,"distributed","1")
-    print("done for 1480Hz")
-    main(1600,"distributed","1")
-    print("done for 1600Hz")
-    main(1800,"distributed","1")
-    print("done for 1800Hz")
-    main(2000,"distributed","1")
-    print("done for 2000Hz")
+if __name__ == "__main__":
+    distributed =[[100,'1'],[100,'2'],[100,'3'],[140,'1'],[140,'2'],[140,'3'],
+                  [180,'1'],[180,'2'],[180,'3'],[220,'1'],[220,'2'],[220,'3'],
+                  [260,'1'],[260,'2'],[260,'3'],[300,'1'],[300,'2'],[300,'3'],
+                  [350,'1'],[350,'2'],[350,'3'],[370,'1'],[370,'2'],[370,'3'],[400,'1'],
+                  [400,'2'],[400,'3'],[500,'1'],[600,'1'],[700,'1'],[800,'1'],
+                  [1000,'1'],[1040,'1'],[1080,'1'],[1120,'1'],[1160,'1'],[1200,'1'],
+                  [1400,'1'],[1440,'1'],[1480,'1'],[1600,'1'], [1800,'1'],[2000,'1']]
+    
+    centralised = [[100,'1'],[100,'2'], [100,'3'],[140,'1'],[140,'2'],
+                   [140,'3'], [140,'4'],[180,'1'],[220,'1'],[220,'2'],
+                   [220,'3'],[220,'4'],[260,'1'],[260,'2'],[260,'3'],
+                   [260,'4'],[300,'1'],[320,'1'],[320,'2'],[320,'3'],
+                   [330,'1'],[350,'1'],[350,'2'],[350,'3'],[350,'4'],
+                   [370,'1'],[370,'2'],[370,'3']]
+    print("running centralised")
+    for i in centralised:
+        main(i[0], 'centralised', i[1])
+    
+    print("running distributed")
+    for i in distributed:
+        main(i[0], 'distributed', i[1])
+    print("done")

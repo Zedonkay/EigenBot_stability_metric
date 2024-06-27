@@ -100,8 +100,12 @@ def kantz_mean_distance(vector_addresses,reconstructed_data,i):
     for j in range(len(vector_addresses)-i):
         dist =0
         for k in vector_addresses[j]:
-            mean_distance += np.log(np.linalg.norm(reconstructed_data[k+i]-reconstructed_data[j+i]))
-        mean_distance.append(dist/len(vector_addresses[j]) if len(vector_addresses[j])>0 else 0)
+            dist += np.log(np.linalg.norm(reconstructed_data[k+i]-reconstructed_data[j+i]))
+        if len(vector_addresses[j])>0:
+            mean_distance.append(dist/len(vector_addresses[j]))
+        else:
+            print("error")
+            print(j,i)
     return np.mean(mean_distance)
 def kantz_distance(vector_addresses,reconstructed_data, t_0, t_f, delta_t):
     mean_distance = []
@@ -146,7 +150,7 @@ def plot_growth_factors(times, lyap_exponents,fn,control_type,frequency,test):
     plt.legend()
     plt.xlabel("Time")
     plt.ylabel("Average divergence")
-    plt.savefig(fg.store_raw_retest(frequency,test,control_type) + "lyapunov_plot.png")
+    plt.savefig(fg.store_clean_data(frequency,test,control_type) + "lyapunov_plot.png")
     plt.clf()
 def plot_exponents(centralised_frequencies,centralised_exponents,distributed_frequencies,distributed_exponents):
     ay = plt.scatter(centralised_frequencies,centralised_exponents,label="Centralised")
@@ -158,7 +162,7 @@ def plot_exponents(centralised_frequencies,centralised_exponents,distributed_fre
     plt.clf()
 def exponent(tau,m,min_steps, t_0,t_f,delta_t, force_minsteps, frequencies,exponents,frequency,control_type,test):
     #load data and format
-    filename = fg.filename_raw_retest(frequency,test,control_type)
+    filename = fg.filename_clean(frequency,test,control_type)
     df = pd.read_csv(filename)
     pdata = df[['pz']]
     data=pdata.values
@@ -175,7 +179,7 @@ def exponent(tau,m,min_steps, t_0,t_f,delta_t, force_minsteps, frequencies,expon
 
     #store times and data in csv
     data = pd.DataFrame(data,index=times,columns=['lyapunov_exponent'])
-    data.to_csv(fg.store_raw_retest(frequency,test,control_type)+"_lyapunovdata.csv",index=True)
+    data.to_csv(fg.store_clean_data(frequency,test,control_type)+"_lyapunovdata.csv",index=True)
 
 def main():
     #parameters
@@ -198,66 +202,37 @@ def main():
 
     #calculate exponents for centralised control
     print("Calculating exponents for centralised control")
-    exponent(tau,m,min_steps,t_0,t_f,delta_t,force_minsteps,centralised_frequencies,centralised_exponents,37,"centralised","1")
-    print("done for 37Hz")
-    exponent(tau,m,min_steps,t_0,t_f,delta_t,force_minsteps,centralised_frequencies,centralised_exponents,40,"centralised","1")
-    print("done for 40Hz")
-    exponent(tau,m,min_steps,t_0,t_f,delta_t,force_minsteps,centralised_frequencies,centralised_exponents,60,"centralised","1")
-    print("done for 60Hz")
-    exponent(tau,m,min_steps,t_0,t_f,delta_t,force_minsteps,centralised_frequencies,centralised_exponents,100,"centralised","1")
-    print("done for 100Hz")
-    exponent(tau,m,min_steps,t_0,t_f,delta_t,force_minsteps,centralised_frequencies,centralised_exponents,140,"centralised","1")
-    print("done for 140Hz")
-    exponent(tau,m,min_steps,t_0,t_f,delta_t,force_minsteps,centralised_frequencies,centralised_exponents,180,"centralised","1")
-    print("done for 180Hz")
-    exponent(tau,m,min_steps,t_0,t_f,delta_t,force_minsteps,centralised_frequencies,centralised_exponents,220,"centralised","1")
-    print("done for 220Hz")
-    exponent(tau,m,min_steps,t_0,t_f,delta_t,force_minsteps,centralised_frequencies,centralised_exponents,260,"centralised","1")
-    print("done for 260Hz")
-    exponent(tau,m,min_steps,t_0,t_f,delta_t,force_minsteps,centralised_frequencies,centralised_exponents,300,"centralised","1")
-    print("done for 300Hz")
-    exponent(tau,m,min_steps,t_0,t_f,delta_t,force_minsteps,centralised_frequencies,centralised_exponents,330,"centralised","1")
-    print("done for 330Hz")
-    exponent(tau,m,min_steps,t_0,t_f,delta_t,force_minsteps,centralised_frequencies,centralised_exponents,350,"centralised","1")   
-    print("done for 350Hz") 
-    exponent(tau,m,min_steps,t_0,t_f,delta_t,force_minsteps,centralised_frequencies,centralised_exponents,400,"centralised","1")
-    print("done for 400Hz")
-
+    centralised = [[100,'1'],[100,'2'], [100,'3'],[140,'1'],[140,'2'],
+                   [140,'3'], [140,'4'],[180,'1'],[220,'1'],[220,'2'],
+                   [220,'3'],[220,'4'],[260,'1'],[260,'2'],[260,'3'],
+                   [260,'4'],[300,'1'],[320,'1'],[320,'2'],[320,'3'],
+                   [330,'1'],[350,'1'],[350,'2'],[350,'3'],[350,'4'],
+                   [370,'1'],[370,'2'],[370,'3']]
+    for i in centralised:
+        exponent(tau,m,min_steps,t_0,t_f,delta_t,force_minsteps,centralised_frequencies,centralised_exponents,i[0],'centralised',i[1])
+        print(f"Exponent for centralised {i[0]}Hz test {i[1]} calculated")
+    
     #calculate exponents for distributed control
     print("Calculating exponents for distributed control")
-    exponent(tau,m,min_steps,t_0,t_f,delta_t,force_minsteps,distributed_frequencies,distributed_exponents,500,"distributed","1")
-    print("done for 500Hz")
-    exponent(tau,m,min_steps,t_0,t_f,delta_t,force_minsteps,distributed_frequencies,distributed_exponents,600,"distributed","1")
-    print("done for 600Hz")
-    exponent(tau,m,min_steps,t_0,t_f,delta_t,force_minsteps,distributed_frequencies,distributed_exponents,700,"distributed","1")
-    print("done for 700Hz")
-    exponent(tau,m,min_steps,t_0,t_f,delta_t,force_minsteps,distributed_frequencies,distributed_exponents,800,"distributed","1")
-    print("done for 800Hz")
-    exponent(tau,m,min_steps,t_0,t_f,delta_t,force_minsteps,distributed_frequencies,distributed_exponents,1000,"distributed","1")
-    print("done for 1000Hz")
-    exponent(tau,m,min_steps,t_0,t_f,delta_t,force_minsteps,distributed_frequencies,distributed_exponents,1200,"distributed","1")
-    print("done for 1200Hz")
-    exponent(tau,m,min_steps,t_0,t_f,delta_t,force_minsteps,distributed_frequencies,distributed_exponents,1400,"distributed","1")
-    print("done for 1400Hz")
-    exponent(tau,m,min_steps,t_0,t_f,delta_t,force_minsteps,distributed_frequencies,distributed_exponents,1440,"distributed","1")
-    print("done for 1440Hz")
-    exponent(tau,m,min_steps,t_0,t_f,delta_t,force_minsteps,distributed_frequencies,distributed_exponents,1480,"distributed","1")
-    print("done for 1480Hz")
-    exponent(tau,m,min_steps,t_0,t_f,delta_t,force_minsteps,distributed_frequencies,distributed_exponents,1600,"distributed","1")
-    print("done for 1600Hz")
-    exponent(tau,m,min_steps,t_0,t_f,delta_t,force_minsteps,distributed_frequencies,distributed_exponents,1800,"distributed","1")
-    print("done for 1800Hz")
-    exponent(tau,m,min_steps,t_0,t_f,delta_t,force_minsteps,distributed_frequencies,distributed_exponents,2000,"distributed","1")
-    print("done for 2000Hz")
+    distributed =[[100,'1'],[100,'2'],[100,'3'],[140,'1'],[140,'2'],[140,'3'],
+                  [180,'1'],[180,'2'],[180,'3'],[220,'1'],[220,'2'],[220,'3'],
+                  [260,'1'],[260,'2'],[260,'3'],[300,'1'],[300,'2'],[300,'3'],
+                  [350,'1'],[350,'2'],[350,'3'],[370,'1'],[370,'2'],[370,'3'],[400,'1'],
+                  [400,'2'],[400,'3'],[500,'1'],[600,'1'],[700,'1'],[800,'1'],
+                  [1000,'1'],[1040,'1'],[1080,'1'],[1120,'1'],[1160,'1'],[1200,'1'],
+                  [1400,'1'],[1440,'1'],[1480,'1'],[1600,'1'], [1800,'1'],[2000,'1']]
+    for i in distributed:
+        exponent(tau,m,min_steps,t_0,t_f,delta_t,force_minsteps,distributed_frequencies,distributed_exponents,i[0],'distributed',i[1])
+        print(f"Exponent for distributed {i[0]}Hz test {i[1]} calculated")
     
     #plot exponents
     plot_exponents(centralised_frequencies,centralised_exponents,distributed_frequencies,distributed_exponents)
 
     #store exponents and frequencies in csv
     data = pd.DataFrame(centralised_exponents,index=centralised_frequencies,columns=['lyapunov_exponent'])
-    data.to_csv("6_Results/raw_data/centralised/retest/centralised_exponents.csv",index=True)
+    data.to_csv("6_Results/clean_data/centralised/centralised_exponents.csv",index=True)
     data = pd.DataFrame(distributed_exponents,index=distributed_frequencies,columns=['lyapunov_exponent'])
-    data.to_csv("6_Results/raw_data/distributed/retest/distributed_exponents.csv",index=True)
+    data.to_csv("6_Results/clean_data/distributed/distributed_exponents.csv",index=True)
     
 if __name__ == "__main__":
     main()  

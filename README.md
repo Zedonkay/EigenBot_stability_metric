@@ -8,39 +8,22 @@ Various tactics include understanding the "shakiness" (via FFT/Power Sensitivity
 ## Table of Contents
 
 - [Installation](#installation)
-- [Usage](#usage)
 
 ## Installation
 
-Following are dependencies for `frequency_metric.py`:
+Following are dependencies for `lyapunov_final.py`:
 ```
-import argparse
-import glob
-import pandas as pd
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
-from scipy.fftpack import fft
 from scipy.signal import welch
-from scipy.signal import find_peaks
-import os
-import natsort
-import ipdb
+import filename_generation as fg
 ```
-
-## Usage
-
-To run `frequency_metric.py`
-
-`python3 frequency_metric.py --centralized_file_path "sample_data/centralised/*.csv" --decentralized_file_path "sample_data/distributed/*.csv"`
-
-For the clean dataset
-
-`python3 frequency_metric.py --centralized_file_path "clean_data/centralised/*.csv" --decentralized_file_path "clean_data/distributed/*.csv"`
-
-For neural v predefined dataset
-`python3 frequency_metric.py --centralized_file_path "raw_predefined_v_neural_data/predefined/*.csv" --decentralized_file_path "raw_predefined_v_neural_data/neural/*.csv"`
 
 ## Contact
 Repository created 4/22/24
 hkou@andrew.cmu.edu
+
+Fork created 6/19/24
+ishikhar@andrew.cmu.edu
 
