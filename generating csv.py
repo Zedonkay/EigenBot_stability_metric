@@ -10,9 +10,9 @@ def lorentz_system(state, sigma, rho, beta):
     return np.array([dx, dy, dz])
 def main():
     # Parameters for the Lorentz system
-    sigma = 16
-    rho = 45.92
-    beta = 8.0 / 2.0
+    sigma = 10
+    rho = 28
+    beta = 8.0 / 3.0
     
    
     
