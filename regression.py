@@ -37,4 +37,4 @@ def main(file_path, t_0, t_f,control_type,frequency,test):
     plot_growth_factors(times, data, poly1d_fn, control_type, frequency, test,t_0,t_f)
 
 if __name__ == "__main__":
-    main("lorentz_lyapunov.csv", 25, 180, "centralised", 0.1, "test")
+    main("lorentz_lyapunov.csv", 25, 300, "centralised", 0.1, "test")
