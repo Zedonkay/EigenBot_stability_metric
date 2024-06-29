@@ -113,10 +113,10 @@ def rosenstein_lyapunov(data,tau,m, min_steps, t_0, t_f,delta_t,force_minsteps):
     #calculate lyapunov exponents
     return times, mean_log_distance
 
-def plot_growth_factors(times, lyap_exponents,fn,control_type,frequency,test):
+def plot_growth_factors(times, lyap_exponents,fn,control_type,frequency,test,t_0,t_f):
     """Plot Lyapunov exponents."""
     ax = plt.plot(times,lyap_exponents,label="Average divergence", color="blue")
-    plt.plot(times[80:], fn(times[80:]),label=f"Least Squares Line", color="red")
+    plt.plot(times[t_0:t_f], fn(times[t_0:t_f]),label=f"Least Squares Line", color="red")
     plt.legend()
     plt.xlabel("Time")
     plt.ylabel("Average divergence")
@@ -129,7 +129,6 @@ def plot_exponents(centralised_frequencies,centralised_exponents,distributed_fre
     plt.xlabel("Frequency")
     plt.ylabel("Lyapunov Exponent")
     plt.legend()
-    plt.show()
     plt.savefig("6_Results/clean_data/lyapunov_exponents.png")
     plt.clf()
     plt.close()
@@ -182,7 +181,7 @@ def kantz_lyapunov(data,tau,m,t_0,t_f,delta_t,epsilon):
    
     return times, mean_distances
 
-def exponent(tau,m,min_steps,epsilon, t_0,t_f,delta_t, force_minsteps, frequencies,exponents,frequency,control_type,test):
+def exponent(tau,m,min_steps,epsilon, g_0,g_f,t_0,t_f,delta_t, force_minsteps,centralised_frequencies,centralised_exponents,distributed_frequencies,distributed_exponents,frequency,control_type,test):
     #load data and format
     filename = fg.filename_clean(frequency,test,control_type)
     df = pd.read_csv(filename)
@@ -190,20 +189,23 @@ def exponent(tau,m,min_steps,epsilon, t_0,t_f,delta_t, force_minsteps, frequenci
     data=pdata.values
 
     #calculate lyapunov exponents with rosenstein method 
-    times, data = rosenstein_lyapunov(data,tau,m,min_steps,t_0,t_f,delta_t,force_minsteps)
+    times, data = rosenstein_lyapunov(data,tau,m,min_steps,g_0,g_f,delta_t,force_minsteps)
 
     # #calculate lyapunov exponents with kantz method
     # times, data = kantz_lyapunov(data,tau,m,t_0,t_f,delta_t,epsilon)
     
     #plot growth
-    coef=np.polyfit(times[80:],data[80:],1)
+    coef=np.polyfit(times[t_0:t_f],data[t_0:t_f],1)
     poly1d_fn = np.poly1d(coef)
-    plot_growth_factors(times, data,poly1d_fn,control_type,frequency,test)
+    plot_growth_factors(times, data,poly1d_fn,control_type,frequency,test,t_0,t_f)
 
     #track exponents and frequencies
-    exponents.append(coef[0])
-    frequencies.append(frequency)
-
+    if(control_type == 'centralised'):
+        centralised_exponents.append(coef[0])
+        centralised_frequencies.append(frequency)
+    else:
+        distributed_exponents.append(coef[0])
+        distributed_frequencies.append(frequency)
     #store times and data in csv
     data = pd.DataFrame(np.column_stack((times,data)),columns=['times','average_divergence'])
     data.to_csv(fg.store_clean_data(frequency,test,control_type)+'lyapunovdata.csv',index=True)
@@ -232,40 +234,26 @@ def main():
 
     #calculate exponents for centralised control
 
-    centralised = [[100,'1'],[100,'2'],[140,'1'],[180,'1'],
-                   [180,'2'],[180,'3'],[220,'1'],[220,'2'],
-                   [220,'3'],[260,'1'],[260,'2'],[260,'3'],
-                   [260,'4'],[300,'1'],[320,'1'],[320,'2'],
-                   [330,'1'],[350,'1'],[350,'2'],[350,'3'],
-                   [370,'1'],[370,'2'],[370,'3']]
-   
-    distributed =[[100,'1'],[100,'2'],[100,'3'],[140,'1'],[140,'2'],
-                  [180,'1'],[180,'2'],[220,'1'],[220,'2'],
-                  [260,'1'],[260,'2'],[260,'3'],[300,'1'],[300,'2'],[300,'3'],
-                  [350,'1'],[350,'2'],[370,'1'],[370,'2'],[400,'1'],
-                  [400,'2'],[500,'1'],[600,'1'],[700,'1'],[800,'1'],
-                  [1000,'1'],[1040,'1'],[1120,'1'],[1160,'1'],[1200,'1'],
-                  [1440,'1'],[1600,'1'], [1800,'1'],[2000,'1']]
-    
+ 
 
     print("Calculating exponents for centralised control")
     for i in centralised:
-        exponent(tau,m,min_steps,epsilon,t_0,t_f,delta_t,force_minsteps,centralised_frequencies,centralised_exponents,i[0],'centralised',i[1])
+        exponent(tau,m,min_steps,epsilon,t_0,t_f,delta_t,force_minsteps,centralised_frequencies,centralised_exponents,distributed_frequencies,distributed_exponents,i[0],'centralised',i[1])
         print(f"Exponent for centralised {i[0]}Hz test {i[1]} calculated")
     
     #calculate exponents for distributed control
     print("Calculating exponents for distributed control")
     for i in distributed:
-        exponent(tau,m,min_steps,epsilon,t_0,t_f,delta_t,force_minsteps,distributed_frequencies,distributed_exponents,i[0],'distributed',i[1])
+        exponent(tau,m,min_steps,epsilon,t_0,t_f,delta_t,force_minsteps,centralised_frequencies,centralised_exponents,distributed_frequencies,distributed_exponents,i[0],'distributed',i[1])
         print(f"Exponent for distributed {i[0]}Hz test {i[1]} calculated")
     
     #plot exponents
     plot_exponents(centralised_frequencies,centralised_exponents,distributed_frequencies,distributed_exponents)
 
     #store exponents and frequencies in csv
-    data = pd.DataFrame(centralised_exponents,index=centralised_frequencies,columns=['mean divergence'])
+    data = pd.DataFrame(np.column_stack((centralised_frequencies,centralised_exponents)),columns=['frequency','exponent'])
     data.to_csv("6_Results/clean_data/centralised/centralised_exponents.csv",index=True)
-    data = pd.DataFrame(distributed_exponents,index=distributed_frequencies,columns=['mean divergence'])
+    data = pd.DataFrame(np.column_stack((distributed_frequencies,distributed_exponents)),columns=['frequency','exponent'])
     data.to_csv("6_Results/clean_data/distributed/distributed_exponents.csv",index=True)
     
 if __name__ == "__main__":

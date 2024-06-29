@@ -1,11 +1,9 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from scipy.interpolate import interp1d
-import math
 import filename_generation as fg
-import truncate as tr
+import matplotlib.pyplot as plt
 
 def import_data(file_path):
     # Read CSV file
@@ -15,52 +13,20 @@ def import_data(file_path):
     time_offset = df.iloc[0, 0]
     raw_timestamps = df.iloc[:, 0]
     timestamps = raw_timestamps - time_offset
-    pos_x = df.iloc[:, 1]
-    pos_y = df.iloc[:, 2]
-    pos_z = df.iloc[:, 3]
-    quaternion = df.iloc[:, 4:8].values
-
-    # Truncate arrays up to timestamps where timestamps = 4.53
-    
-    # timestamps = timestamps[begin_trunc_index:end_trunc_index]
-    # pos_x = pos_x[begin_trunc_index:end_trunc_index]
-    # pos_y = pos_y[begin_trunc_index:end_trunc_index]
-    # pos_z = pos_z[begin_trunc_index:end_trunc_index]
-    # quaternion = quaternion[begin_trunc_index:end_trunc_index]
+    pos_x = df[['px']].values
+    pos_y = df[['py']].values
+    pos_z = df[['pz']].values
+    quaternion = df[['ox', 'oy', 'oz', 'ow']].values
+    vel_x = df[['vel_x']].values
+    vel_y = df[['vel_y']].values
+    vel_z = df[['vel_z']].values
 
 
-    # # Print sizes of arrays after truncation
-    # print("Size of timestamps array after truncation:", timestamps.shape)
-    # print("Size of pos_x array after truncation:", pos_x.shape)
-    # print("Size of pos_y array after truncation:", pos_y.shape)
-    # print("Size of pos_z array after truncation:", pos_z.shape)
-    # print("Size of quaternion array after truncation:", quaternion.shape)
-
-    return timestamps, pos_x, pos_y, pos_z, quaternion
-
-def compute_velocities(pos_x, pos_y, pos_z, timestamps):
-    # Compute time differentials
-    time_diffs = np.diff(timestamps)
-
-    # Compute position differentials
-    pos_x_diffs = np.diff(pos_x)
-    pos_y_diffs = np.diff(pos_y)
-    pos_z_diffs = np.diff(pos_z)
-
-    # Interpolate velocities at timestamps where position data is available
-    interp_func_x = interp1d(timestamps[:-1], pos_x_diffs / time_diffs, kind='linear', fill_value='extrapolate')
-    interp_func_y = interp1d(timestamps[:-1], pos_y_diffs / time_diffs, kind='linear', fill_value='extrapolate')
-    interp_func_z = interp1d(timestamps[:-1], pos_z_diffs / time_diffs, kind='linear', fill_value='extrapolate')
-
-    # Compute velocities at original timestamps
-    vel_x = interp_func_x(timestamps)
-    vel_y = interp_func_y(timestamps)
-    vel_z = interp_func_z(timestamps)
-
-    return vel_x, vel_y, vel_z
+    return timestamps, pos_x, pos_y, pos_z, quaternion,vel_x, vel_y, vel_z
 
 
 def quaternion_to_euler(quaternion):
+    # Convert quaternion to roll, pitch, yaw angles
     roll = np.arctan2(2*(quaternion[:, 0]*quaternion[:, 1] + quaternion[:, 2]*quaternion[:, 3]), 1 - 2*(quaternion[:, 1]**2 + quaternion[:, 2]**2))
     pitch = np.arcsin(2*(quaternion[:, 0]*quaternion[:, 2] - quaternion[:, 3]*quaternion[:, 1]))
     yaw = np.arctan2(2*(quaternion[:, 0]*quaternion[:, 3] + quaternion[:, 1]*quaternion[:, 2]), 1 - 2*(quaternion[:, 2]**2 + quaternion[:, 3]**2))
@@ -161,11 +127,23 @@ def plot_3d_euler_state_space(timestamps, roll, pitch, yaw,frequency,test,contro
     plt.clf()
     plt.close()
 
+def plot_gait(timestamps,pos_x,pos_y,pos_z,frequency,test,control_type):
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.plot(pos_x/pos_y, pos_z)
+    ax.set_xlabel('Position X')
+    ax.set_ylabel('Position Z')
+    ax.set_title('2D Gait Cycle Plot')
+    plt.savefig(fg.store_clean_data(frequency,test,control_type)+"gait.png")
+    plt.clf()
+    plt.close()
+
+
+
 def main(frequency,control_type,test):
     file_path = fg.filename_clean(frequency,test,control_type)
-    timestamps, pos_x, pos_y, pos_z, quaternion = import_data(file_path)
+    timestamps, pos_x, pos_y, pos_z, quaternion,vel_x, vel_y, vel_z = import_data(file_path)
 
-    vel_x, vel_y, vel_z = compute_velocities(pos_x, pos_y, pos_z, timestamps)
     # Convert quaternion to roll, pitch, yaw angles
     roll, pitch, yaw = quaternion_to_euler(quaternion)
 
@@ -179,27 +157,27 @@ def main(frequency,control_type,test):
     # Plot 3D Euler state space
     plot_3d_euler_state_space(timestamps, roll, pitch, yaw,frequency,test,control_type)
 
+    #plot 2d gait cycle
+    plot_gait(timestamps,pos_x,pos_y,pos_z,frequency,test,control_type)
+
 
 if __name__ == "__main__":
-    centralised = [[100,'1'],[100,'2'],[140,'1'],[180,'1'],
-                   [180,'2'],[180,'3'],[220,'1'],[220,'2'],
-                   [220,'3'],[260,'1'],[260,'2'],[260,'3'],
-                   [260,'4'],[300,'1'],[320,'1'],[320,'2'],
-                   [330,'1'],[350,'1'],[350,'2'],[350,'3'],
-                   [370,'1'],[370,'2'],[370,'3']]
-   
-    distributed =[[100,'1'],[100,'2'],[100,'3'],[140,'1'],[140,'2'],
-                  [180,'1'],[180,'2'],[220,'1'],[220,'2'],
-                  [260,'1'],[260,'2'],[260,'3'],[300,'1'],[300,'2'],[300,'3'],
-                  [350,'1'],[350,'2'],[370,'1'],[370,'2'],[400,'1'],
-                  [400,'2'],[500,'1'],[600,'1'],[700,'1'],[800,'1'],
-                  [1000,'1'],[1040,'1'],[1120,'1'],[1160,'1'],[1200,'1'],
-                  [1440,'1'],[1600,'1'], [1800,'1'],[2000,'1']]
-    
+    centralised = [[140, '1'], [180, '1'],
+                   [180, '2'], [180, '3'], [220, '1'], [220, '2'],
+                   [220, '3'], [260, '1'], [260, '2'], [260, '3'],
+                   [320, '1'], [320, '2'],
+                   [330, '1'], [350, '1']]
+
+    distributed = [[100, '1'], [140, '1'], [140, '2'],
+                   [180, '1'], [180, '2'], [220, '1'], [220, '2'],
+                   [260, '1'], [260, '2'], [260, '3'], [300, '1'], [300, '2'], [300, '3'],
+                   [350, '1'], [350, '2'], [370, '1'], [370, '2'], [400, '1'],
+                   [400, '2'], [500, '1'], [600, '1'], [700, '1'], [800, '1'],
+                   [1000, '1'], [1040, '1'], [1120, '1'], [1160, '1'], [1200, '1'],
+                   [1440, '1'], [1600, '1'], [1800, '1'], [2000, '1']]
     print("running centralised")
     for i in centralised:
         main(i[0], 'centralised', i[1])
-    
     print("running distributed")
     for i in distributed:
         main(i[0], 'distributed', i[1])

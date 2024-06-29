@@ -8,17 +8,24 @@ Various tactics include understanding the "shakiness" (via FFT/Power Sensitivity
 ## Table of Contents
 
 - [Installation](#installation)
+- [Usage](#usage)
 
 ## Installation
 
-Following are dependencies for `lyapunov_final.py`:
+Following are dependencies for `main.py`:
 ```
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.signal import welch
 import filename_generation as fg
+from mpl_toolkits.mplot3d import Axes3D
+from scipy.interpolate import interp1d
 ```
+## Usage
+set parameters in main.py
+adjust file parameters in 2_raw_data/running_info.csv
+
 
 ## Contact
 Repository created 4/22/24
