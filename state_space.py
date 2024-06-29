@@ -24,7 +24,11 @@ def import_data(file_path):
 
     return timestamps, pos_x, pos_y, pos_z, quaternion,vel_x, vel_y, vel_z
 
-
+def find_displacement(pos_x,pos_y):
+    displacements = []
+    for i in range(len(pos_x)):
+        displacements.append(np.linalg.norm(pos_x[i]-pos_x[len(pos_x)-1])+np.linalg.norm(pos_y[i]-pos_y[len(pos_y)-1]))
+    return displacements 
 def quaternion_to_euler(quaternion):
     # Convert quaternion to roll, pitch, yaw angles
     roll = np.arctan2(2*(quaternion[:, 0]*quaternion[:, 1] + quaternion[:, 2]*quaternion[:, 3]), 1 - 2*(quaternion[:, 1]**2 + quaternion[:, 2]**2))
@@ -127,10 +131,11 @@ def plot_3d_euler_state_space(timestamps, roll, pitch, yaw,frequency,test,contro
     plt.clf()
     plt.close()
 
-def plot_gait(timestamps,pos_x,pos_y,pos_z,frequency,test,control_type):
+def plot_gait(displacements,pos_x,pos_y,pos_z,frequency,test,control_type):
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    ax.plot(pos_x/pos_y, pos_z)
+
+    ax.plot(displacements, pos_z)
     ax.set_xlabel('Position X')
     ax.set_ylabel('Position Z')
     ax.set_title('2D Gait Cycle Plot')
@@ -158,7 +163,8 @@ def main(frequency,control_type,test):
     plot_3d_euler_state_space(timestamps, roll, pitch, yaw,frequency,test,control_type)
 
     #plot 2d gait cycle
-    plot_gait(timestamps,pos_x,pos_y,pos_z,frequency,test,control_type)
+    displacements = find_displacement(pos_x,pos_y)
+    plot_gait(displacements,pos_x,pos_y,pos_z,frequency,test,control_type)
 
 
 if __name__ == "__main__":
