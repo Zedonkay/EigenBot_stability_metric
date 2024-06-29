@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def reconstruction(data,tau,m):
     
     d = len(data)
@@ -17,7 +18,6 @@ def reconstruction(data,tau,m):
                     
                     reconstructed_data[i][j*len(data[0])+k] = data[i+j*tau][k]
     return reconstructed_data
-
 def kantz_mean_distance(vector_addresses,reconstructed_data,i):
     #calculate mean distance for kantz method
     distances = []
@@ -49,7 +49,7 @@ def find_epsilon_vectors(reconstructed_data,epsilon):
                     vector_locations.append(j)
         vector_addresses.append(vector_locations)
     return vector_addresses
-def lyapunov(data,tau,m,t_0,t_f,delta_t,epsilon):
+def kantz_lyapunov(data,tau,m,t_0,t_f,delta_t,epsilon):
     # kantz method for lyapunov exponents
 
     #reconstruct data

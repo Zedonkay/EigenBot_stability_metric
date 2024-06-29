@@ -53,8 +53,7 @@ def find_closest_vectors(reconstructed_data,min_step,t_f):
             neighbors_index.append(-500)
     return neighbors_index
 
-
-def expected_log_distance(reconstructed_data,neighbors_index,i) -> float:
+def log_distance(reconstructed_data,neighbors_index,i) -> float:
     #calculate expected log distance for rosenstein method
     d_ji = []
     for j in range(len(reconstructed_data)-i):
@@ -79,15 +78,13 @@ def lyapunov(data,tau,m, min_steps, t_0, t_f,delta_t,force_minsteps):
                 min_steps = int(min_steps)+1
             else:
                 min_steps = int(min_steps)
-    
     #find closest vectors
     neighbors_index = find_closest_vectors(reconstructed_data,min_steps,t_f)
-   
     #calculate mean distance
     mean_log_distance = []
     times = []
     for i in range(t_0,t_f):
-        mean_log_distance.append(expected_log_distance(reconstructed_data,neighbors_index,i))
+        mean_log_distance.append(log_distance(reconstructed_data,neighbors_index,i))
         times.append(i*delta_t)
     mean_log_distance = np.array(mean_log_distance)
     times = np.array(times)
