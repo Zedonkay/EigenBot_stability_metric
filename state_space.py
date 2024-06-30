@@ -13,16 +13,12 @@ def import_data(file_path):
     time_offset = df.iloc[0, 0]
     raw_timestamps = df.iloc[:, 0]
     timestamps = raw_timestamps - time_offset
-    pos_x = df[['px']].values
-    pos_y = df[['py']].values
-    pos_z = df[['pz']].values
-    quaternion = df[['ox', 'oy', 'oz', 'ow']].values
-    vel_x = df[['vel_x']].values
-    vel_y = df[['vel_y']].values
-    vel_z = df[['vel_z']].values
+    pos_x = df.iloc[:, 1]
+    pos_y = df.iloc[:, 2]
+    pos_z = df.iloc[:, 3]
+    quaternion = df.iloc[:, 4:8].values
 
-
-    return timestamps, pos_x, pos_y, pos_z, quaternion,vel_x, vel_y, vel_z
+    return df, timestamps, pos_x, pos_y, pos_z, quaternion
 
 def find_displacement(pos_x,pos_y):
     displacements = []
@@ -35,6 +31,44 @@ def quaternion_to_euler(quaternion):
     pitch = np.arcsin(2*(quaternion[:, 0]*quaternion[:, 2] - quaternion[:, 3]*quaternion[:, 1]))
     yaw = np.arctan2(2*(quaternion[:, 0]*quaternion[:, 3] + quaternion[:, 1]*quaternion[:, 2]), 1 - 2*(quaternion[:, 2]**2 + quaternion[:, 3]**2))
     return roll, pitch, yaw
+def compute_plotting_points(df):
+    pos_x,pos_y,pos_z = df['px'].values,df['py'].values,df['pz'].values
+    positions = df[['px','py','pz']].values
+    range_x = pos_x[len(pos_x)-1]-pos_x[0]
+    range_y =  pos_y[len(pos_y)-1]-pos_y[0]
+    W = np.array([range_x,range_y,0])
+    W = W/np.linalg.norm(W)
+    V = np.cross(W,np.array([1,0,0]))
+    V = V/np.linalg.norm(V)
+    U = np.cross(V,W)
+    U = U/np.linalg.norm(U)
+    matrix = np.array([U,V,W])
+    plotting = []
+    for position in positions:
+        plotting.append(np.dot(matrix,position))
+    plotting = np.array(plotting)
+    return plotting[:,0],plotting[:,1],plotting[:,2]
+def compute_velocities(pos_x, pos_y, pos_z, timestamps):
+    # Compute time differentials
+    time_diffs = np.diff(timestamps)
+
+    # Compute position differentials
+    pos_x_diffs = np.diff(pos_x)
+    pos_y_diffs = np.diff(pos_y)
+    pos_z_diffs = np.diff(pos_z)
+
+    # Interpolate velocities at timestamps where position data is available
+    interp_func_x = interp1d(timestamps[:-1], pos_x_diffs / time_diffs, kind='linear', fill_value='extrapolate')
+    interp_func_y = interp1d(timestamps[:-1], pos_y_diffs / time_diffs, kind='linear', fill_value='extrapolate')
+    interp_func_z = interp1d(timestamps[:-1], pos_z_diffs / time_diffs, kind='linear', fill_value='extrapolate')
+
+    # Compute velocities at original timestamps
+    vel_x = interp_func_x(timestamps)
+    vel_y = interp_func_y(timestamps)
+    vel_z = interp_func_z(timestamps)
+
+    return vel_x, vel_y, vel_z
+
 
 def plot_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, roll, pitch, yaw,frequency,test,control_type):
     # Plot individual 2D plots for pos_x, pos_y, pos_z, roll, pitch, yaw
@@ -131,14 +165,13 @@ def plot_3d_euler_state_space(timestamps, roll, pitch, yaw,frequency,test,contro
     plt.clf()
     plt.close()
 
-def plot_gait(displacements,pos_x,pos_y,pos_z,frequency,test,control_type):
+def plot_gait(plot_x,plot_y,plot_z,frequency,test,control_type):
     fig = plt.figure()
     ax = fig.add_subplot(111)
-
-    ax.plot(displacements, pos_z)
-    ax.set_xlabel('Position X')
-    ax.set_ylabel('Position Z')
-    ax.set_title('2D Gait Cycle Plot')
+    ax.plot(plot_x, plot_y)
+    ax.set_xlabel('Plotted X')
+    ax.set_ylabel('Plotted Y')
+    ax.set_title('Gait Cycle Plot')
     plt.savefig(fg.store_clean_data(frequency,test,control_type)+"gait.png")
     plt.clf()
     plt.close()
@@ -147,10 +180,15 @@ def plot_gait(displacements,pos_x,pos_y,pos_z,frequency,test,control_type):
 
 def main(frequency,control_type,test):
     file_path = fg.filename_clean(frequency,test,control_type)
-    timestamps, pos_x, pos_y, pos_z, quaternion,vel_x, vel_y, vel_z = import_data(file_path)
+    df, timestamps, pos_x, pos_y, pos_z, quaternion = import_data(file_path)
 
     # Convert quaternion to roll, pitch, yaw angles
     roll, pitch, yaw = quaternion_to_euler(quaternion)
+    
+    # Compute velocities
+    vel_x, vel_y, vel_z = compute_velocities(pos_x, pos_y, pos_z, timestamps)
+    #compute plotting points
+    plot_x,plot_y,plot_z = compute_plotting_points(df)
 
     # Plot 2D positions and angles
     plot_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, roll, pitch, yaw, frequency,test,control_type)
@@ -163,8 +201,7 @@ def main(frequency,control_type,test):
     plot_3d_euler_state_space(timestamps, roll, pitch, yaw,frequency,test,control_type)
 
     #plot 2d gait cycle
-    displacements = find_displacement(pos_x,pos_y)
-    plot_gait(displacements,pos_x,pos_y,pos_z,frequency,test,control_type)
+    plot_gait(plot_x,plot_y,plot_z,frequency,test,control_type)
 
 
 if __name__ == "__main__":

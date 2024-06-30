@@ -24,35 +24,14 @@ def find_end(start,data,tolerance):
         if np.linalg.norm(data[i]-data[i-1]>tolerance):
             return i
 
-def compute_velocities(pos_x, pos_y, pos_z, timestamps):
-    # Compute time differentials
-    time_diffs = np.diff(timestamps)
 
-    # Compute position differentials
-    pos_x_diffs = np.diff(pos_x)
-    pos_y_diffs = np.diff(pos_y)
-    pos_z_diffs = np.diff(pos_z)
 
-    # Interpolate velocities at timestamps where position data is available
-    interp_func_x = interp1d(timestamps[:-1], pos_x_diffs / time_diffs, kind='linear', fill_value='extrapolate')
-    interp_func_y = interp1d(timestamps[:-1], pos_y_diffs / time_diffs, kind='linear', fill_value='extrapolate')
-    interp_func_z = interp1d(timestamps[:-1], pos_z_diffs / time_diffs, kind='linear', fill_value='extrapolate')
-
-    # Compute velocities at original timestamps
-    vel_x = interp_func_x(timestamps)
-    vel_y = interp_func_y(timestamps)
-    vel_z = interp_func_z(timestamps)
-
-    return vel_x, vel_y, vel_z     
-  
 def main(frequency,test,control_type,tolerance):
     filename = fg.filename_raw_test(frequency,test,control_type)
     df = pd.read_csv(filename)
     data = df[['pz']].values
     start,end = find_start_and_end(data,tolerance)
     df = df[start:end]
-    vel_x, vel_y, vel_z = compute_velocities(df['px'].values,df['py'].values,df['pz'].values,df['timestamp'].values)
-    df = df.assign(vel_x=vel_x,vel_y=vel_y,vel_z=vel_z)
     df.to_csv(fg.filename_clean(frequency,test,control_type),index=False)
 
 
