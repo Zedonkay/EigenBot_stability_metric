@@ -14,8 +14,6 @@ def main():
     rho = 28
     beta = 8.0 / 3.0
     
-   
-    
     # Number of steps for data set
     num_steps = 10000
 

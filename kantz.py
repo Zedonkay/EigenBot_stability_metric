@@ -2,7 +2,6 @@ import numpy as np
 
 
 def reconstruction(data,tau,m):
-    
     d = len(data)
     d = d - (m-1)*tau
     if(len(data.shape)==1):
@@ -18,6 +17,8 @@ def reconstruction(data,tau,m):
                     
                     reconstructed_data[i][j*len(data[0])+k] = data[i+j*tau][k]
     return reconstructed_data
+
+
 def kantz_mean_distance(vector_addresses,reconstructed_data,i):
     #calculate mean distance for kantz method
     distances = []
@@ -27,6 +28,7 @@ def kantz_mean_distance(vector_addresses,reconstructed_data,i):
                 distances.append(np.log(np.linalg.norm(reconstructed_data[k+i]-reconstructed_data[j+i])))
 
     return np.mean(distances)
+
 def kantz_distance(vector_addresses,reconstructed_data, t_0, t_f, delta_t):
     mean_distance = []
     times = []
@@ -36,6 +38,7 @@ def kantz_distance(vector_addresses,reconstructed_data, t_0, t_f, delta_t):
         mean_distance.append(kantz_mean_distance(vector_addresses,reconstructed_data,i))
         times.append(i*delta_t)
     return times, mean_distance
+
 def find_epsilon_vectors(reconstructed_data,epsilon):
     vector_addresses=[]
     for i in range(len(reconstructed_data)): 
