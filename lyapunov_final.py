@@ -20,12 +20,13 @@ def plot_growth_factors(times, lyap_exponents,fn,control_type,frequency,test,t_0
 def plot_exponents(centralised_frequencies,centralised_exponents,distributed_frequencies,distributed_exponents):
     ay = plt.scatter(centralised_frequencies,centralised_exponents,label="Centralised")
     plt.scatter(distributed_frequencies,distributed_exponents,label="Distributed")
-    plt.xlabel("Frequency")
+    plt.xlabel("Update Rate [Hz]")
     plt.ylabel("Lyapunov Exponent")
     plt.legend()
     plt.savefig("6_Results/clean_data/lyapunov_exponents.png")
     plt.clf()
     plt.close()
+
 def welch_method(data):
     data=np.reshape(data,(1,-1))
     time_series= data[0]
@@ -33,6 +34,8 @@ def welch_method(data):
     w = Pxx / np.sum(Pxx)
     mean_frequency = np.average(f, weights=w)
     return 1 / mean_frequency
+
+
 
 def exponent(tau,m,min_steps,epsilon,plotting_0,plotting_final,delta_t, force_minsteps,centralised_frequencies,centralised_exponents,distributed_frequencies,distributed_exponents,frequency,control_type,test):
     #load data and format
@@ -50,6 +53,7 @@ def exponent(tau,m,min_steps,epsilon,plotting_0,plotting_final,delta_t, force_mi
     t_0 = 0
     t_f = 2*min_steps
     print(min_steps)
+
     times, data = rosenstein.lyapunov(data,tau,m,min_steps,plotting_0,plotting_final,delta_t)
 
     # #calculate lyapunov exponents with kantz method

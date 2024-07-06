@@ -18,8 +18,14 @@ def import_data(file_path):
     pos_y = df.iloc[:, 2]
     pos_z = df.iloc[:, 3]
     quaternion = df.iloc[:, 4:8].values
+    vel_x = df.iloc[:, 9]
+    vel_y = df.iloc[:, 10]
+    vel_z = df.iloc[:, 11]
+    acc_x = df.iloc[:, 12]
+    acc_y = df.iloc[:, 13]
+    acc_z = df.iloc[:, 14]
 
-    return df, timestamps, pos_x, pos_y, pos_z, quaternion
+    return df, timestamps, pos_x, pos_y, pos_z, quaternion, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z
 def find_displacement(pos_x,pos_y):
     displacements = []
     for i in range(len(pos_x)):
@@ -63,8 +69,7 @@ def find_peaks(pos_z):
 def compute_plotting_points(df,peaks):
     pos_x,pos_y,pos_z = df['px'].values,df['py'].values,df['pz'].values
     positions = df[['px','py','pz']].values
-    point_1,point_2 = find_lines(pos_x,0.0002)
-    range_x = pos_x[point_2]-pos_x[point_1]
+    range_x = np.max(pos_x)-np.min(pos_x)
     range_y =  np.max(pos_y)-np.min(pos_y)
     W = np.array([range_x,range_y,0])
     W = W/np.linalg.norm(W)
@@ -78,31 +83,12 @@ def compute_plotting_points(df,peaks):
         plotting.append(np.dot(matrix,position))
     plotting = np.array(plotting)
     return plotting[:,0],plotting[:,1],plotting[:,2]
-def compute_velocities(pos_x, pos_y, pos_z, timestamps):
-    # Compute time differentials
-    time_diffs = np.diff(timestamps)
-
-    # Compute position differentials
-    pos_x_diffs = np.diff(pos_x)
-    pos_y_diffs = np.diff(pos_y)
-    pos_z_diffs = np.diff(pos_z)
-
-    # Interpolate velocities at timestamps where position data is available
-    interp_func_x = interp1d(timestamps[:-1], pos_x_diffs / time_diffs, kind='linear', fill_value='extrapolate')
-    interp_func_y = interp1d(timestamps[:-1], pos_y_diffs / time_diffs, kind='linear', fill_value='extrapolate')
-    interp_func_z = interp1d(timestamps[:-1], pos_z_diffs / time_diffs, kind='linear', fill_value='extrapolate')
-
-    # Compute velocities at original timestamps
-    vel_x = interp_func_x(timestamps)
-    vel_y = interp_func_y(timestamps)
-    vel_z = interp_func_z(timestamps)
-
-    return vel_x, vel_y, vel_z
 
 
-def plot_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, roll, pitch, yaw,frequency,test,control_type):
+
+def plot_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z,acc_x,acc_y,acc_z, roll, pitch, yaw,frequency,test,control_type):
     # Plot individual 2D plots for pos_x, pos_y, pos_z, roll, pitch, yaw
-    fig, axs = plt.subplots(3, 3, figsize=(18, 10))
+    fig, axs = plt.subplots(4, 3, figsize=(18, 10))
     axs[0, 0].plot(timestamps, pos_x)
     axs[0, 0].set_xlabel('Timestamp')
     axs[0, 0].set_ylabel('Position X')
@@ -133,21 +119,39 @@ def plot_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, roll, pitch, y
     axs[1, 2].set_ylabel('Velocity Z')
     axs[1, 2].set_title('Velocity Z vs. Timestamp')
 
-    # plot 2D angles on the third row of the same plot
-    axs[2, 0].plot(timestamps, roll)
+    # plot 2D accelerations on the third row of the same plot
+    axs[2, 0].plot(timestamps, acc_x)
     axs[2, 0].set_xlabel('Timestamp')
-    axs[2, 0].set_ylabel('Roll (rad)')
-    axs[2, 0].set_title('Roll vs. Timestamp')
+    axs[2, 0].set_ylabel('Acceleration X')
+    axs[2, 0].set_title('Acceleration X vs. Timestamp')
 
-    axs[2, 1].plot(timestamps, pitch)
+    axs[2, 1].plot(timestamps, acc_y)
     axs[2, 1].set_xlabel('Timestamp')
-    axs[2, 1].set_ylabel('Pitch (rad)')
-    axs[2, 1].set_title('Pitch vs. Timestamp')
+    axs[2, 1].set_ylabel('Acceleration Y')
+    axs[2, 1].set_title('Acceleration Y vs. Timestamp')
 
-    axs[2, 2].plot(timestamps, yaw)
+    axs[2, 2].plot(timestamps, acc_z)
     axs[2, 2].set_xlabel('Timestamp')
-    axs[2, 2].set_ylabel('Yaw (rad)')
-    axs[2, 2].set_title('Yaw vs. Timestamp')
+    axs[2, 2].set_ylabel('Acceleration Z')
+    axs[2, 2].set_title('Acceleration Z vs. Timestamp')
+
+    # plot 2D angles on the fourth row of the same plot
+    axs[3, 0].plot(timestamps, roll)
+    axs[3, 0].set_xlabel('Timestamp')
+    axs[3, 0].set_ylabel('Roll (rad)')
+    axs[3, 0].set_title('Roll vs. Timestamp')
+
+    axs[3, 1].plot(timestamps, pitch)
+    axs[3, 1].set_xlabel('Timestamp')
+    axs[3, 1].set_ylabel('Pitch (rad)')
+    axs[3, 1].set_title('Pitch vs. Timestamp')
+
+    axs[3, 2].plot(timestamps, yaw)
+    axs[3, 2].set_xlabel('Timestamp')
+    axs[3, 2].set_ylabel('Yaw (rad)')
+    axs[3, 2].set_title('Yaw vs. Timestamp')
+
+
 
     plt.tight_layout()
     plt.savefig(fg.store_clean_data(frequency,test,control_type) +"2d_state_space.png")
@@ -225,14 +229,13 @@ def plot_plotting_y(frequency,test,control_type,plot_y,plot_z):
     plt.close()
 def main(frequency,control_type,test):
     file_path = fg.filename_clean(frequency,test,control_type)
-    df, timestamps, pos_x, pos_y, pos_z, quaternion = import_data(file_path)
+    df, timestamps, pos_x, pos_y, pos_z, quaternion, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z = import_data(file_path)
 
     # Convert quaternion to roll, pitch, yaw angles
     roll, pitch, yaw = quaternion_to_euler(quaternion)
     
-    # Compute velocities
-    vel_x, vel_y, vel_z = compute_velocities(pos_x, pos_y, pos_z, timestamps)
-    
+   
+
     # find peaks
     peaks = find_peaks(pos_z)
 
@@ -242,7 +245,8 @@ def main(frequency,control_type,test):
     
 
     # Plot 2D positions and angles
-    plot_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, roll, pitch, yaw, frequency,test,control_type)
+    plot_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, 
+            acc_x,acc_y,acc_z,roll, pitch, yaw, frequency,test,control_type)
 
     # Plot 3D phase space
     plot_3d_phase_space_pos(pos_x, pos_y, pos_z,frequency,test,control_type)
