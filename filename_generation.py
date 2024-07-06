@@ -25,3 +25,10 @@ def store_raw_retest(frequency = int, test=int, control_type=str):
 
 def store_raw_test(frequency = int, test=int, control_type=str):
     return "6_results/raw_data/"+control_type+"/"+str(frequency)+"hz/"+"test"+str(test)+"/"+str(frequency)+"Hz_"+str(test)+"_"
+def clean_create_folder_store(frequency = int, test = int, control_type = str):
+    return "6_results/clean_data/"+control_type+"/"+str(frequency)+"hz/"+"test"+str(test)+"/"
+def clean_create_folder_store_frequency(frequency = int, test=int,control_type = str):
+    return "6_results/clean_data/"+control_type+"/"+str(frequency)+"hz/"
+
+def clean_create_folder(frequency = int, test = int, control_type = str):
+    return "1_clean_data/"+control_type+"/"+str(frequency)+"hz/"

@@ -1,5 +1,4 @@
 import numpy as np
-from scipy.signal import welch
 
 def reconstruction(data,tau,m):
     
@@ -18,14 +17,6 @@ def reconstruction(data,tau,m):
                     
                     reconstructed_data[i][j*len(data[0])+k] = data[i+j*tau][k]
     return reconstructed_data
-
-def welch_method(data):
-    data=np.reshape(data,(1,-1))
-    time_series= data[0]
-    f, Pxx = welch(time_series)
-    w = Pxx / np.sum(Pxx)
-    mean_frequency = np.average(f, weights=w)
-    return 1 / mean_frequency
 
 def find_closest_vectors(reconstructed_data,min_step,t_f):
     #find closest vectors for rosenstein method
@@ -67,17 +58,11 @@ def log_distance(reconstructed_data,neighbors_index,i) -> float:
     d_ji = np.array(d_ji)
     return np.mean(np.log(d_ji))
 
-def lyapunov(data,tau,m, min_steps, t_0, t_f,delta_t,force_minsteps):
+def lyapunov(data,tau,m,min_steps,t_0,t_f,delta_t):
     # rosenstein method for lyapunov exponents
 
     #reconstruction through time delay
     reconstructed_data = reconstruction(data,tau,m)
-    if not force_minsteps:
-            min_steps = welch_method(data)
-            if min_steps%1 != 0:
-                min_steps = int(min_steps)+1
-            else:
-                min_steps = int(min_steps)
     #find closest vectors
     neighbors_index = find_closest_vectors(reconstructed_data,min_steps,t_f)
     #calculate mean distance

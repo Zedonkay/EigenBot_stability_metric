@@ -60,4 +60,5 @@ def main(t_0, t_f,control_type,frequency,test):
     distributed_exponents = df_dist["exponent"]
     plot_exponents(centralised_frequencies,centralised_exponents,distributed_frequencies,distributed_exponents)
 if __name__ == "__main__":
-    main(80, 200, "centralised", 330, "1")
+    #main(80, 200, "centralised", 330, "1")
+    pass

@@ -4,6 +4,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from scipy.interpolate import interp1d
 import filename_generation as fg
 import matplotlib.pyplot as plt
+from matplotlib import cm
 
 def import_data(file_path):
     # Read CSV file
@@ -19,7 +20,6 @@ def import_data(file_path):
     quaternion = df.iloc[:, 4:8].values
 
     return df, timestamps, pos_x, pos_y, pos_z, quaternion
-
 def find_displacement(pos_x,pos_y):
     displacements = []
     for i in range(len(pos_x)):
@@ -31,11 +31,41 @@ def quaternion_to_euler(quaternion):
     pitch = np.arcsin(2*(quaternion[:, 0]*quaternion[:, 2] - quaternion[:, 3]*quaternion[:, 1]))
     yaw = np.arctan2(2*(quaternion[:, 0]*quaternion[:, 3] + quaternion[:, 1]*quaternion[:, 2]), 1 - 2*(quaternion[:, 2]**2 + quaternion[:, 3]**2))
     return roll, pitch, yaw
-def compute_plotting_points(df):
+def find_lines(pos_x,tolerance):
+    lines = []
+    i=0
+    while i<len(pos_x)-2:
+        if pos_x[i+1]-pos_x[i]>tolerance:
+            current_line = []
+            current_line.append(i)
+            for j in range(i+1,len(pos_x)-1):
+                if pos_x[j+1]-pos_x[j]<0:
+                    current_line.append(j)
+                    break
+            lines.append(current_line)
+            i = j
+        i+=1
+    if(len(lines[len(lines)-1])==1):
+        lines.pop()
+    p_1 = (lines[0][0]+lines[0][1])/2
+    p_2 = (lines[len(lines)-1][0]+lines[len(lines)-1][1])/2
+    return int(round(p_1)),int(round(p_2))
+def find_peaks(pos_z):
+    peaks = [0]
+    for i in range(1,len(pos_z)-1):
+        if(pos_z[i]<0.172):
+            continue
+        if pos_z[i]>pos_z[i-1] and pos_z[i]>pos_z[i+1]:
+            peaks.append(i)
+    peaks.append(len(pos_z)-1)
+    return peaks
+    
+def compute_plotting_points(df,peaks):
     pos_x,pos_y,pos_z = df['px'].values,df['py'].values,df['pz'].values
     positions = df[['px','py','pz']].values
-    range_x = pos_x[len(pos_x)-1]-pos_x[0]
-    range_y =  pos_y[len(pos_y)-1]-pos_y[0]
+    point_1,point_2 = find_lines(pos_x,0.0002)
+    range_x = pos_x[point_2]-pos_x[point_1]
+    range_y =  np.max(pos_y)-np.min(pos_y)
     W = np.array([range_x,range_y,0])
     W = W/np.linalg.norm(W)
     V = np.cross(W,np.array([1,0,0]))
@@ -165,19 +195,34 @@ def plot_3d_euler_state_space(timestamps, roll, pitch, yaw,frequency,test,contro
     plt.clf()
     plt.close()
 
-def plot_gait(plot_x,plot_y,plot_z,frequency,test,control_type):
+def plot_gait(plot_x,plot_y,plot_z,peaks,frequency,test,control_type):
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    ax.plot(plot_x, plot_y)
-    ax.set_xlabel('Plotted X')
-    ax.set_ylabel('Plotted Y')
+    color = cm.rainbow(np.linspace(0,1,len(peaks)))
+    for i in range(len(peaks)-1):
+        ax.plot(plot_x[peaks[i]:peaks[i+1]],plot_y[peaks[i]:peaks[i+1]],color=color[i])
+    ax.set_xlabel('Transverse Plane')
+    ax.set_ylabel('Frontal Plane')
     ax.set_title('Gait Cycle Plot')
     plt.savefig(fg.store_clean_data(frequency,test,control_type)+"gait.png")
     plt.clf()
     plt.close()
-
-
-
+def plot_plotting_x(frequency,test,control_type,plot_x,plot_z):
+    plt.plot(plot_x,plot_z)
+    plt.xlabel('Plotting X')
+    plt.ylabel('Plotting Z')
+    plt.title('Plotting X vs Plotting Z')
+    plt.savefig(fg.store_clean_data(frequency,test,control_type)+'x_vs_z.png')
+    plt.clf()
+    plt.close()
+def plot_plotting_y(frequency,test,control_type,plot_y,plot_z):
+    plt.plot(plot_y,plot_z)
+    plt.xlabel('Plotting Y')
+    plt.ylabel('Plotting Z')
+    plt.title('Plotting Y vs Plotting Z')
+    plt.savefig(fg.store_clean_data(frequency,test,control_type)+'y_vs_z.png')
+    plt.clf()
+    plt.close()
 def main(frequency,control_type,test):
     file_path = fg.filename_clean(frequency,test,control_type)
     df, timestamps, pos_x, pos_y, pos_z, quaternion = import_data(file_path)
@@ -187,8 +232,14 @@ def main(frequency,control_type,test):
     
     # Compute velocities
     vel_x, vel_y, vel_z = compute_velocities(pos_x, pos_y, pos_z, timestamps)
+    
+    # find peaks
+    peaks = find_peaks(pos_z)
+
     #compute plotting points
-    plot_x,plot_y,plot_z = compute_plotting_points(df)
+    plot_x,plot_y,plot_z = compute_plotting_points(df,peaks)
+
+    
 
     # Plot 2D positions and angles
     plot_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, roll, pitch, yaw, frequency,test,control_type)
@@ -199,29 +250,12 @@ def main(frequency,control_type,test):
 
     # Plot 3D Euler state space
     plot_3d_euler_state_space(timestamps, roll, pitch, yaw,frequency,test,control_type)
-
+    
     #plot 2d gait cycle
-    plot_gait(plot_x,plot_y,plot_z,frequency,test,control_type)
+    plot_gait(plot_x,plot_y,plot_z,peaks, frequency,test,control_type)
 
+    #plot plotting x vs z
+    plot_plotting_x(frequency,test,control_type,plot_x,plot_z)
 
-if __name__ == "__main__":
-    centralised = [[140, '1'], [180, '1'],
-                   [180, '2'], [180, '3'], [220, '1'], [220, '2'],
-                   [220, '3'], [260, '1'], [260, '2'], [260, '3'],
-                   [320, '1'], [320, '2'],
-                   [330, '1'], [350, '1']]
-
-    distributed = [[100, '1'], [140, '1'], [140, '2'],
-                   [180, '1'], [180, '2'], [220, '1'], [220, '2'],
-                   [260, '1'], [260, '2'], [260, '3'], [300, '1'], [300, '2'], [300, '3'],
-                   [350, '1'], [350, '2'], [370, '1'], [370, '2'], [400, '1'],
-                   [400, '2'], [500, '1'], [600, '1'], [700, '1'], [800, '1'],
-                   [1000, '1'], [1040, '1'], [1120, '1'], [1160, '1'], [1200, '1'],
-                   [1440, '1'], [1600, '1'], [1800, '1'], [2000, '1']]
-    print("running centralised")
-    for i in centralised:
-        main(i[0], 'centralised', i[1])
-    print("running distributed")
-    for i in distributed:
-        main(i[0], 'distributed', i[1])
-    print("done")
+    #plot plotting y vs z
+    plot_plotting_y(frequency,test,control_type,plot_y,plot_z)

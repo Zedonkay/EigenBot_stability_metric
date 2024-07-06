@@ -1,3 +1,4 @@
+#!/path/to/venv python3
 import pandas as pd
 import lyapunov_final as lyap
 import filename_generation as fg
@@ -7,6 +8,7 @@ import retruncate as rtr
 import state_space as ss
 import matplotlib.pyplot as plt
 
+print("Running main.py")
 def main():
     # Set the values for various parameters
     tau = 11
@@ -14,9 +16,9 @@ def main():
     delta_t = 0.01
     min_steps = 100
     force_minsteps = False
-    g_0 = 0
-    g_f = 300
     epsilon = 10
+    plotting_0=0
+    plotting_final=300
     tolerance = 0.001
 
     # Initialize lists to store results
@@ -43,7 +45,7 @@ def main():
         ss.main(file[1], file[0], file[2])
 
         # Calculate Lyapunov exponents for the data
-        lyap.exponent(tau, m, min_steps, epsilon, g_0, g_f, file[5], file[6],
+        lyap.exponent(tau, m, min_steps, epsilon, plotting_0,plotting_final,
                       delta_t, force_minsteps, centralised_frequencies,
                       centralised_exponents, distributed_frequencies,
                       distributed_exponents, file[1], file[0], file[2])
