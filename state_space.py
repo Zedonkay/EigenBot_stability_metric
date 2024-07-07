@@ -6,6 +6,7 @@ import filename_generation as fg
 import matplotlib.pyplot as plt
 from matplotlib import cm
 
+
 def import_data(file_path):
     # Read CSV file
     df = pd.read_csv(file_path, delimiter=',')
@@ -18,12 +19,12 @@ def import_data(file_path):
     pos_y = df.iloc[:, 2]
     pos_z = df.iloc[:, 3]
     quaternion = df.iloc[:, 4:8].values
-    vel_x = df.iloc[:, 9]
-    vel_y = df.iloc[:, 10]
-    vel_z = df.iloc[:, 11]
-    acc_x = df.iloc[:, 12]
-    acc_y = df.iloc[:, 13]
-    acc_z = df.iloc[:, 14]
+    vel_x=df['vx']
+    vel_y=df['vy']
+    vel_z=df['vz']
+    acc_x=df['ax']
+    acc_y=df['ay']
+    acc_z=df['az']
 
     return df, timestamps, pos_x, pos_y, pos_z, quaternion, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z
 def find_displacement(pos_x,pos_y):

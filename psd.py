@@ -3,23 +3,31 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import filename_generation as fg
 from scipy.signal import welch
+import matplotlib.patches as mpatches
+import matplotlib.markers as markers
+
+labels=[]
+def add_label(violin, label):
+    color = violin["bodies"][0].get_facecolor().flatten()
+    labels.append((mpatches.Patch(color=color), label))
 
 def plot_psd(centralised_frequencies,centralised_psds,distributed_frequencies,distributed_psds):
-    fix,axs = plt.subplots(1,2,figsize=(10,6))
-    axs[0].boxplot(centralised_psds)
-    axs[0].set_xticklabels(centralised_frequencies)
-    axs[0].set_xlabel("Update Rate [Hz]")
-    axs[0].set_ylabel("Power Spectrum Density * Freq [W*Hz]")
-    axs[0].set_ylim([0,2])
-    axs[0].set_title("Centralised")
-    axs[1].boxplot(distributed_psds)
-    axs[1].set_xticklabels(distributed_frequencies)
-    axs[1].set_xlabel("Update Rate [Hz]")
-    axs[1].set_ylabel("Power Spectrum Density * Freq [W*Hz]")
-    axs[1].set_ylim([0,2])
-    axs[1].set_title("Distributed")
-    title = "PSD*Freq Distribution for Z-Position vs. Update Rate"
-    plt.savefig("6_Results/clean_data/psd.png")
+    fig,ax=plt.subplots()
+    add_label(ax.violinplot(centralised_psds,side='high',showmeans=False,showmedians=False,showextrema=False),"Centralised")
+    add_label(ax.violinplot(distributed_psds,side='low',showmeans=False,showmedians=False,showextrema=False),"Distributed")
+    ax.set_xticks(distributed_frequencies)
+    for i in range(len(distributed_frequencies)):
+        if(i<len(centralised_frequencies)):
+            ax.scatter(centralised_frequencies[i],np.mean(centralised_psds[i]),marker = markers.CARETLEFTBASE, color = 'r')
+            ax.scatter(centralised_frequencies[i],np.min(centralised_psds[i]),marker = markers.TICKLEFT, color = 'r')
+            ax.scatter(centralised_frequencies[i],np.max(centralised_psds[i]),marker = markers.TICKLEFT, color = 'r')
+        ax.scatter(distributed_frequencies[i],np.mean(distributed_psds[i]),marker = markers.CARETRIGHTBASE, color='b')
+        ax.scatter(distributed_frequencies[i],np.min(distributed_psds[i]),marker = markers.TICKRIGHT, color='b')
+        ax.scatter(distributed_frequencies[i],np.max(distributed_psds[i]),marker = markers.TICKRIGHT, color='b')
+    ax.legend(*zip(*labels))
+    ax.set_xlabel("Frequency (Hz)")
+    ax.set_ylabel("PSD*Freq")
+    fig.savefig("6_Results/clean_data/psd.png")
     plt.clf()
     plt.close()
 

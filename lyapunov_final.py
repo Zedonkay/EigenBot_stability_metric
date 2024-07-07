@@ -37,7 +37,7 @@ def welch_method(data):
 
 
 
-def exponent(tau,m,min_steps,epsilon,plotting_0,plotting_final,delta_t, force_minsteps,centralised_frequencies,centralised_exponents,distributed_frequencies,distributed_exponents,frequency,control_type,test):
+def exponent(tau,m,min_steps,epsilon,plotting_0,plotting_final,delta_t, force_minsteps,centralised_exponents,distributed_exponents,frequency,control_type,test):
     #load data and format
     filename = fg.filename_clean(frequency,test,control_type)
     df = pd.read_csv(filename)
@@ -67,10 +67,8 @@ def exponent(tau,m,min_steps,epsilon,plotting_0,plotting_final,delta_t, force_mi
     #track exponents and frequencies
     if(control_type == 'centralised'):
         centralised_exponents.append(coef[0])
-        centralised_frequencies.append(frequency)
     else:
         distributed_exponents.append(coef[0])
-        distributed_frequencies.append(frequency)
     #store times and data in csv
     data = pd.DataFrame(np.column_stack((times,data)),columns=['times','average_divergence'])
     data.to_csv(fg.store_clean_data(frequency,test,control_type)+'lyapunovdata.csv',index=True)
