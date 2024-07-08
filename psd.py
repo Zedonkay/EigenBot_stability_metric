@@ -12,21 +12,18 @@ def add_label(violin, label):
     labels.append((mpatches.Patch(color=color), label))
 
 def plot_psd(centralised_frequencies,centralised_psds,distributed_frequencies,distributed_psds):
-    fig,ax=plt.subplots()
-    add_label(ax.violinplot(centralised_psds,side='high',showmeans=False,showmedians=False,showextrema=False),"Centralised")
-    add_label(ax.violinplot(distributed_psds,side='low',showmeans=False,showmedians=False,showextrema=False),"Distributed")
-    ax.set_xticks(distributed_frequencies)
-    for i in range(len(distributed_frequencies)):
-        if(i<len(centralised_frequencies)):
-            ax.scatter(centralised_frequencies[i],np.mean(centralised_psds[i]),marker = markers.CARETLEFTBASE, color = 'r')
-            ax.scatter(centralised_frequencies[i],np.min(centralised_psds[i]),marker = markers.TICKLEFT, color = 'r')
-            ax.scatter(centralised_frequencies[i],np.max(centralised_psds[i]),marker = markers.TICKLEFT, color = 'r')
-        ax.scatter(distributed_frequencies[i],np.mean(distributed_psds[i]),marker = markers.CARETRIGHTBASE, color='b')
-        ax.scatter(distributed_frequencies[i],np.min(distributed_psds[i]),marker = markers.TICKRIGHT, color='b')
-        ax.scatter(distributed_frequencies[i],np.max(distributed_psds[i]),marker = markers.TICKRIGHT, color='b')
-    ax.legend(*zip(*labels))
+    fig,ax=plt.subplots(1,1,figsize=(10,5))
+    
+    ax.set_xticklabels(distributed_frequencies)
+    
+    add_label(ax.violinplot(centralised_psds,side='low',showmeans=True,showmedians=False,showextrema=True), "Centralised Control")
+    add_label(ax.violinplot(distributed_psds,side='high',showmeans=True,showmedians=False,showextrema=True), "Distributed Control")
+    ax.legend(*zip(*labels),loc=9)
     ax.set_xlabel("Frequency (Hz)")
     ax.set_ylabel("PSD*Freq")
+    ax.set_xlabel("Frequency (Hz)")
+    ax.set_ylabel("PSD*Freq")
+    ax.set_title("PSD*Freq for Z-Acceleration vs Frequency on Flat Terrain")
     fig.savefig("6_Results/clean_data/psd.png")
     plt.clf()
     plt.close()

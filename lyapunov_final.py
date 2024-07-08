@@ -13,7 +13,11 @@ def plot_growth_factors(times, lyap_exponents,fn,control_type,frequency,test,t_0
     plt.plot(times[t_0:t_f], fn(times[t_0:t_f]),label=f"Least Squares Line", color="red")
     plt.legend()
     plt.xlabel("Time")
-    plt.ylabel("Average divergence")
+    plt.ylabel("Log mean divergence")
+    if control_type == "centralised":
+        plt.title(f"Log mean divergence vs time for Centralised control at {frequency} Hz")
+    else:
+        plt.title(f"Log mean divergence vs time for Distributed control at {frequency} Hz")
     plt.savefig(fg.store_clean_data(frequency,test,control_type)+"lyapunov_plot.png")
     plt.clf()
     plt.close()
@@ -22,6 +26,7 @@ def plot_exponents(centralised_frequencies,centralised_exponents,distributed_fre
     plt.scatter(distributed_frequencies,distributed_exponents,label="Distributed")
     plt.xlabel("Update Rate [Hz]")
     plt.ylabel("Lyapunov Exponent")
+    plt.title("Lyapunov Exponents vs Update Rates on Flat Terrain")
     plt.legend()
     plt.savefig("6_Results/clean_data/lyapunov_exponents.png")
     plt.clf()

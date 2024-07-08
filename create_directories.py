@@ -3,7 +3,7 @@ import pandas as pd
 import filename_generation as fg
 
 if __name__ =="__main__":
-    df = pd.read_csv("2_raw_data/running_info.csv")
+    df = pd.read_csv("2_raw_data/running_info_all_good.csv")
     data = df.to_numpy()
     for file in data:
         print(f"{file[0]} {file[1]}hz test {file[2]}")

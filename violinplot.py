@@ -24,6 +24,7 @@ fig, (ax1, ax2) = plt.subplots(nrows=1, ncols=2, figsize=(9, 4), sharey=True)
 ax1.set_title('Default violin plot')
 ax1.set_ylabel('Observed values')
 ax1.violinplot(data)
+print(len(data))
 
 ax2.set_title('Customized violin plot')
 parts = ax2.violinplot(

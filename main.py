@@ -34,7 +34,7 @@ def main():
     psds_distributed = []
 
     # Read data from a CSV file
-    df = pd.read_csv("2_raw_data/running_info.csv")
+    df = pd.read_csv("2_raw_data/running_info_all_good.csv")
     data = df.to_numpy()
 
     # Process each file in the data
@@ -53,24 +53,24 @@ def main():
         # Perform re-truncation on the data
         rtr.truncate(file[1], file[2], file[0], file[3], file[4])
 
-        # # Perform state space analysis on the data
-        # ss.main(file[1], file[0], file[2])
+        # Perform state space analysis on the data
+        ss.main(file[1], file[0], file[2])
         
-        # # Calculate Lyapunov exponents for the data
-        # lyap.exponent(tau, m, min_steps, epsilon, plotting_0,plotting_final,
-        #               delta_t, force_minsteps, centralised_exponents, 
-        #               distributed_exponents, file[1], file[0], file[2])
+    #     # Calculate Lyapunov exponents for the data
+    #     lyap.exponent(tau, m, min_steps, epsilon, plotting_0,plotting_final,
+    #                   delta_t, force_minsteps, centralised_exponents, 
+    #                   distributed_exponents, file[1], file[0], file[2])
         
-        # Calculate PSDs for the data
-        psd.main(psds_centralised, psds_distributed, file[1], file[2], file[0])
+    #     # Calculate PSDs for the data
+    #     psd.main(psds_centralised, psds_distributed, file[1], file[2], file[0])
 
     # # Plot the Lyapunov exponents
     # lyap.plot_exponents(centralised_frequencies, centralised_exponents,
     #                     distributed_frequencies, distributed_exponents)
 
-    # Plot the PSDs
-    psd.plot_psd(centralised_frequencies, psds_centralised,
-                 distributed_frequencies, psds_distributed)
+    # # Plot the PSDs
+    # psd.plot_psd(centralised_frequencies, psds_centralised,
+    #              distributed_frequencies, psds_distributed)
     # # Save the results to CSV files
     # data = pd.DataFrame(np.column_stack((centralised_frequencies, centralised_exponents)),
     #                     columns=['frequency', 'exponent'])

@@ -67,12 +67,13 @@ def find_peaks(pos_z):
     peaks.append(len(pos_z)-1)
     return peaks
     
-def compute_plotting_points(df,peaks):
+def compute_plotting_points(df,peaks,control_type):
     pos_x,pos_y,pos_z = df['px'].values,df['py'].values,df['pz'].values
     positions = df[['px','py','pz']].values
-    range_x = np.max(pos_x)-np.min(pos_x)
+    point_1,point_2 = find_lines(pos_x,0.1)
+    range_x = pos_x[point_2]-pos_x[point_1]
     range_y =  np.max(pos_y)-np.min(pos_y)
-    W = np.array([range_x,range_y,0])
+    W=np.array([range_x,range_y,0])
     W = W/np.linalg.norm(W)
     V = np.cross(W,np.array([1,0,0]))
     V = V/np.linalg.norm(V)
@@ -87,10 +88,20 @@ def compute_plotting_points(df,peaks):
 
 
 
-def plot_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z,acc_x,acc_y,acc_z, roll, pitch, yaw,frequency,test,control_type):
+def plot_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z,acc_x,acc_y,acc_z, 
+            roll, pitch, yaw,frequency,test,control_type):
     # Plot individual 2D plots for pos_x, pos_y, pos_z, roll, pitch, yaw
     fig, axs = plt.subplots(4, 3, figsize=(18, 10))
+    if control_type == "centralised":
+        fig.suptitle(f'2D State Space Plots for Centralised Control at {frequency} Hz')
+    else:
+        fig.suptitle(f'2D State Space Plots for Distributed Control at {frequency} Hz')
+
+    point_1,point_2 = find_lines(pos_x,0.1)
+
     axs[0, 0].plot(timestamps, pos_x)
+    axs[0,0].scatter(timestamps[point_1],pos_x[point_1],color='red')
+    axs[0,0].scatter(timestamps[point_2],pos_x[point_2],color='red')
     axs[0, 0].set_xlabel('Timestamp')
     axs[0, 0].set_ylabel('Position X')
     axs[0, 0].set_title('Position X vs. Timestamp')
@@ -169,7 +180,10 @@ def plot_3d_phase_space_vel(vel_x, vel_y, vel_z,frequency,test, control_type):
     ax.set_xlabel('Velocity X')
     ax.set_ylabel('Velocity Y')
     ax.set_zlabel('Velocity Z')
-    ax.set_title('3D Phase Space Plot')
+    if control_type == "centralised":
+        plt.title(f'3D Phase Space Plot for Centralised Control at {frequency} Hz')
+    else:
+        plt.title(f'3D Phase Space Plot for Distributed Control at {frequency} Hz')
     plt.savefig(fg.store_clean_data(frequency,test,control_type)+ "3d_phase_space_vel.png")
     plt.clf()
     plt.close
@@ -182,7 +196,10 @@ def plot_3d_phase_space_pos(pos_x, pos_y, pos_z,frequency, test,control_type):
     ax.set_xlabel('Position X')
     ax.set_ylabel('Position Y')
     ax.set_zlabel('Position Z')
-    ax.set_title('3D Phase Space Plot')
+    if control_type == "centralised":
+        plt.title(f'3D Phase Space Plot for Centralised Control at {frequency} Hz')
+    else:
+        plt.title(f'3D Phase Space Plot for Distributed Control at {frequency} Hz')
     plt.savefig(fg.store_clean_data(frequency,test,control_type)+"3d_state_space.png")
     plt.clf()
     plt.close()
@@ -195,7 +212,10 @@ def plot_3d_euler_state_space(timestamps, roll, pitch, yaw,frequency,test,contro
     ax.set_xlabel('Roll (rad)')
     ax.set_ylabel('Pitch (rad)')
     ax.set_zlabel('Yaw (rad)')
-    ax.set_title('3D Euler State Space Plot')
+    if control_type == "centralised":
+        plt.title(f'3D Euler State Space Plot for Centralised Control at {frequency} Hz')
+    else:
+        plt.title(f'3D Euler State Space Plot for Distributed Control at {frequency} Hz')
     plt.savefig(fg.store_clean_data(frequency,test,control_type)+"3d_euler_state_space.png")
     plt.clf()
     plt.close()
@@ -208,7 +228,10 @@ def plot_gait(plot_x,plot_y,plot_z,peaks,frequency,test,control_type):
         ax.plot(plot_x[peaks[i]:peaks[i+1]],plot_y[peaks[i]:peaks[i+1]],color=color[i])
     ax.set_xlabel('Transverse Plane')
     ax.set_ylabel('Frontal Plane')
-    ax.set_title('Gait Cycle Plot')
+    if control_type == "centralised":
+        plt.title(f'Gait Cycle for Centralised Control at {frequency} Hz')
+    else:
+        plt.title(f'Gait Cycle for Distributed Control at {frequency} Hz')
     plt.savefig(fg.store_clean_data(frequency,test,control_type)+"gait.png")
     plt.clf()
     plt.close()
@@ -241,7 +264,7 @@ def main(frequency,control_type,test):
     peaks = find_peaks(pos_z)
 
     #compute plotting points
-    plot_x,plot_y,plot_z = compute_plotting_points(df,peaks)
+    plot_x,plot_y,plot_z = compute_plotting_points(df,peaks,control_type)
 
     
 
