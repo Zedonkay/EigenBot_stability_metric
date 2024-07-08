@@ -52,7 +52,7 @@ def find_lines(pos_x,tolerance):
             lines.append(current_line)
             i = j
         i+=1
-    if(len(lines[len(lines)-1])==1):
+    if(len( lines[len(lines)-1])<2):
         lines.pop()
     p_1 = (lines[0][0]+lines[0][1])/2
     p_2 = (lines[len(lines)-1][0]+lines[len(lines)-1][1])/2
@@ -67,13 +67,13 @@ def find_peaks(pos_z):
     peaks.append(len(pos_z)-1)
     return peaks
     
-def compute_plotting_points(df,peaks,control_type):
+def compute_plotting_points(df,peaks,tolerance):
     pos_x,pos_y,pos_z = df['px'].values,df['py'].values,df['pz'].values
     positions = df[['px','py','pz']].values
-    point_1,point_2 = find_lines(pos_x,0.1)
+    point_1,point_2 = find_lines(pos_x,tolerance)
     range_x = pos_x[point_2]-pos_x[point_1]
-    range_y =  np.max(pos_y)-np.min(pos_y)
-    W=np.array([range_x,range_y,0])
+    range_y = np.min(pos_y)-np.max(pos_y)
+    W=np.array([range_x+.005,range_y,0])
     W = W/np.linalg.norm(W)
     V = np.cross(W,np.array([1,0,0]))
     V = V/np.linalg.norm(V)
@@ -89,7 +89,7 @@ def compute_plotting_points(df,peaks,control_type):
 
 
 def plot_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z,acc_x,acc_y,acc_z, 
-            roll, pitch, yaw,frequency,test,control_type):
+            roll, pitch, yaw,frequency,test,control_type,tolerance):
     # Plot individual 2D plots for pos_x, pos_y, pos_z, roll, pitch, yaw
     fig, axs = plt.subplots(4, 3, figsize=(18, 10))
     if control_type == "centralised":
@@ -97,7 +97,7 @@ def plot_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z,acc_x,acc_y,acc
     else:
         fig.suptitle(f'2D State Space Plots for Distributed Control at {frequency} Hz')
 
-    point_1,point_2 = find_lines(pos_x,0.1)
+    point_1,point_2 = find_lines(pos_x,tolerance)
 
     axs[0, 0].plot(timestamps, pos_x)
     axs[0,0].scatter(timestamps[point_1],pos_x[point_1],color='red')
@@ -251,7 +251,7 @@ def plot_plotting_y(frequency,test,control_type,plot_y,plot_z):
     plt.savefig(fg.store_clean_data(frequency,test,control_type)+'y_vs_z.png')
     plt.clf()
     plt.close()
-def main(frequency,control_type,test):
+def main(frequency,control_type,test,tolerance):
     file_path = fg.filename_clean(frequency,test,control_type)
     df, timestamps, pos_x, pos_y, pos_z, quaternion, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z = import_data(file_path)
 
@@ -264,13 +264,13 @@ def main(frequency,control_type,test):
     peaks = find_peaks(pos_z)
 
     #compute plotting points
-    plot_x,plot_y,plot_z = compute_plotting_points(df,peaks,control_type)
+    plot_x,plot_y,plot_z = compute_plotting_points(df,peaks,tolerance)
 
     
 
     # Plot 2D positions and angles
     plot_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, 
-            acc_x,acc_y,acc_z,roll, pitch, yaw, frequency,test,control_type)
+            acc_x,acc_y,acc_z,roll, pitch, yaw, frequency,test,control_type,tolerance)
 
     # Plot 3D phase space
     plot_3d_phase_space_pos(pos_x, pos_y, pos_z,frequency,test,control_type)

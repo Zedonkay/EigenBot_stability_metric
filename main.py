@@ -22,6 +22,7 @@ def main():
     plotting_0=0
     plotting_final=300
     tolerance = 0.001
+    vector_tolerance = 0.0004
 
     # Initialize lists to store results
     centralised_exponents = []
@@ -54,7 +55,7 @@ def main():
         rtr.truncate(file[1], file[2], file[0], file[3], file[4])
 
         # Perform state space analysis on the data
-        ss.main(file[1], file[0], file[2])
+        ss.main(file[1], file[0], file[2],vector_tolerance)
         
     #     # Calculate Lyapunov exponents for the data
     #     lyap.exponent(tau, m, min_steps, epsilon, plotting_0,plotting_final,
