@@ -22,7 +22,8 @@ def main():
     plotting_0=0
     plotting_final=300
     tolerance = 0.001
-    vector_tolerance = 0.0004
+    min = 120
+    max = 1350
 
     # Initialize lists to store results
     centralised_exponents = []
@@ -41,7 +42,6 @@ def main():
     # Process each file in the data
     for file in data:
         print(f"{file[0]} {file[1]}hz test {file[2]}")
-
         # Store the frequency of the data
         if(file[0]=="centralised"):
             centralised_frequencies.append(file[1])
@@ -55,31 +55,31 @@ def main():
         rtr.truncate(file[1], file[2], file[0], file[3], file[4])
 
         # Perform state space analysis on the data
-        ss.main(file[1], file[0], file[2],vector_tolerance)
+        ss.main(file[1], file[0], file[2],min,max)
         
-    #     # Calculate Lyapunov exponents for the data
-    #     lyap.exponent(tau, m, min_steps, epsilon, plotting_0,plotting_final,
-    #                   delta_t, force_minsteps, centralised_exponents, 
-    #                   distributed_exponents, file[1], file[0], file[2])
+        # Calculate Lyapunov exponents for the data
+        lyap.exponent(tau, m, min_steps, epsilon, plotting_0,plotting_final,
+                      delta_t, force_minsteps, centralised_exponents, 
+                      distributed_exponents, file[1], file[0], file[2])
         
-    #     # Calculate PSDs for the data
-    #     psd.main(psds_centralised, psds_distributed, file[1], file[2], file[0])
+        # Calculate PSDs for the data
+        psd.main(psds_centralised, psds_distributed, file[1], file[2], file[0])
 
-    # # Plot the Lyapunov exponents
-    # lyap.plot_exponents(centralised_frequencies, centralised_exponents,
-    #                     distributed_frequencies, distributed_exponents)
+    # Plot the Lyapunov exponents
+    lyap.plot_exponents(centralised_frequencies, centralised_exponents,
+                        distributed_frequencies, distributed_exponents)
 
-    # # Plot the PSDs
-    # psd.plot_psd(centralised_frequencies, psds_centralised,
-    #              distributed_frequencies, psds_distributed)
-    # # Save the results to CSV files
-    # data = pd.DataFrame(np.column_stack((centralised_frequencies, centralised_exponents)),
-    #                     columns=['frequency', 'exponent'])
-    # data.to_csv("6_Results/clean_data/centralised/centralised_exponents.csv", index=True)
+    # Plot the PSDs
+    psd.plot_psd(centralised_frequencies, psds_centralised,
+                 distributed_frequencies, psds_distributed)
+    # Save the results to CSV files
+    data = pd.DataFrame(np.column_stack((centralised_frequencies, centralised_exponents)),
+                        columns=['frequency', 'exponent'])
+    data.to_csv("6_Results/clean_data/centralised/centralised_exponents.csv", index=True)
 
-    # data = pd.DataFrame(np.column_stack((distributed_frequencies, distributed_exponents)),
-    #                     columns=['frequency', 'exponent'])
-    # data.to_csv("6_Results/clean_data/distributed/distributed_exponents.csv", index=True)
+    data = pd.DataFrame(np.column_stack((distributed_frequencies, distributed_exponents)),
+                        columns=['frequency', 'exponent'])
+    data.to_csv("6_Results/clean_data/distributed/distributed_exponents.csv", index=True)
 
 
 

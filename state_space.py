@@ -67,13 +67,12 @@ def find_peaks(pos_z):
     peaks.append(len(pos_z)-1)
     return peaks
     
-def compute_plotting_points(df,peaks,tolerance):
+def compute_plotting_points(df,peaks,min,max):
     pos_x,pos_y,pos_z = df['px'].values,df['py'].values,df['pz'].values
     positions = df[['px','py','pz']].values
-    point_1,point_2 = find_lines(pos_x,tolerance)
-    range_x = pos_x[point_2]-pos_x[point_1]
-    range_y = np.min(pos_y)-np.max(pos_y)
-    W=np.array([range_x+.005,range_y,0])
+    range_x = pos_x[max]-pos_x[min]
+    range_y = pos_y[max]-pos_y[min]
+    W=np.array([range_x,range_y,0])
     W = W/np.linalg.norm(W)
     V = np.cross(W,np.array([1,0,0]))
     V = V/np.linalg.norm(V)
@@ -89,7 +88,7 @@ def compute_plotting_points(df,peaks,tolerance):
 
 
 def plot_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z,acc_x,acc_y,acc_z, 
-            roll, pitch, yaw,frequency,test,control_type,tolerance):
+            roll, pitch, yaw,frequency,test,control_type,min,max):
     # Plot individual 2D plots for pos_x, pos_y, pos_z, roll, pitch, yaw
     fig, axs = plt.subplots(4, 3, figsize=(18, 10))
     if control_type == "centralised":
@@ -97,11 +96,10 @@ def plot_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z,acc_x,acc_y,acc
     else:
         fig.suptitle(f'2D State Space Plots for Distributed Control at {frequency} Hz')
 
-    point_1,point_2 = find_lines(pos_x,tolerance)
 
     axs[0, 0].plot(timestamps, pos_x)
-    axs[0,0].scatter(timestamps[point_1],pos_x[point_1],color='red')
-    axs[0,0].scatter(timestamps[point_2],pos_x[point_2],color='red')
+    axs[0,0].scatter(timestamps[min],pos_x[min],color='red')
+    axs[0,0].scatter(timestamps[max],pos_x[max],color='red')
     axs[0, 0].set_xlabel('Timestamp')
     axs[0, 0].set_ylabel('Position X')
     axs[0, 0].set_title('Position X vs. Timestamp')
@@ -251,26 +249,33 @@ def plot_plotting_y(frequency,test,control_type,plot_y,plot_z):
     plt.savefig(fg.store_clean_data(frequency,test,control_type)+'y_vs_z.png')
     plt.clf()
     plt.close()
-def main(frequency,control_type,test,tolerance):
+def main(frequency,control_type,test,min,max):
+    # Generate file path
     file_path = fg.filename_clean(frequency,test,control_type)
+
+    # Import data
     df, timestamps, pos_x, pos_y, pos_z, quaternion, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z = import_data(file_path)
 
     # Convert quaternion to roll, pitch, yaw angles
     roll, pitch, yaw = quaternion_to_euler(quaternion)
     
-   
+   #check that max value is in range
+    if max>len(pos_x):
+        max = 1050
+    if max>len(pos_x):
+        max = 770
 
     # find peaks
     peaks = find_peaks(pos_z)
 
     #compute plotting points
-    plot_x,plot_y,plot_z = compute_plotting_points(df,peaks,tolerance)
+    plot_x,plot_y,plot_z = compute_plotting_points(df,peaks,min,max)
 
     
 
     # Plot 2D positions and angles
     plot_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, 
-            acc_x,acc_y,acc_z,roll, pitch, yaw, frequency,test,control_type,tolerance)
+            acc_x,acc_y,acc_z,roll, pitch, yaw, frequency,test,control_type,min,max)
 
     # Plot 3D phase space
     plot_3d_phase_space_pos(pos_x, pos_y, pos_z,frequency,test,control_type)
