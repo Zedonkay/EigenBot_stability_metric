@@ -1,13 +1,10 @@
 #!/path/to/venv python3
 import pandas as pd
 import lyapunov_final as lyap
-import filename_generation as fg
 import numpy as np
 import truncate as tr
 import retruncate as rtr
 import state_space as ss
-import matplotlib.pyplot as plt
-from scipy.signal import welch
 import psd as psd
 
 print("Running main.py")
@@ -36,7 +33,7 @@ def main():
     psds_distributed = []
 
     # Read data from a CSV file
-    df = pd.read_csv("2_raw_data/running_info_all_good.csv")
+    df = pd.read_csv("2_raw_data/running_info.csv")
     data = df.to_numpy()
 
     # Process each file in the data

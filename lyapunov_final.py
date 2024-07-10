@@ -5,7 +5,6 @@ from scipy.signal import welch
 import filename_generation as fg
 import rosenstein
 import kantz
-from scipy.signal import welch
 
 def plot_growth_factors(times, lyap_exponents,fn,control_type,frequency,test,t_0,t_f):
     """Plot Lyapunov exponents."""
@@ -56,8 +55,7 @@ def exponent(tau,m,min_steps,epsilon,plotting_0,plotting_final,delta_t, force_mi
     else:
         min_steps = int(min_steps)
     t_0 = 0
-    t_f = 2*min_steps
-    print(min_steps)
+    t_f = min_steps*2
 
     times, data = rosenstein.lyapunov(data,tau,m,min_steps,plotting_0,plotting_final,delta_t)
 
@@ -75,5 +73,5 @@ def exponent(tau,m,min_steps,epsilon,plotting_0,plotting_final,delta_t, force_mi
     else:
         distributed_exponents.append(coef[0])
     #store times and data in csv
-    data = pd.DataFrame(np.column_stack((times,data)),columns=['times','average_divergence'])
+    data = pd.DataFrame(np.column_stack((times,data)),columns=['times','Mean Divergence'])
     data.to_csv(fg.store_clean_data(frequency,test,control_type)+'lyapunovdata.csv',index=True)

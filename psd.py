@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import filename_generation as fg
 from scipy.signal import welch
 import matplotlib.patches as mpatches
-import matplotlib.markers as markers
 
 labels=[]
 def add_label(violin, label):
@@ -16,8 +15,10 @@ def plot_psd(centralised_frequencies,centralised_psds,distributed_frequencies,di
     
     ax.set_xticklabels(distributed_frequencies)
     
-    add_label(ax.violinplot(centralised_psds,side='low',showmeans=True,showmedians=False,showextrema=True), "Centralised Control")
-    add_label(ax.violinplot(distributed_psds,side='high',showmeans=True,showmedians=False,showextrema=True), "Distributed Control")
+    add_label(ax.violinplot(centralised_psds,side='high',showmeans=False,showmedians=False,showextrema=False), "Centralised Control")
+    ax.set_xticklabels(centralised_frequencies)
+    add_label(ax.violinplot(distributed_psds,side='low',showmeans=False,showmedians=False,showextrema=False), "Distributed Control")
+    ax.set_xticklabels(distributed_frequencies)
     ax.legend(*zip(*labels),loc=9)
     ax.set_xlabel("Frequency (Hz)")
     ax.set_ylabel("PSD*Freq")
