@@ -23,8 +23,8 @@ from mpl_toolkits.mplot3d import Axes3D
 from scipy.interpolate import interp1d
 ```
 ## Usage
-set parameters for running lyapunov in main.py \n
-adjust file by file parameters in 2_raw_data/running_info.csv \n
+set parameters for running lyapunov in main.py  
+adjust file by file parameters in 2_raw_data/running_info.csv  
 run the main.py file
 
 
