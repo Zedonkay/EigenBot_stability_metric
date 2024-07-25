@@ -35,8 +35,6 @@ def clean_data(data):
 def main(type,tolerance):
     filename = fg.filename_raw_data(type)
     df = pd.read_csv(filename)
-    data = clean_data(df.values)
-    df = pd.DataFrame(data,columns=df.columns)
     data = df['pz'].values
     start,end = find_start_and_end(data,tolerance)
     df = df[start:end]

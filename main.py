@@ -43,6 +43,10 @@ def main():
         #retruncate data
         print("Retruncating data")
         tr.retruncate(file[0],file[1],file[2])
+        
+        # #plot state space
+        # print("Plotting State Space")
+        # ss.main(file[0])
 
         #calculate lyapunov exponents
         print("Calculating Lyapunov Exponents")

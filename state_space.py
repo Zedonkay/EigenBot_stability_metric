@@ -76,7 +76,7 @@ def find_top_peaks(pos_z):
 def find_bottom_peaks(pos_z):
     peaks = []
     for i in range(1,len(pos_z)-1):
-        if pos_z[i]<pos_z[i-1] and pos_z[i]<pos_z[i+1]:
+        if pos_z[i]<pos_z[i-1] or pos_z[i]<pos_z[i+1]:
             if(len(pos_z)-i>50):
                 next_positions = pos_z[i:i+50]
             else:
@@ -87,7 +87,6 @@ def find_bottom_peaks(pos_z):
                 previous_positions = pos_z[:i]
             if len(next_positions[next_positions<pos_z[i]])==0 and len(previous_positions[previous_positions<pos_z[i]])==0:
                 peaks.append(i)
-    
     return peaks
 def compute_midpoints(bottom_peaks,top_peaks,pos_z):
     midpoints = []
@@ -128,10 +127,7 @@ def plot_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z,acc_x,acc_y,acc
             roll, pitch, yaw,type,midpoints):
     # Plot individual 2D plots for pos_x, pos_y, pos_z, roll, pitch, yaw
     fig, axs = plt.subplots(4, 3, figsize=(18, 10))
-    if control_type == "centralised":
-        fig.suptitle(f'2D State Space Plots for Centralised Control at {frequency} Hz')
-    else:
-        fig.suptitle(f'2D State Space Plots for Distributed Control at {frequency} Hz')
+    fig.suptitle('2D State Space Plots for ' + type)
 
 
     axs[0, 0].plot(timestamps, pos_x)
@@ -233,7 +229,7 @@ def plot_3d_phase_space_pos(pos_x, pos_y, pos_z,frequency, test,control_type,bot
         plt.title(f'3D Phase Space Plot for Centralised Control at {frequency} Hz')
     else:
         plt.title(f'3D Phase Space Plot for Distributed Control at {frequency} Hz')
-    plt.savefig(fg.filename_store_data(data)+"3d_state_space.png")
+    plt.savefig(fg.filename_store_data(type)+"3d_state_space.png")
     plt.clf()
     plt.close()
 def plot_rotated_helix(pos_x, pos_y, pos_z,data,bottom_peaks):
