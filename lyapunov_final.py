@@ -6,30 +6,26 @@ import filename_generation as fg
 import rosenstein
 import kantz
 
-def plot_growth_factors(times, lyap_exponents,fn,control_type,frequency,test,t_0,t_f):
+def plot_growth_factors(times, lyap_exponents,fn,type,t_0,t_f):
     """Plot Lyapunov exponents."""
     ax = plt.plot(times,lyap_exponents,label="Average divergence", color="blue")
     plt.plot(times[t_0:t_f], fn(times[t_0:t_f]),label=f"Least Squares Line", color="red")
     plt.legend()
     plt.xlabel("Time")
     plt.ylabel("Log mean divergence")
-    if control_type == "centralised":
-        plt.title(f"Log mean divergence vs time for Centralised control at {frequency} Hz")
-    else:
-        plt.title(f"Log mean divergence vs time for Distributed control at {frequency} Hz")
-    plt.savefig(fg.store_clean_data(frequency,test,control_type)+"lyapunov_plot.png")
+    plt.title(f"Mean Divergence vs Time for {type}")
+    plt.savefig(fg.filename_store_data(type)+"lyapunov_plot.png")
     plt.clf()
     plt.close()
-def plot_exponents(centralised_frequencies,centralised_exponents,distributed_frequencies,distributed_exponents):
-    ay = plt.scatter(centralised_frequencies,centralised_exponents,label="Centralised")
-    plt.scatter(distributed_frequencies,distributed_exponents,label="Distributed")
-    plt.xlabel("Update Rate [Hz]")
-    plt.ylabel("Lyapunov Exponent")
-    plt.title("Lyapunov Exponents vs Update Rates on Flat Terrain")
-    plt.legend()
-    plt.savefig("6_Results/clean_data/lyapunov_exponents.png")
-    plt.clf()
-    plt.close()
+def plot_exponents(types,exponents):
+    fig,ax=plt.subplots(1,1,figsize=(10,5))
+    ax.set_xticklabels(types)
+    ax.scatter(range(len(exponents)),exponents)
+    ax.set_xlabel("Type")
+    ax.set_ylabel("Exponent")
+    ax.set_title("Lyapunov Exponents for Z-Acceleration on Flat Terrain")
+    fig.savefig("3_Results/exponents.png")
+
 
 def welch_method(data):
     data=np.reshape(data,(1,-1))
@@ -41,9 +37,10 @@ def welch_method(data):
 
 
 
-def exponent(tau,m,min_steps,epsilon,plotting_0,plotting_final,delta_t, force_minsteps,centralised_exponents,distributed_exponents,frequency,control_type,test):
+def exponent(tau,m,min_steps,epsilon,plotting_0,plotting_final,
+             delta_t, force_minsteps,types,exponents,type):
     #load data and format
-    filename = fg.filename_clean(frequency,test,control_type)
+    filename = fg.filename_clean_data(type)
     df = pd.read_csv(filename)
     pdata = df[['pz']]
     data=pdata.values
@@ -65,13 +62,12 @@ def exponent(tau,m,min_steps,epsilon,plotting_0,plotting_final,delta_t, force_mi
     #plot growth
     coef=np.polyfit(times[t_0:t_f],data[t_0:t_f],1)
     poly1d_fn = np.poly1d(coef)
-    plot_growth_factors(times, data,poly1d_fn,control_type,frequency,test,t_0,t_f)
+    plot_growth_factors(times, data,poly1d_fn,type,t_0,t_f)
 
     #track exponents and frequencies
-    if(control_type == 'centralised'):
-        centralised_exponents.append(coef[0])
-    else:
-        distributed_exponents.append(coef[0])
+    exponents.append(coef[0])
+    types.append(type)
+
     #store times and data in csv
     data = pd.DataFrame(np.column_stack((times,data)),columns=['times','Mean Divergence'])
-    data.to_csv(fg.store_clean_data(frequency,test,control_type)+'lyapunovdata.csv',index=True)
+    data.to_csv(fg.filename_lyapunov(type),index=True)

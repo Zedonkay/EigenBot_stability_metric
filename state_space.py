@@ -125,7 +125,7 @@ def compute_plotting_points(data,bottom_peaks):
     return rotated_data[:,0],rotated_data[:,1],rotated_data[:,2]
 
 def plot_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z,acc_x,acc_y,acc_z, 
-            roll, pitch, yaw,frequency,test,control_type,midpoints):
+            roll, pitch, yaw,type,midpoints):
     # Plot individual 2D plots for pos_x, pos_y, pos_z, roll, pitch, yaw
     fig, axs = plt.subplots(4, 3, figsize=(18, 10))
     if control_type == "centralised":
@@ -199,7 +199,7 @@ def plot_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z,acc_x,acc_y,acc
 
 
     plt.tight_layout()
-    plt.savefig(fg.store_clean_data(frequency,test,control_type) +"2d_state_space.png")
+    plt.savefig(fg.filename_store_data(type) +"2d_state_space.png")
     plt.clf()
     plt.close()
 
@@ -217,7 +217,7 @@ def plot_3d_phase_space_vel(vel_x, vel_y, vel_z,frequency,test, control_type):
         plt.title(f'3D Phase Space Plot for Centralised Control at {frequency} Hz')
     else:
         plt.title(f'3D Phase Space Plot for Distributed Control at {frequency} Hz')
-    plt.savefig(fg.store_clean_data(frequency,test,control_type)+ "3d_phase_space_vel.png")
+    plt.savefig(fg.filename_store_data(data)+ "3d_phase_space_vel.png")
     plt.clf()
     plt.close
 
@@ -233,10 +233,10 @@ def plot_3d_phase_space_pos(pos_x, pos_y, pos_z,frequency, test,control_type,bot
         plt.title(f'3D Phase Space Plot for Centralised Control at {frequency} Hz')
     else:
         plt.title(f'3D Phase Space Plot for Distributed Control at {frequency} Hz')
-    plt.savefig(fg.store_clean_data(frequency,test,control_type)+"3d_state_space.png")
+    plt.savefig(fg.filename_store_data(data)+"3d_state_space.png")
     plt.clf()
     plt.close()
-def plot_rotated_helix(pos_x, pos_y, pos_z,frequency,test,control_type,bottom_peaks):
+def plot_rotated_helix(pos_x, pos_y, pos_z,data,bottom_peaks):
     # Plot 3D phase space plot
     bottom_peaks = np.array(bottom_peaks)
     bottom_peaks = bottom_peaks[bottom_peaks<min(len(pos_x),len(pos_y),len(pos_z))]
@@ -270,9 +270,9 @@ def plot_rotated_helix(pos_x, pos_y, pos_z,frequency,test,control_type,bottom_pe
     axs[1,1].set_zlabel('Position Z')
 
     plt.tight_layout()
-    plt.savefig(fg.store_clean_data(frequency,test,control_type)+"rotated_helix.png")
+    plt.savefig(fg.filename_store_data(data)+"rotated_helix.png")
 
-def plot_original_helix(pos_x, pos_y, pos_z,frequency,test,control_type,bottom_peaks):
+def plot_original_helix(pos_x, pos_y, pos_z,data,bottom_peaks):
     # Plot 3D phase space plot
     point_1 = bottom_peaks[0]
     point_2 = bottom_peaks[len(bottom_peaks)-3]
@@ -281,7 +281,7 @@ def plot_original_helix(pos_x, pos_y, pos_z,frequency,test,control_type,bottom_p
     z_arrow = [pos_z[point_2],pos_z[point_1]]
 
     fig, axs = plt.subplots(2, 2, figsize=(18, 10))
-    fig.suptitle('Original Helix Plot')
+    fig.suptitle('Original Helix Plot for '+data)
 
     axs[0, 0].plot(pos_x, pos_y)
     axs[0, 0].scatter(pos_x[bottom_peaks],pos_y[bottom_peaks])
@@ -309,11 +309,11 @@ def plot_original_helix(pos_x, pos_y, pos_z,frequency,test,control_type,bottom_p
     axs[1,1].set_zlabel('Position Z')
 
     plt.tight_layout()
-    plt.savefig(fg.store_clean_data(frequency,test,control_type)+"original_helix.png")
+    plt.savefig(fg.filename_store_data(data)+"original_helix.png")
 
 
 
-def plot_3d_euler_state_space(timestamps, roll, pitch, yaw,frequency,test,control_type):
+def plot_3d_euler_state_space(timestamps, roll, pitch, yaw,data):
     # Plot 3D Euler state space plot
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
@@ -321,15 +321,12 @@ def plot_3d_euler_state_space(timestamps, roll, pitch, yaw,frequency,test,contro
     ax.set_xlabel('Roll (rad)')
     ax.set_ylabel('Pitch (rad)')
     ax.set_zlabel('Yaw (rad)')
-    if control_type == "centralised":
-        plt.title(f'3D Euler State Space Plot for Centralised Control at {frequency} Hz')
-    else:
-        plt.title(f'3D Euler State Space Plot for Distributed Control at {frequency} Hz')
-    plt.savefig(fg.store_clean_data(frequency,test,control_type)+"3d_euler_state_space.png")
+    plt.title('3D Euler State Space Plot for ' + type)
+    plt.savefig(fg.filename_store_data(type)+"3d_euler_state_space.png")
     plt.clf()
     plt.close()
 
-def plot_gait(plot_x,plot_y,plot_z,bottom_peaks,frequency,test,control_type):
+def plot_gait(plot_x,plot_y,plot_z,bottom_peaks,type):
     fig = plt.figure()
     ax = fig.add_subplot(111)
 
@@ -339,17 +336,15 @@ def plot_gait(plot_x,plot_y,plot_z,bottom_peaks,frequency,test,control_type):
             ax.plot(plot_x[j:j+5],plot_y[j:j+5],color=color[j-bottom_peaks[i]])
     ax.set_xlabel('Transverse Plane')
     ax.set_ylabel('Frontal Plane')
-    if control_type == "centralised":
-        plt.title(f'Gait Cycle for Centralised Control at {frequency} Hz')
-    else:
-        plt.title(f'Gait Cycle for Distributed Control at {frequency} Hz')
-    plt.savefig(fg.store_clean_data(frequency,test,control_type)+"gait.png")
+    plt.title(f"Gait Cycle for {type}")
+    
+    plt.savefig(fg.filename_store_data(type)+"gait.png")
     plt.clf()
     plt.close()
 
-def main(frequency,control_type,test):
+def main(type):
     # Generate file path
-    file_path = fg.filename_clean(frequency,test,control_type)
+    file_path = fg.filename_clean_data(type)
 
     # Import data
     df, timestamps, pos_x, pos_y, pos_z, quaternion, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z = import_data(file_path)
@@ -371,20 +366,20 @@ def main(frequency,control_type,test):
 
     # Plot 2D positions and angles
     plot_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, 
-            acc_x,acc_y,acc_z,roll, pitch, yaw, frequency,test,control_type,midpoints)
+            acc_x,acc_y,acc_z,roll, pitch, yaw, type,midpoints)
 
     # Plot 3D phase space
-    plot_3d_phase_space_pos(pos_x, pos_y, pos_z,frequency,test,control_type,bottom_peaks,top_peaks)
-    plot_3d_phase_space_vel(vel_x, vel_y, vel_z,frequency,test,control_type)
+    plot_3d_phase_space_pos(pos_x, pos_y, pos_z,type,bottom_peaks,top_peaks)
+    plot_3d_phase_space_vel(vel_x, vel_y, vel_z,type)
 
     # Plot 3D Euler state space
-    plot_3d_euler_state_space(timestamps, roll, pitch, yaw,frequency,test,control_type)
+    plot_3d_euler_state_space(timestamps, roll, pitch, yaw,type)
     
     #plot 2d gait cycle
-    plot_gait(plot_x,plot_y,plot_z,bottom_peaks, frequency,test,control_type)
+    plot_gait(plot_x,plot_y,plot_z,bottom_peaks, type)
 
     #plot rotated data
-    plot_rotated_helix(plot_x,plot_y,plot_z,frequency,test,control_type,bottom_peaks)
+    plot_rotated_helix(plot_x,plot_y,plot_z,type,bottom_peaks)
 
-    #plot original data
-    plot_original_helix(pos_x, pos_y, pos_z,frequency,test,control_type,bottom_peaks)
+    #plot original type
+    plot_original_helix(pos_x, pos_y, pos_z,type,bottom_peaks)
