@@ -24,10 +24,9 @@ from scipy.interpolate import interp1d
 ```
 ## Usage
 set parameters for running lyapunov in main.py  
-adjust file by file parameters in 2_raw_data/running_info.csv  
+adjust file by file parameters in 1_raw_data/running_info.csv  
 run the main.py file  
-to run against all data that looks good (multiple files per frequency) change line 36 in main.py to df = pd.read_csv("2_raw_data/running_info_for_all.csv")  
-to create correct directories to run for all data, delete all directories inside of 1_clean_data and 6_results/clean_data and run create_directories.py with its line 7 changed to df = pd.read_csv("2_raw_data/running_info_for_all.csv")
+
 
 
 ## Contact
