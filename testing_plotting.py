@@ -19,7 +19,7 @@ def rotate_data(data,min,max,initial_x):
     return rotated_data    
 
 def compute_plotting_points(data,bottom_peaks):
-    initial_x = data[0][0]
+    initial_x = data[bottom_peaks[0]][0]
     for i in range(len(bottom_peaks)-1):
         if i == 0:
             rotated_data = rotate_data(data,bottom_peaks[i],bottom_peaks[i+1],initial_x)
@@ -54,8 +54,7 @@ def generate_values():
 def plot_helix(helix_values):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
-    for i in range(len(helix_values)):
-        ax.scatter(helix_values[i][0], helix_values[i][1], helix_values[i][2])
+    ax.scatter(helix_values[:,0],helix_values[:,1],helix_values[:,2])
     fig.suptitle('Helix Plot')
     ax.set_xlabel('X')
     ax.set_ylabel('Y')

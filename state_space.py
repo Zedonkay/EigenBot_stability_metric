@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 
 
+
+
 def import_data(file_path):
     # Read CSV file
     df = pd.read_csv(file_path, delimiter=',')
@@ -96,31 +98,29 @@ def compute_midpoints(bottom_peaks,top_peaks,pos_z):
     np.insert(midpoints,0,0)
     return midpoints
 
-
-def rotate_data(data,min,max,initial_x,initial_z):
+def rotate_data(data,min,max,initial_x):
     vector = [data[max][0]-data[min][0],
               data[max][1]-data[min][1],
               data[max][2]-data[min][2]]
-    angle = -np.arctan(vector[0]/vector[1])
+    angle = np.arctan2(vector[1],vector[0])
     rotated_data = []
     rotation_matrix = np.array([[np.cos(angle), -np.sin(angle), 0],
                                 [np.sin(angle), np.cos(angle), 0],
                                 [0, 0, 1]])
     for i in range(min,max):
         current_data= np.dot(rotation_matrix,np.array([data[i][0],data[i][1],data[i][2]]))
-        current_data[0] = current_data[0]-initial_x+data[min][0]
-        current_data[2] = current_data[2]-initial_z+data[min][2]
+        current_data[0] = current_data[0]-initial_x
         rotated_data.append(current_data)
     rotated_data = np.array(rotated_data)
     return rotated_data    
+
 def compute_plotting_points(data,bottom_peaks):
     initial_x = data[bottom_peaks[0]][0]
-    initial_z= data[bottom_peaks[0]][2]
     for i in range(len(bottom_peaks)-1):
         if i == 0:
-            rotated_data = rotate_data(data,bottom_peaks[i],bottom_peaks[i+1],initial_x,initial_z)
+            rotated_data = rotate_data(data,bottom_peaks[i],bottom_peaks[i+1],initial_x)
         else:
-            rotated_data = np.concatenate((rotated_data,rotate_data(data,bottom_peaks[i],bottom_peaks[i+1],initial_x,initial_z)))
+            rotated_data = np.concatenate((rotated_data,rotate_data(data,bottom_peaks[i],bottom_peaks[i+1],initial_x)))
     rotated_data = np.array(rotated_data)
     return rotated_data[:,0],rotated_data[:,1],rotated_data[:,2]
 
@@ -274,6 +274,12 @@ def plot_rotated_helix(pos_x, pos_y, pos_z,frequency,test,control_type,bottom_pe
 
 def plot_original_helix(pos_x, pos_y, pos_z,frequency,test,control_type,bottom_peaks):
     # Plot 3D phase space plot
+    point_1 = bottom_peaks[0]
+    point_2 = bottom_peaks[len(bottom_peaks)-3]
+    x_arrow = [pos_x[point_2],pos_x[point_1]]
+    y_arrow = [pos_y[point_2],pos_y[point_1]]
+    z_arrow = [pos_z[point_2],pos_z[point_1]]
+
     fig, axs = plt.subplots(2, 2, figsize=(18, 10))
     fig.suptitle('Original Helix Plot')
 
