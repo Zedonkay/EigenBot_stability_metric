@@ -22,13 +22,6 @@ def find_end(start,data,tolerance):
     for i in range(len(data)-1,0,-1):
         if np.linalg.norm(data[i]-data[i-1]>tolerance):
             return i
-def clean_data(data):
-    to_remove = []
-    for i in range(1,len(data)-1):
-        if(data[i-1][0]==data[i][0]):
-            to_remove.append(i)
-    return np.delete(data,to_remove,0)
-
         
 
 
@@ -36,10 +29,11 @@ def main(type,tolerance):
     filename = fg.filename_raw_data(type)
     df = pd.read_csv(filename)
     data = df['pz'].values
-    start,end = find_start_and_end(data,tolerance)
-    df = df[start:end]
-    df['timestamp']=df['timestamp']-df.iloc[1,0]
+    # start,end = find_start_and_end(data,tolerance)
+    # df = df[start:end]
+    df['timestamp']=df['timestamp']-df['timestamp'].values[0]
     timestamp = df['timestamp'].values
+    print(df['timestamp'])
     df['vx'] = np.gradient(df['px'], df['timestamp'])
     df['vy'] = np.gradient(df['py'], df['timestamp'])
     df['vz'] = np.gradient(df['pz'], df['timestamp'])
