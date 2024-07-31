@@ -35,8 +35,8 @@ def calc(data):
     f, Pxx = welch(time_series)
     return f, Pxx
 
-def main(psds_centralised,psds_distributed,frequency,test,control_type):
-    filename = fg.filename_clean(frequency,test,control_type)
+def main(psds_centralised,psds_distributed,disturbance,control_type):
+    filename = fg.filename_clean(disturbance,control_type)
     df = pd.read_csv(filename)
     pdata = df[['az']]
     data=pdata.values

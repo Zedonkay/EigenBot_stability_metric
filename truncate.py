@@ -4,7 +4,7 @@ import filename_generation as fg
 
 def find_start_and_end(data,tolerance):
     start = find_start(data,tolerance)
-    end = find_end(start,data,tolerance)
+    end = find_end(data,tolerance)
     return start,end
     
 def find_start(data,tolerance):
@@ -18,15 +18,29 @@ def find_start(data,tolerance):
     return 0
 
         
-def find_end(start,data,tolerance):
+def find_end(data,tolerance):
     for i in range(len(data)-1,0,-1):
         if np.linalg.norm(data[i]-data[i-1]>tolerance):
             return i
 
+def retruncate(disturbance, control_type, start, end):
+    # Generate the filename based on the input parameters
+    filename = fg.filename_clean(disturbance, control_type)
+    
+    # Read the raw data from the CSV file
+    raw_test = pd.read_csv(filename)
+    
+    # Truncate the data based on the start and end indices
+    if end != 9999:
+        raw_test = raw_test.iloc[start:end]
+    else:
+        raw_test = raw_test.iloc[start:]
+    
+    # Save the truncated data back to the CSV file
+    raw_test.to_csv(filename, index=False)
 
-
-def main(frequency,test,control_type,tolerance):
-    filename = fg.filename_raw_test(frequency,test,control_type)
+def main(disturbance,control_type,tolerance):
+    filename = fg.filename_raw_test(disturbance,control_type)
     df = pd.read_csv(filename)
     data = df[['pz']].values
     start,end = find_start_and_end(data,tolerance)
@@ -45,4 +59,4 @@ def main(frequency,test,control_type,tolerance):
     df['jy'] = np.gradient(df['ay'], df['timestamp'])
     df['jz'] = np.gradient(df['az'], df['timestamp'])
 
-    df.to_csv(fg.filename_clean(frequency,test,control_type),index=False)
+    df.to_csv(fg.filename_clean(disturbance,control_type),index=False)
