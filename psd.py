@@ -10,22 +10,25 @@ def add_label(violin, label):
     color = violin["bodies"][0].get_facecolor().flatten()
     labels.append((mpatches.Patch(color=color), label))
 
-def plot_psd(centralised_frequencies,centralised_psds,distributed_frequencies,distributed_psds):
+def set_axis_style(ax, labels):
+    ax.set_xticks(np.arange(1, len(labels) + 1), labels=labels)
+    ax.set_xlim(0.25, len(labels) + 0.75)
+
+def plot_psd(psds_neural,psds_predefined,disturbances):
     fig,ax=plt.subplots(1,1,figsize=(10,5))
     
-    ax.set_xticklabels(distributed_frequencies)
     
-    add_label(ax.violinplot(centralised_psds,side='high',showmeans=False,showmedians=False,showextrema=False), "Centralised Control")
-    ax.set_xticklabels(centralised_frequencies)
-    add_label(ax.violinplot(distributed_psds,side='low',showmeans=False,showmedians=False,showextrema=False), "Distributed Control")
-    ax.set_xticklabels(distributed_frequencies)
+    add_label(ax.violinplot(psds_neural,side='high',showmeans=False,showmedians=False,showextrema=False),"Neural")
+    add_label(ax.violinplot(psds_predefined,side='low',showmeans=False,showmedians=False,showextrema=False),"Predefined")
+    
+    
     ax.legend(*zip(*labels),loc=9)
-    ax.set_xlabel("Frequency (Hz)")
+    
+    ax.set_xlabel("Disturbance")
     ax.set_ylabel("PSD*Freq")
-    ax.set_xlabel("Frequency (Hz)")
-    ax.set_ylabel("PSD*Freq")
-    ax.set_title("PSD*Freq for Z-Acceleration vs Frequency on Flat Terrain")
-    fig.savefig("6_Results/clean_data/psd.png")
+    set_axis_style(ax, disturbances)
+    ax.set_title("PSD*Freq for Z-Acceleration vs Frequency")
+    fig.savefig(f"3_results/psd.png")
     plt.clf()
     plt.close()
 
@@ -35,13 +38,13 @@ def calc(data):
     f, Pxx = welch(time_series)
     return f, Pxx
 
-def main(psds_centralised,psds_distributed,disturbance,control_type):
-    filename = fg.filename_clean(disturbance,control_type)
+def main(psds_neural,psds_predefined,disturbance,control_type):
+    filename = fg.filename_clean(disturbance ,control_type)
     df = pd.read_csv(filename)
     pdata = df[['az']]
     data=pdata.values
     f, Pxx = calc(data)
-    if control_type == "centralised":
-        psds_centralised.append(Pxx*f)
+    if control_type=="Predefined":
+        psds_predefined.append(Pxx*f)
     else:
-        psds_distributed.append(Pxx*f)
+        psds_neural.append(Pxx*f)

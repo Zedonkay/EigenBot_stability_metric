@@ -6,10 +6,13 @@ import filename_generation as fg
 import rosenstein
 import kantz
 
-def plot_growth_factors(times, lyap_exponents,fn,control_type,disturbance,t_0,t_f):
+def set_axis_style(ax, labels):
+    ax.set_xticks(np.arange(1, len(labels) + 1), labels=labels)
+    ax.set_xlim(0.25, len(labels) + 0.75)
+def plot_growth_factors(times, lyap_exponents,fn,control_type,disturbance,t_0,t_f,coef):
     """Plot Lyapunov exponents."""
     ax = plt.plot(times,lyap_exponents,label="Average divergence", color="blue")
-    plt.plot(times[t_0:t_f], fn(times[t_0:t_f]),label=f"Least Squares Line", color="red")
+    plt.plot(times[t_0:t_f], fn(times[t_0:t_f]),label=f"Least Squares Line (slope={np.round(coef[0],3)})", color="red")
     plt.legend()
     plt.xlabel("Time")
     plt.ylabel("Log mean divergence")
@@ -19,14 +22,15 @@ def plot_growth_factors(times, lyap_exponents,fn,control_type,disturbance,t_0,t_
     plt.savefig(fg.store_clean_data(disturbance,control_type)+"lyapunov_plot.png")
     plt.clf()
     plt.close()
-def plot_exponents(centralised_frequencies,centralised_exponents,distributed_frequencies,distributed_exponents):
-    ay = plt.scatter(centralised_frequencies,centralised_exponents,label="Centralised")
-    plt.scatter(distributed_frequencies,distributed_exponents,label="Distributed")
-    plt.xlabel("Update Rate [Hz]")
+    
+def plot_exponents(predefined_exponents,neural_exponents,disturbances):
+    ay = plt.scatter(disturbances,predefined_exponents,label="Predefined Control",color="blue")
+    plt.scatter(disturbances,neural_exponents,label="Neural Control",color="red")
+    plt.xlabel("Disturbance")
     plt.ylabel("Lyapunov Exponent")
-    plt.title("Lyapunov Exponents vs Update Rates on Flat Terrain")
+    plt.title("Lyapunov Exponents for Neural and Predefined Control")
     plt.legend()
-    plt.savefig("6_Results/clean_data/lyapunov_exponents.png")
+    plt.savefig("3_results/lyapunov_exponents.png")
     plt.clf()
     plt.close()
 
@@ -41,7 +45,7 @@ def welch_method(data):
 
 
 def exponent(tau,m,min_steps,epsilon,plotting_0,plotting_final,delta_t, 
-             force_minsteps,centralised_exponents,distributed_exponents,disturbance,control_type):
+             force_minsteps,predefined_exponents,neural_exponents,disturbance,control_type):
     #load data and format
     filename = fg.filename_clean(disturbance,control_type)
     df = pd.read_csv(filename)
@@ -66,13 +70,13 @@ def exponent(tau,m,min_steps,epsilon,plotting_0,plotting_final,delta_t,
     #plot growth
     coef=np.polyfit(times[t_0:t_f],data[t_0:t_f],1)
     poly1d_fn = np.poly1d(coef)
-    plot_growth_factors(times, data,poly1d_fn,control_type,disturbance,t_0,t_f)
+    plot_growth_factors(times, data,poly1d_fn,control_type,disturbance,t_0,t_f,coef)
 
     #track exponents and frequencies
-    if(control_type == 'centralised'):
-        centralised_exponents.append(coef[0])
+    if(control_type == 'Predefined'):
+        predefined_exponents.append(coef[0])
     else:
-        distributed_exponents.append(coef[0])
+        neural_exponents.append(coef[0])
     #store times and data in csv
     data = pd.DataFrame(np.column_stack((times,data)),columns=['times','Mean Divergence'])
     data.to_csv(fg.store_clean_data(disturbance,control_type)+'lyapunovdata.csv',index=True)

@@ -27,9 +27,8 @@ def main():
     neural_disturbances = []
 
     # keep track of psds
-    psds_predefined = []
     psds_neural = []
-
+    psds_predefined = []
     # Read data from a CSV file
     df = pd.read_csv("2_raw_data/running_info.csv")
     data = df.to_numpy()
@@ -38,10 +37,10 @@ def main():
     for file in data:
         print(f"Processing {file[0]} control for {file[1]}")
         #store frequencies
-        if(file[0]=="predefined"):
+        if(file[0]=="Predefined"):
             predefined_disturbances.append(file[1])
         else:
-             s.append(file[1])
+             neural_disturbances.append(file[1])
 
         # Perform truncation on the data
         tr.main(file[1],file[0], tolerance)
@@ -58,24 +57,25 @@ def main():
                       neural_exponents, file[1], file[0])
         
         # Calculate PSDs for the data
-        psd.main(psds_predefined, psds_neural, file[1], file[0])
+        
+        psd.main(psds_neural,psds_predefined, file[1], file[0])
 
-    # # Plot the Lyapunov exponents
-    # lyap.plot_exponents(predefined_disturbances, predefined_exponents,
-    #                     neural_disturbances, neural_exponents)
+    # Plot the Lyapunov exponents
+    lyap.plot_exponents(predefined_exponents,neural_exponents,predefined_disturbances)
 
-    # Plot the PSDs
-    psd.plot_psd(predefined_disturbances, psds_predefined,
-                 neural_disturbances, psds_neural)
+    psd.plot_psd(psds_neural,psds_predefined,neural_disturbances)
     # Save the results to CSV files
+
     data = pd.DataFrame(np.column_stack((predefined_disturbances, predefined_exponents)),
                         columns=['frequency', 'exponent'])
-    data.to_csv("6_Results/clean_data/predefined/predefined_exponents.csv", index=True)
+    data.to_csv("3_results/predefined_exponents.csv", index=True)
 
     data = pd.DataFrame(np.column_stack((neural_disturbances, neural_exponents)),
                         columns=['frequency', 'exponent'])
-    data.to_csv("6_Results/clean_data/neural/neural_exponents.csv", index=True)
+    data.to_csv("3_results/neural_exponents.csv", index=True)
+   
 
+   
 
 
 if __name__ == "__main__":
