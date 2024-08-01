@@ -11,8 +11,8 @@ print("Running main.py")
 
 def main():
     # Set the values for various parameters
-    tau = 11  # Time delay for Lyapunov exponent calculation
-    m = 3  # Embedding dimension for Lyapunov exponent calculation
+    tau = 3  # Time delay for Lyapunov exponent calculation
+    m = 11  # Embedding dimension for Lyapunov exponent calculation
     delta_t = 0.01  # Time step for Lyapunov exponent calculation
     min_steps = 100  # Minimum number of steps for Lyapunov exponent calculation
     force_minsteps = False  # Flag to force minimum steps for Lyapunov exponent calculation

@@ -70,7 +70,7 @@ def welch_method(data):
     - data: The input data.
     
     Returns:
-    - The mean frequency calculated using the Welch method.
+    - The mean period calculated using the Welch method.
     """
     data = np.reshape(data, (1, -1))
     time_series = data[0]
@@ -106,7 +106,7 @@ def exponent(tau, m, min_steps, epsilon, plotting_0, plotting_final, delta_t, fo
         min_steps = welch_method(data)  # Calculate the minimum number of steps using the Welch method
     min_steps = int(min_steps) + 1 if min_steps % 1 != 0 else int(min_steps)  # Round up the minimum number of steps
     t_0 = 0  # Set the starting index for plotting
-    t_f = min_steps * 2  # Set the ending index for plotting
+    t_f = min_steps   # Set the ending index for plotting
     plotting_final = 3 * min_steps  # Set the final index for plotting
 
     times, data = rosenstein.lyapunov(data, tau, m, min_steps, plotting_0, plotting_final, delta_t)  # Calculate the Lyapunov exponents
