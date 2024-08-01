@@ -32,8 +32,11 @@ def import_data(file_path):
     aa_x = df['aa_x']
     aa_y = df['aa_y']
     aa_z = df['aa_z']
+    roll = df['roll']
+    pitch = df['pitch']
+    yaw = df['yaw']
     
-    return df, timestamps, pos_x, pos_y, pos_z, quaternion, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z, wx, wy, wz, aa_x, aa_y, aa_z
+    return df, timestamps, pos_x, pos_y, pos_z, quaternion, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z, wx, wy, wz, aa_x, aa_y, aa_z, roll, pitch, yaw
 
 # Function to calculate displacement
 def find_displacement(pos_x, pos_y):
@@ -300,10 +303,7 @@ def main(disturbance, control_type):
     file_path = fg.filename_clean(disturbance, control_type)
     
     # Import data from the CSV file
-    df, timestamps, pos_x, pos_y, pos_z, quaternion, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z, wx, wy, wz, aa_x, aa_y, aa_z = import_data(file_path)
-    
-    # Convert quaternion to Euler angles
-    roll, pitch, yaw = quaternion_to_euler(quaternion)
+    df, timestamps, pos_x, pos_y, pos_z, quaternion, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z, wx, wy, wz, aa_x, aa_y, aa_z, roll, pitch, yaw = import_data(file_path)
     
     # Plot 2D linear state space
     plot_linear_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z, disturbance, control_type)

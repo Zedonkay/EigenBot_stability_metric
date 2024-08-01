@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import filename_generation as fg
+import state_space as ss
 
 # Function to find the start and end indices of data based on a tolerance
 def find_start_and_end(data, tolerance):
@@ -101,5 +102,10 @@ def main(disturbance, control_type, tolerance):
     df['aa_y'] = np.gradient(df['wy'])
     df['aa_z'] = np.gradient(df['wz'])
     
+    quaternion = df.iloc[:, 4:8].values
+    roll,pitch,yaw = ss.quaternion_to_euler(quaternion)
+    df['roll'] = roll
+    df['pitch'] = pitch
+    df['yaw'] = yaw
     # Save the processed data to a new CSV file
     df.to_csv(fg.filename_clean(disturbance, control_type), index=False)

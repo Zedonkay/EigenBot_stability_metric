@@ -99,7 +99,7 @@ def exponent(tau, m, min_steps, epsilon, plotting_0, plotting_final, delta_t, fo
     """
     filename = fg.filename_clean(disturbance, control_type)  # Generate the filename for clean data
     df = pd.read_csv(filename)  # Read the data from the file
-    pdata = df[['pz']]  # Extract the 'pz' column from the data
+    pdata = df[['roll', 'pitch', 'yaw']]  # Select the relevant columns
     data = pdata.values  # Convert the data to a numpy array
 
     if not force_minsteps:
