@@ -11,15 +11,15 @@ print("Running main.py")
 
 def main():
     # Set the values for various parameters
-    tau = 7  # Time delay for Lyapunov exponent calculation
+    tau = 7  # Time delay for Lyapunov exponent calculation (in number of steps)
     m = 22  # Embedding dimension for Lyapunov exponent calculation
-    delta_t = 0.01  # Time step for Lyapunov exponent calculation
-    min_steps = 100  # Minimum number of steps for Lyapunov exponent calculation
-    force_minsteps = False  # Flag to force minimum steps for Lyapunov exponent calculation
-    epsilon = 10  # Tolerance for truncation and re-truncation
+    delta_t = 0.1  # Time step for between data points
+    min_steps = 100  # Minimum number of steps between neighbors (should force_minsteps be True)
+    force_minsteps = False  # Flag to force preset minimum steps for Lyapunov exponent calculation
+    epsilon = 10  # Not in use (for kantz algorithm)
     plotting_0 = 0  # Starting point for Lyapunov exponent plotting
-    plotting_final = 300  # Ending point for Lyapunov exponent plotting
-    tolerance = 0.001  # Tolerance for truncation and re-truncation
+    plotting_final = 300  # Ending point for Lyapunov exponent plotting (overwritten - ignore)
+    tolerance = 0.001  # Tolerance for truncation and re-truncation (not used - ignore)
 
     # Initialize lists to store results
     predefined_exponents = []  # List to store predefined Lyapunov exponents
@@ -52,7 +52,7 @@ def main():
         tr.retruncate(file[1], file[0], file[2], file[3])
 
         # Perform state space analysis on the data
-        ss.main(file[1], file[0])
+        ss.main(file[1], file[0],delta_t)
 
         # Calculate Lyapunov exponents for the data
         lyap.exponent(tau, m, min_steps, epsilon, plotting_0, plotting_final,

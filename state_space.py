@@ -55,62 +55,62 @@ def quaternion_to_euler(quaternion):
     return roll, pitch, yaw
 
 # Function to plot 2D linear state space
-def plot_linear_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z, disturbance, control_type):
+def plot_linear_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z, disturbance, control_type,delta_t):
     # Create a 3x3 grid of subplots
     fig, axs = plt.subplots(3, 3, figsize=(18, 10))
     fig.suptitle(f"2D Linear State Space Plot for {control_type} Control on {disturbance} Terrain")
-
+    timestamps=timestamps*delta_t
     # Plot position X vs. timestamp
     axs[0, 0].plot(timestamps, pos_x)
-    axs[0, 0].set_xlabel('Timestamp')
+    axs[0, 0].set_xlabel('Time (s)')
     axs[0, 0].set_ylabel('Position X')
     axs[0, 0].set_title('Position X vs. Timestamp')
 
     # Plot position Y vs. timestamp
     axs[0, 1].plot(timestamps, pos_y)
-    axs[0, 1].set_xlabel('Timestamp')
+    axs[0, 1].set_xlabel('Time (s)')
     axs[0, 1].set_ylabel('Position Y')
     axs[0, 1].set_title('Position Y vs. Timestamp')
 
     # Plot position Z vs. timestamp
     axs[0, 2].plot(timestamps, pos_z)
-    axs[0, 2].set_xlabel('Timestamp')
+    axs[0, 2].set_xlabel('Time (s)')
     axs[0, 2].set_ylabel('Position Z')
     axs[0, 2].set_title('Position Z vs. Timestamp')
 
     # Plot velocity X vs. timestamp
     axs[1, 0].plot(timestamps, vel_x)
-    axs[1, 0].set_xlabel('Timestamp')
+    axs[1, 0].set_xlabel('Time (s)')
     axs[1, 0].set_ylabel('Velocity X')
     axs[1, 0].set_title('Velocity X vs. Timestamp')
 
     # Plot velocity Y vs. timestamp
     axs[1, 1].plot(timestamps, vel_y)
-    axs[1, 1].set_xlabel('Timestamp')
+    axs[1, 1].set_xlabel('Time (s)')
     axs[1, 1].set_ylabel('Velocity Y')
     axs[1, 1].set_title('Velocity Y vs. Timestamp')
 
     # Plot velocity Z vs. timestamp
     axs[1, 2].plot(timestamps, vel_z)
-    axs[1, 2].set_xlabel('Timestamp')
+    axs[1, 2].set_xlabel('Time (s)')
     axs[1, 2].set_ylabel('Velocity Z')
     axs[1, 2].set_title('Velocity Z vs. Timestamp')
 
     # Plot acceleration X vs. timestamp
     axs[2, 0].plot(timestamps, acc_x)
-    axs[2, 0].set_xlabel('Timestamp')
+    axs[2, 0].set_xlabel('Time (s)')
     axs[2, 0].set_ylabel('Acceleration X')
     axs[2, 0].set_title('Acceleration X vs. Timestamp')
 
     # Plot acceleration Y vs. timestamp
     axs[2, 1].plot(timestamps, acc_y)
-    axs[2, 1].set_xlabel('Timestamp')
+    axs[2, 1].set_xlabel('Time (s)')
     axs[2, 1].set_ylabel('Acceleration Y')
     axs[2, 1].set_title('Acceleration Y vs. Timestamp')
 
     # Plot acceleration Z vs. timestamp
     axs[2, 2].plot(timestamps, acc_z)
-    axs[2, 2].set_xlabel('Timestamp')
+    axs[2, 2].set_xlabel('Time (s)')
     axs[2, 2].set_ylabel('Acceleration Z')
     axs[2, 2].set_title('Acceleration Z vs. Timestamp')
 
@@ -121,62 +121,62 @@ def plot_linear_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, acc_x, 
     plt.close()
 
 # Function to plot 2D angular state space
-def plot_angular_2d(timestamps, roll, pitch, yaw, wx, wy, wz, aa_x, aa_y, aa_z, disturbance, control_type):
+def plot_angular_2d(timestamps, roll, pitch, yaw, wx, wy, wz, aa_x, aa_y, aa_z, disturbance, control_type,delta_t):
     # Create a 3x3 grid of subplots
     fig, axs = plt.subplots(3, 3, figsize=(18, 10))
     fig.suptitle(f"2D Angular State Space Plot for {control_type} Control on {disturbance} Terrain")
-
+    timestamps=timestamps*delta_t
     # Plot roll vs. timestamp
     axs[0, 0].plot(timestamps, roll)
-    axs[0, 0].set_xlabel('Timestamp')
+    axs[0, 0].set_xlabel('Time (s)')
     axs[0, 0].set_ylabel('Roll')
     axs[0, 0].set_title('Roll vs. Timestamp')
 
     # Plot pitch vs. timestamp
     axs[0, 1].plot(timestamps, pitch)
-    axs[0, 1].set_xlabel('Timestamp')
+    axs[0, 1].set_xlabel('Time (s)')
     axs[0, 1].set_ylabel('Pitch')
     axs[0, 1].set_title('Pitch vs. Timestamp')
 
     # Plot yaw vs. timestamp
     axs[0, 2].plot(timestamps, yaw)
-    axs[0, 2].set_xlabel('Timestamp')
+    axs[0, 2].set_xlabel('Time (s)')
     axs[0, 2].set_ylabel('Yaw')
     axs[0, 2].set_title('Yaw vs. Timestamp')
 
     # Plot angular velocity X vs. timestamp
     axs[1, 0].plot(timestamps, wx)
-    axs[1, 0].set_xlabel('Timestamp')
+    axs[1, 0].set_xlabel('Time (s)')
     axs[1, 0].set_ylabel('Angular Velocity X')
     axs[1, 0].set_title('Angular Velocity X vs. Timestamp')
 
     # Plot angular velocity Y vs. timestamp
     axs[1, 1].plot(timestamps, wy)
-    axs[1, 1].set_xlabel('Timestamp')
+    axs[1, 1].set_xlabel('Time (s)')
     axs[1, 1].set_ylabel('Angular Velocity Y')
     axs[1, 1].set_title('Angular Velocity Y vs. Timestamp')
 
     # Plot angular velocity Z vs. timestamp
     axs[1, 2].plot(timestamps, wz)
-    axs[1, 2].set_xlabel('Timestamp')
+    axs[1, 2].set_xlabel('Time (s)')
     axs[1, 2].set_ylabel('Angular Velocity Z')
     axs[1, 2].set_title('Angular Velocity Z vs. Timestamp')
 
     # Plot angular acceleration X vs. timestamp
     axs[2, 0].plot(timestamps, aa_x)
-    axs[2, 0].set_xlabel('Timestamp')
+    axs[2, 0].set_xlabel('Time (s)')
     axs[2, 0].set_ylabel('Angular Acceleration X')
     axs[2, 0].set_title('Angular Acceleration X vs. Timestamp')
 
     # Plot angular acceleration Y vs. timestamp
     axs[2, 1].plot(timestamps, aa_y)
-    axs[2, 1].set_xlabel('Timestamp')
+    axs[2, 1].set_xlabel('Time (s)')
     axs[2, 1].set_ylabel('Angular Acceleration Y')
     axs[2, 1].set_title('Angular Acceleration Y vs. Timestamp')
 
     # Plot angular acceleration Z vs. timestamp
     axs[2, 2].plot(timestamps, aa_z)
-    axs[2, 2].set_xlabel('Timestamp')
+    axs[2, 2].set_xlabel('Time (s)')
     axs[2, 2].set_ylabel('Angular Acceleration Z')
     axs[2, 2].set_title('Angular Acceleration Z vs. Timestamp')
 
@@ -298,7 +298,7 @@ def plot_gait(plot_x, plot_y, plot_z, bottom_peaks, disturbance, control_type):
     plt.close()
 
 # Main function
-def main(disturbance, control_type):
+def main(disturbance, control_type,delta_t):
     # Generate the file path based on the disturbance and control type
     file_path = fg.filename_clean(disturbance, control_type)
     
@@ -306,8 +306,11 @@ def main(disturbance, control_type):
     df, timestamps, pos_x, pos_y, pos_z, quaternion, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z, wx, wy, wz, aa_x, aa_y, aa_z, roll, pitch, yaw = import_data(file_path)
     
     # Plot 2D linear state space
-    plot_linear_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z, disturbance, control_type)
+    plot_linear_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z, disturbance, control_type,delta_t)
     
+    # Plot 2D angular state space
+    plot_angular_2d(timestamps, roll, pitch, yaw, wx, wy, wz, aa_x, aa_y, aa_z, disturbance, control_type,delta_t)
+
     # Plot 3D phase space for position
     plot_3d_phase_space_pos(pos_x, pos_y, pos_z, disturbance, control_type)
     

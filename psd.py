@@ -39,8 +39,8 @@ def plot_psd(psds_neural, psds_predefined, disturbances):
     fig, ax = plt.subplots(1, 1, figsize=(10, 5))  # Create a figure and axes object
     
     # Add violin plots for neural and predefined control
-    add_label(ax.violinplot(psds_neural, side='high', showmeans=False, showmedians=False, showextrema=False), "Neural")
-    add_label(ax.violinplot(psds_predefined, side='low', showmeans=False, showmedians=False, showextrema=False), "Predefined")
+    add_label(ax.violinplot(psds_neural, side='high', showmeans=False, showmedians=True, showextrema=False), "Neural")
+    add_label(ax.violinplot(psds_predefined, side='low', showmeans=False, showmedians=True, showextrema=False), "Predefined")
     
     ax.legend(*zip(*labels), loc=9)  # Add legend using the labels list
     ax.set_xlabel("Disturbance")  # Set x-axis label
