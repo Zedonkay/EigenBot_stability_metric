@@ -277,23 +277,14 @@ def plot_3d_angular_accelerations(timestamps, ang_x, ang_y, ang_z, disturbance, 
     plt.close()
 
 # Function to plot gait cycle
-def plot_gait(plot_x, plot_y, plot_z, bottom_peaks, disturbance, control_type):
-    # Create a 2D plot
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    
-    # Plot the gait cycle using different colors for each step
-    for i in range(len(bottom_peaks) - 1):
-        color = cm.rainbow(np.linspace(0, 1, bottom_peaks[i + 1] - bottom_peaks[i]))
-        for j in range(bottom_peaks[i], bottom_peaks[i + 1] - 1, 4):
-            ax.plot(plot_x[j:j + 5], plot_y[j:j + 5], color=color[j - bottom_peaks[i]])
-    
-    ax.set_xlabel('Transverse Plane')
-    ax.set_ylabel('Frontal Plane')
-    plt.title(f'Gait Cycle for {control_type} Control on {disturbance} Terrain')
-    
-    # Save and close the plot
-    plt.savefig(fg.store_clean_data(disturbance, control_type) + "gait.png")
+def plot_gait(roll,yaw,disturbance,control_type):
+    plt.figure()
+    plt.plot(roll,yaw)
+    plt.xlabel('Roll')
+    plt.ylabel('Yaw')
+    plt.title(f"Gait for {control_type} Control on {disturbance} Terrain")
+
+    plt.savefig(fg.store_clean_data(disturbance,control_type)+"gait.png")
     plt.clf()
     plt.close()
 
@@ -325,3 +316,6 @@ def main(disturbance, control_type,delta_t):
     
     # Plot 3D angular accelerations
     plot_3d_angular_accelerations(timestamps, aa_x, aa_y, aa_z, disturbance, control_type)
+
+    #plot gait
+    plot_gait(roll,yaw,disturbance,control_type)

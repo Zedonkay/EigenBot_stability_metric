@@ -12,7 +12,7 @@ print("Running main.py")
 def main():
     # Set the values for various parameters
     tau = 7  # Time delay for Lyapunov exponent calculation (in number of steps)
-    m = 22  # Embedding dimension for Lyapunov exponent calculation
+    m = 18  # Embedding dimension for Lyapunov exponent calculation
     delta_t = 0.1  # Time step for between data points
     min_steps = 100  # Minimum number of steps between neighbors (should force_minsteps be True)
     force_minsteps = False  # Flag to force preset minimum steps for Lyapunov exponent calculation
