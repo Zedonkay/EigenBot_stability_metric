@@ -19,17 +19,18 @@ def main():
     epsilon = 10  # Tolerance for truncation and re-truncation
     plotting_0 = 0  # Starting point for Lyapunov exponent plotting
     plotting_final = 300  # Ending point for Lyapunov exponent plotting
-    tolerance = 0.001  # Tolerance for truncation and re-truncation
+    tolerance = 0.05*np.pi  # Tolerance for truncation and re-truncation
 
     # Initialize lists to store results
-    predefined_exponents = []  # List to store predefined Lyapunov exponents
-    predefined_disturbances = []  # List to store predefined disturbances
-    neural_exponents = []  # List to store neural Lyapunov exponents
-    neural_disturbances = []  # List to store neural disturbances
+    flat_exponents = []  # List to store flat terrain Lyapunov exponents
+    hill_exponents = []  # List to store hill terrain Lyapunov exponents
+    flat_trial = []  # List to store flat terrain trial numbers
+    hill_trial = []  # List to store hill terrain trial numbers
+
 
     # Keep track of PSDs (Power Spectral Densities)
-    psds_neural = []  # List to store neural PSDs
-    psds_predefined = []  # List to store predefined PSDs
+    psds_flat = []  # List to store flat terrain PSDs
+    psds_hill = []  # List to store hill terrain PSDs
 
     # Read data from a CSV file
     df = pd.read_csv("2_raw_data/running_info.csv")
@@ -37,45 +38,43 @@ def main():
 
     # Process each file in the data
     for file in data:
-        print(f"Processing {file[0]} control for {file[1]}")
+        print(f"Processing data for {file[0]} test {file[1]}")
         
         # Store frequencies
-        if file[0] == "Predefined":
-            predefined_disturbances.append(file[1])
+        if file[1] == "flat":
+            flat_trial.append(file[2])
         else:
-            neural_disturbances.append(file[1])
-
+            hill_trial.append(file[2])
         # Perform truncation on the data
-        tr.main(file[1], file[0], tolerance)
+        tr.main(file[0], file[1], file[2], tolerance)
 
         # Perform re-truncation on the data
-        tr.retruncate(file[1], file[0], file[2], file[3])
+        tr.retruncate(file[0], file[1], file[2], file[3], file[4])
 
         # Perform state space analysis on the data
-        ss.main(file[1], file[0])
+        ss.main(file[0], file[1], file[2])
 
         # Calculate Lyapunov exponents for the data
         lyap.exponent(tau, m, min_steps, epsilon, plotting_0, plotting_final,
-                      delta_t, force_minsteps, predefined_exponents,
-                      neural_exponents, file[1], file[0])
-
+                      delta_t, force_minsteps, flat_exponents,hill_exponents, file[0], file[1], file[2])
+        
         # Calculate PSDs for the data
-        psd.main(psds_neural, psds_predefined, file[1], file[0])
+        psd.main(psds_flat, psds_hill, file[0], file[1], file[2])
 
     # Plot the Lyapunov exponents
-    lyap.plot_exponents(predefined_exponents, neural_exponents, predefined_disturbances)
+    print("plotting lyapunov exponents")
+    lyap.plot_exponents(flat_exponents, hill_exponents, flat_trial, hill_trial)
 
     # Plot the PSDs
-    psd.plot_psd(psds_neural, psds_predefined, neural_disturbances)
+    print("plotting psdss")
+    psd.plot_psd(flat_exponents, hill_exponents, flat_trial, hill_trial)
 
     # Save the results to CSV files
-    data = pd.DataFrame(np.column_stack((predefined_disturbances, predefined_exponents)),
+    print("saving data")
+    data = pd.DataFrame(np.column_stack((body_trial, body_exponents)),
                         columns=['frequency', 'exponent'])
-    data.to_csv("3_results/predefined_exponents.csv", index=True)
+    data.to_csv("3_results/body/body_exponents.csv", index=True)
 
-    data = pd.DataFrame(np.column_stack((neural_disturbances, neural_exponents)),
-                        columns=['frequency', 'exponent'])
-    data.to_csv("3_results/neural_exponents.csv", index=True)
 
 
 if __name__ == "__main__":

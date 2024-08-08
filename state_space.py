@@ -55,10 +55,10 @@ def quaternion_to_euler(quaternion):
     return roll, pitch, yaw
 
 # Function to plot 2D linear state space
-def plot_linear_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z, disturbance, control_type):
+def plot_linear_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z, terrain,object,test):
     # Create a 3x3 grid of subplots
     fig, axs = plt.subplots(3, 3, figsize=(18, 10))
-    fig.suptitle(f"2D Linear State Space Plot for {control_type} Control on {disturbance} Terrain")
+    fig.suptitle(f"2D Linear State Space Plot for {object} on {terrain} terrain (test {test})")
 
     # Plot position X vs. timestamp
     axs[0, 0].plot(timestamps, pos_x)
@@ -116,15 +116,15 @@ def plot_linear_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, acc_x, 
 
     # Adjust the layout and save the plot
     plt.tight_layout()
-    plt.savefig(fg.store_clean_data(disturbance, control_type) + "2d_linear_state_space.png")
+    plt.savefig(fg.store_clean_data(terrain,object,test) + "2d_linear_state_space.png")
     plt.clf()
     plt.close()
 
 # Function to plot 2D angular state space
-def plot_angular_2d(timestamps, roll, pitch, yaw, wx, wy, wz, aa_x, aa_y, aa_z, disturbance, control_type):
+def plot_angular_2d(timestamps, roll, pitch, yaw, wx, wy, wz, aa_x, aa_y, aa_z, terrain,object,test):
     # Create a 3x3 grid of subplots
     fig, axs = plt.subplots(3, 3, figsize=(18, 10))
-    fig.suptitle(f"2D Angular State Space Plot for {control_type} Control on {disturbance} Terrain")
+    fig.suptitle(f"2D Angular State Space Plot for {object} on {terrain} terrain (test {test})")
 
     # Plot roll vs. timestamp
     axs[0, 0].plot(timestamps, roll)
@@ -182,12 +182,12 @@ def plot_angular_2d(timestamps, roll, pitch, yaw, wx, wy, wz, aa_x, aa_y, aa_z, 
 
     # Adjust the layout and save the plot
     plt.tight_layout()
-    plt.savefig(fg.store_clean_data(disturbance, control_type) + "2d_angular_state_space.png")
+    plt.savefig(fg.store_clean_data(terrain,object,test) + "2d_angular_state_space.png")
     plt.clf()
     plt.close()
 
 # Function to plot 3D phase space plot for velocity
-def plot_3d_phase_space_vel(vel_x, vel_y, vel_z, disturbance, control_type):
+def plot_3d_phase_space_vel(vel_x, vel_y, vel_z, terrain,object,test):
     # Create a 3D plot
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
@@ -197,15 +197,15 @@ def plot_3d_phase_space_vel(vel_x, vel_y, vel_z, disturbance, control_type):
     ax.set_xlabel('Velocity X')
     ax.set_ylabel('Velocity Y')
     ax.set_zlabel('Velocity Z')
-    plt.title(f'3D Phase Space Plot for {control_type} Control on {disturbance} Terrain')
+    plt.title(f'3D Phase Space Plot for {object} on {terrain} terrain (test {test})')
     
     # Save and close the plot
-    plt.savefig(fg.store_clean_data(disturbance, control_type) + "3d_phase_space_vel.png")
+    plt.savefig(fg.store_clean_data(terrain,object,test) + "3d_phase_space_vel.png")
     plt.clf()
     plt.close()
 
 # Function to plot 3D phase space plot for position
-def plot_3d_phase_space_pos(pos_x, pos_y, pos_z, disturbance, control_type):
+def plot_3d_phase_space_pos(pos_x, pos_y, pos_z, terrain,object,test):
     # Create a 3D plot
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
@@ -215,15 +215,15 @@ def plot_3d_phase_space_pos(pos_x, pos_y, pos_z, disturbance, control_type):
     ax.set_xlabel('Position X')
     ax.set_ylabel('Position Y')
     ax.set_zlabel('Position Z')
-    plt.title(f'3D Phase Space Plot for {control_type} Control on {disturbance} Terrain')
+    plt.title(f'3D Phase Space Plot for {object} on {terrain} terrain (test {test})')
     
     # Save and close the plot
-    plt.savefig(fg.store_clean_data(disturbance, control_type) + "3d_state_space.png")
+    plt.savefig(fg.store_clean_data(terrain,object,test) + "3d_state_space.png")
     plt.clf()
     plt.close()
 
 # Function to plot 3D Euler state space
-def plot_3d_euler_state_space(timestamps, roll, pitch, yaw, disturbance, control_type):
+def plot_3d_euler_state_space(timestamps, roll, pitch, yaw, terrain,object,test):
     # Create a 3D plot
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
@@ -233,15 +233,15 @@ def plot_3d_euler_state_space(timestamps, roll, pitch, yaw, disturbance, control
     ax.set_xlabel('Roll (rad)')
     ax.set_ylabel('Pitch (rad)')
     ax.set_zlabel('Yaw (rad)')
-    plt.title(f'3D Euler State Space Plot for {control_type} Control on {disturbance} Terrain')
+    plt.title(f'3D Euler State Space Plot for {object} on {terrain} terrain (test {test})')
     
     # Save and close the plot
-    plt.savefig(fg.store_clean_data(disturbance, control_type) + "3d_euler_state_space.png")
+    plt.savefig(fg.store_clean_data(terrain,object,test) + "3d_euler_state_space.png")
     plt.clf()
     plt.close()
 
 # Function to plot 3D angular velocities
-def plot_3d_angular_velocities(timestamps, ang_x, ang_y, ang_z, disturbance, control_type):
+def plot_3d_angular_velocities(timestamps, ang_x, ang_y, ang_z, terrain,object,test):
     # Create a 3D plot
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
@@ -251,15 +251,15 @@ def plot_3d_angular_velocities(timestamps, ang_x, ang_y, ang_z, disturbance, con
     ax.set_xlabel('Angular Velocity X')
     ax.set_ylabel('Angular Velocity Y')
     ax.set_zlabel('Angular Velocity Z')
-    plt.title(f'3D Angular Velocity Plot for {control_type} Control on {disturbance} Terrain')
+    plt.title(f'3D Angular Velocity Plot for {object} on {terrain} terrain (test {test})')
     
     # Save and close the plot
-    plt.savefig(fg.store_clean_data(disturbance, control_type) + "3d_angular_velocities.png")
+    plt.savefig(fg.store_clean_data(terrain,object,test) + "3d_angular_velocities.png")
     plt.clf()
     plt.close()
 
 # Function to plot 3D angular accelerations
-def plot_3d_angular_accelerations(timestamps, ang_x, ang_y, ang_z, disturbance, control_type):
+def plot_3d_angular_accelerations(timestamps, ang_x, ang_y, ang_z, terrain,object,test):
     # Create a 3D plot
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
@@ -269,56 +269,58 @@ def plot_3d_angular_accelerations(timestamps, ang_x, ang_y, ang_z, disturbance, 
     ax.set_xlabel('Angular Acceleration X')
     ax.set_ylabel('Angular Acceleration Y')
     ax.set_zlabel('Angular Acceleration Z')
-    plt.title(f'3D Angular Acceleration Plot for {control_type} Control on {disturbance} Terrain')
+    plt.title(f'3D Angular Acceleration Plot for {object} on {terrain} terrain (test {test})')
     
     # Save and close the plot
-    plt.savefig(fg.store_clean_data(disturbance, control_type) + "3d_angular_accelerations.png")
+    plt.savefig(fg.store_clean_data(terrain,object,test) + "3d_angular_accelerations.png")
     plt.clf()
     plt.close()
 
 # Function to plot gait cycle
-def plot_gait(plot_x, plot_y, plot_z, bottom_peaks, disturbance, control_type):
+def plot_gait(pitch,roll, terrain,object,test):
     # Create a 2D plot
     fig = plt.figure()
     ax = fig.add_subplot(111)
     
-    # Plot the gait cycle using different colors for each step
-    for i in range(len(bottom_peaks) - 1):
-        color = cm.rainbow(np.linspace(0, 1, bottom_peaks[i + 1] - bottom_peaks[i]))
-        for j in range(bottom_peaks[i], bottom_peaks[i + 1] - 1, 4):
-            ax.plot(plot_x[j:j + 5], plot_y[j:j + 5], color=color[j - bottom_peaks[i]])
-    
-    ax.set_xlabel('Transverse Plane')
-    ax.set_ylabel('Frontal Plane')
-    plt.title(f'Gait Cycle for {control_type} Control on {disturbance} Terrain')
+    # Plot
+    ax.plot(pitch, roll)
+    ax.set_xlabel('Pitch')
+    ax.set_ylabel('Roll')
+    plt.title(f'Gait Cycle for {object} on {terrain} terrain (test {test})')
     
     # Save and close the plot
-    plt.savefig(fg.store_clean_data(disturbance, control_type) + "gait.png")
+    plt.savefig(fg.store_clean_data(terrain,object,test) + "gait.png")
     plt.clf()
     plt.close()
 
 # Main function
-def main(disturbance, control_type):
+def main(terrain,object,test):
     # Generate the file path based on the disturbance and control type
-    file_path = fg.filename_clean(disturbance, control_type)
+    file_path = fg.filename_clean(terrain,object,test)
     
     # Import data from the CSV file
     df, timestamps, pos_x, pos_y, pos_z, quaternion, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z, wx, wy, wz, aa_x, aa_y, aa_z, roll, pitch, yaw = import_data(file_path)
     
     # Plot 2D linear state space
-    plot_linear_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z, disturbance, control_type)
+    plot_linear_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z, terrain,object,test)
+
+    # Plot 2D angular state space
+    plot_angular_2d(timestamps, roll, pitch, yaw, wx, wy, wz, aa_x, aa_y, aa_z, terrain,object,test)
     
     # Plot 3D phase space for position
-    plot_3d_phase_space_pos(pos_x, pos_y, pos_z, disturbance, control_type)
+    plot_3d_phase_space_pos(pos_x, pos_y, pos_z, terrain,object,test)
     
     # Plot 3D phase space for velocity
-    plot_3d_phase_space_vel(vel_x, vel_y, vel_z, disturbance, control_type)
+    plot_3d_phase_space_vel(vel_x, vel_y, vel_z, terrain,object,test)
     
     # Plot 3D Euler state space
-    plot_3d_euler_state_space(timestamps, roll, pitch, yaw, disturbance, control_type)
+    plot_3d_euler_state_space(timestamps, roll, pitch, yaw, terrain,object,test)
     
     # Plot 3D angular velocities
-    plot_3d_angular_velocities(timestamps, wx, wy, wz, disturbance, control_type)
+    plot_3d_angular_velocities(timestamps, wx, wy, wz, terrain,object,test)
     
     # Plot 3D angular accelerations
-    plot_3d_angular_accelerations(timestamps, aa_x, aa_y, aa_z, disturbance, control_type)
+    plot_3d_angular_accelerations(timestamps, aa_x, aa_y, aa_z, terrain,object,test)
+
+    # Plot gait cycle
+    plot_gait(pitch,roll, terrain,object,test)

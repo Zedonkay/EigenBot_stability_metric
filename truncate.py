@@ -23,21 +23,22 @@ def find_end(data, tolerance):
             return i
 
 # Function to truncate the data based on start and end indices
-def retruncate(disturbance, control_type, start, end):
-    # Generate the filename based on the input parameters
-    filename = fg.filename_clean(disturbance, control_type)
-    
-    # Read the raw data from the CSV file
-    raw_test = pd.read_csv(filename)
-    
-    # Truncate the data based on the start and end indices
-    if end != 9999:
-        raw_test = raw_test.iloc[start:end]
-    else:
-        raw_test = raw_test.iloc[start:]
-    
-    # Save the truncated data back to the CSV file
-    raw_test.to_csv(filename, index=False)
+def retruncate(terrain,object,test, start, end):
+    if not (start==0 and end==9999):
+        # Generate the filename based on the input parameters
+        filename = fg.filename_clean(terrain,object,test)
+        
+        # Read the raw data from the CSV file
+        raw_test = pd.read_csv(filename)
+        
+        # Truncate the data based on the start and end indices
+        if end != 9999:
+            raw_test = raw_test.iloc[start:end]
+        else:
+            raw_test = raw_test.iloc[start:]
+        
+        # Save the truncated data back to the CSV file
+        raw_test.to_csv(filename, index=False)
 
 # Function to calculate angular velocities between quaternions
 def angular_velocities(q1, q2, dt):
@@ -55,18 +56,28 @@ def calculate_angular_velocities(quaternions, times):
         a_velocities.append(angular_velocities(q1, q2, times[i] - times[i-1]))
     return np.array(a_velocities)
 
+def remove_duplicates(data):
+    for i in range(len(data)-1,1,-1):
+        if data[i][1]==data[i-1][1]:
+            data = np.delete(data, i, axis=0)
+    return data
 # Main function
-def main(disturbance, control_type, tolerance):
+def main(terrain,object,test, tolerance):
     # Generate the filename for the raw data
-    filename = fg.filename_raw_test(disturbance, control_type)
+    filename = fg.filename_raw_test(terrain,object,test)
     
     # Read the raw data from the CSV file
     df = pd.read_csv(filename)
+
+    #remove duplicates
+    data =remove_duplicates(df.values)
+
+    df=pd.DataFrame(data,columns=df.columns)
     
     # Extract the 'pz' column as the data
     data = df[['pz']].values
     
-    # Uncomment the following lines to find the start and end indices
+    # Uncomment the following lines to window the data according to the tolerance
     # start, end = find_start_and_end(data, tolerance)
     # df = df[start:end]
     
@@ -108,4 +119,4 @@ def main(disturbance, control_type, tolerance):
     df['pitch'] = pitch
     df['yaw'] = yaw
     # Save the processed data to a new CSV file
-    df.to_csv(fg.filename_clean(disturbance, control_type), index=False)
+    df.to_csv(fg.filename_clean(terrain,object,test), index=False)

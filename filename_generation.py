@@ -1,12 +1,11 @@
 
-def filename_clean(disturbance,control_type):
-    return "1_clean_data/"+disturbance+"/"+disturbance+"_"+control_type+".csv"
-def filename_raw_test(disturbance,control_type):
-    return "2_raw_data/"+disturbance+"/"+"pos_quart_"+disturbance+"_"+control_type+".csv"
-def filename_lyapunov(disturbance,control_type):
-    return "3_results/"+disturbance+"/"+control_type+"/"+disturbance+"_"+control_type+"_"+"_lyapunov.csv"
-def filename_exponents(disturbance,control_type):
-    return "3_results/"+disturbance+"/"+disturbance+"_exponents.csv"
-def store_clean_data(disturbance,control_type):
-    return "3_results/"+disturbance+"/"+control_type+"/"+disturbance+"_"+control_type+"_"
-
+def filename_clean(terrain,object,test):
+    return "1_clean_data/"+terrain+"/"+object+"/"+terrain+"_"+object+"_test"+str(test)+".csv"
+def filename_raw_test(terrain,object,test):
+    return "2_raw_data/"+terrain+"/"+object+"/eigenhub_"+object+"_data_"+terrain+"_"+str(test)+".csv"
+def filename_lyapunov(terrain,object,test):
+    return "3_results/"+terrain+"/"+object+"/test"+str(test)+"/"+object+"_test"+str(test)+"_lyapunov.csv"
+def filename_exponents(terrain,object,test):
+    return "3_results/"+terrain+"/"+object+"/"+terrain+"_"+object+"_exponents.csv"
+def store_clean_data(terrain,object,test):
+    return "3_results/"+terrain+"/"+object+"/test"+str(test)+"/"+terrain+"_"+object+"_test"+str(test)+"_"

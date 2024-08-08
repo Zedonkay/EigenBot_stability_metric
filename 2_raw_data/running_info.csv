@@ -1,7 +1,6 @@
-﻿control_type,Disturbance,t_0,t_f
-Neural,Flat,0,9999
-Predefined,Flat,0,9999
-Neural,Block,0,9999
-Predefined,Block,0,9999
-Neural,Hill,0,9999
-Predefined,Hill,0,9999
+﻿Terrain,Object,Test,t_0,t_f
+Flat,Body,1,0,9999
+Flat,Body,2,0,9999
+Hill,Body,1,0,9999
+Hill,Body,2,0,9999
+Hill,Body,3,0,9999
