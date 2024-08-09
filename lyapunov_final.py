@@ -101,7 +101,7 @@ def exponent(tau, m, min_steps, epsilon, plotting_0, plotting_final, delta_t, fo
     """
     filename = fg.filename_clean(terrain, object, test)  # Generate the filename for clean data
     df = pd.read_csv(filename)  # Read the data from the file
-    pdata = df[['roll', 'pitch', 'yaw']]  # Select the relevant columns
+    pdata = df[['yaw']]  # Select the relevant columns
     data = pdata.values  # Convert the data to a numpy array
 
     if not force_minsteps:

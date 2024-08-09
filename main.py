@@ -38,7 +38,7 @@ def main():
 
     # Process each file in the data
     for file in data:
-        print(f"Processing data for {file[0]} test {file[1]}")
+        print(f"Processing data for {file[1]} on {file[0]} terrain (test {file[2]})")
         
         # Store frequencies
         if file[1] == "flat":
@@ -55,6 +55,7 @@ def main():
         ss.main(file[0], file[1], file[2])
 
         # Calculate Lyapunov exponents for the data
+
         lyap.exponent(tau, m, min_steps, epsilon, plotting_0, plotting_final,
                       delta_t, force_minsteps, flat_exponents,hill_exponents, file[0], file[1], file[2])
         
@@ -71,10 +72,13 @@ def main():
 
     # Save the results to CSV files
     print("saving data")
-    data = pd.DataFrame(np.column_stack((body_trial, body_exponents)),
+    data = pd.DataFrame(np.column_stack((flat_trial, flat_exponents)),
                         columns=['frequency', 'exponent'])
-    data.to_csv("3_results/body/body_exponents.csv", index=True)
+    data.to_csv("3_results/Flat/Flat_exponents.csv", index=False)
 
+    data = pd.DataFrame(np.column_stack((hill_trial, hill_exponents)))
+    data.to_csv("3_results/Hill/Hill_exponents.csv", index=False)
+    
 
 
 if __name__ == "__main__":

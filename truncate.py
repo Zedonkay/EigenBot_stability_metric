@@ -113,7 +113,7 @@ def main(terrain,object,test, tolerance):
     df['aa_y'] = np.gradient(df['wy'])
     df['aa_z'] = np.gradient(df['wz'])
     
-    quaternion = df.iloc[:, 4:8].values
+    quaternion = df[['ox','oy','oz','ow']].values
     roll,pitch,yaw = ss.quaternion_to_euler(quaternion)
     df['roll'] = roll
     df['pitch'] = pitch

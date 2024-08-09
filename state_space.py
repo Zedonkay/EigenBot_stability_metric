@@ -16,10 +16,10 @@ def import_data(file_path):
     # Extract the columns for timestamps, position, quaternion, velocity, acceleration, angular velocity, and angular acceleration
     raw_timestamps = df.iloc[:, 0]
     timestamps = raw_timestamps - time_offset
-    pos_x = df.iloc[:, 1]
-    pos_y = df.iloc[:, 2]
-    pos_z = df.iloc[:, 3]
-    quaternion = df.iloc[:, 4:8].values
+    pos_x = df['px']
+    pos_y = df['py']
+    pos_z = df['pz']
+    quaternion = df[['ox', 'oy', 'oz','ow']].values
     vel_x = df['vx']
     vel_y = df['vy']
     vel_z = df['vz']
