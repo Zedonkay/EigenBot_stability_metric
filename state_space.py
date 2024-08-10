@@ -53,6 +53,29 @@ def quaternion_to_euler(quaternion):
     pitch = np.arcsin(2 * (quaternion[:, 0] * quaternion[:, 2] - quaternion[:, 3] * quaternion[:, 1]))
     yaw = np.arctan2(2 * (quaternion[:, 0] * quaternion[:, 3] + quaternion[:, 1] * quaternion[:, 2]), 1 - 2 * (quaternion[:, 2] ** 2 + quaternion[:, 3] ** 2))
     return roll, pitch, yaw
+def plot_quaternion(quaternion,timestamps,terrain,object,test):
+    #plot quaternions vs time
+    fig, axs = plt.subplots(4, 1, figsize=(18, 10))
+    fig.suptitle(f"Quaternion vs Time for {object} on {terrain} terrain (test {test})")
+    axs[0].plot(timestamps, quaternion[:,0])
+    axs[0].set_xlabel('Timestamp')
+    axs[0].set_ylabel('Quaternion X')
+    axs[0].set_title('Quaternion X vs. Timestamp')
+    axs[1].plot(timestamps, quaternion[:,1])
+    axs[1].set_xlabel('Timestamp')
+    axs[1].set_ylabel('Quaternion Y')
+    axs[1].set_title('Quaternion Y vs. Timestamp')
+    axs[2].plot(timestamps, quaternion[:,2])
+    axs[2].set_xlabel('Timestamp')
+    axs[2].set_ylabel('Quaternion Z')
+    axs[2].set_title('Quaternion Z vs. Timestamp')
+    axs[3].plot(timestamps, quaternion[:,3])
+    axs[3].set_xlabel('Timestamp')
+    axs[3].set_ylabel('Quaternion W')
+    axs[3].set_title('Quaternion W vs. Timestamp')
+    plt.tight_layout()
+    plt.savefig(fg.store_clean_data(terrain,object,test) + "quaternion.png")
+
 
 # Function to plot 2D linear state space
 def plot_linear_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z, terrain,object,test):
@@ -324,3 +347,6 @@ def main(terrain,object,test):
 
     # Plot gait cycle
     plot_gait(pitch,roll, terrain,object,test)
+
+    # Plot quaternion
+    plot_quaternion(quaternion,timestamps,terrain,object,test)

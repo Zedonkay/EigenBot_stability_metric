@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import filename_generation as fg
 import state_space as ss
+from scipy.spatial.transform import Rotation as R
 
 # Function to find the start and end indices of data based on a tolerance
 def find_start_and_end(data, tolerance):
@@ -56,11 +57,29 @@ def calculate_angular_velocities(quaternions, times):
         a_velocities.append(angular_velocities(q1, q2, times[i] - times[i-1]))
     return np.array(a_velocities)
 
+#function to remove duplicates
 def remove_duplicates(data):
     for i in range(len(data)-1,1,-1):
         if data[i][1]==data[i-1][1]:
             data = np.delete(data, i, axis=0)
     return data
+
+#Function to change position coordinates to basis based on slope of terrain
+def change_basis(positions,quaternions,terrain):
+    o0=quaternions[0]
+    r=R.from_quat(o0)
+    print(r.as_euler('xyz', degrees=True))
+    W = np.array([1,0,np.sin(np.radians(10))])
+    W = W/np.linalg.norm(W)
+    U = np.array([0,1,0])
+    U = np.cross(W,U)
+    U = U/np.linalg.norm(U)
+    V = np.cross(U,W)
+    V = V/np.linalg.norm(V)
+    basis = np.array([U,V,W])
+    positions = np.dot(positions,basis)
+    return positions
+
 # Main function
 def main(terrain,object,test, tolerance):
     # Generate the filename for the raw data
@@ -74,6 +93,14 @@ def main(terrain,object,test, tolerance):
 
     df=pd.DataFrame(data,columns=df.columns)
     
+    # Change the basis of the position coordinates
+    positions = df[['px', 'py', 'pz']].values
+    quaternion = df[['ox', 'oy', 'oz', 'ow']].values
+    positions= change_basis(positions,quaternion,terrain)
+    df['px'] = positions[:, 0]
+    df['py'] = positions[:, 1]
+    df['pz'] = positions[:, 2]
+
     # Extract the 'pz' column as the data
     data = df[['pz']].values
     
@@ -85,7 +112,6 @@ def main(terrain,object,test, tolerance):
     df['timestamp'] = df['timestamp'] - df.iloc[0, 0]
     
     # Extract the quaternion and timestamp columns
-    quaternion = df[['ow', 'ox', 'oy', 'oz']].values
     timestamp = df['timestamp'].values
     
     # Calculate the angular velocities between quaternions
