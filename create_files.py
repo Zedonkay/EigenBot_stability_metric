@@ -17,18 +17,33 @@ def make_leg_files():
             print(f"Processing leg {leg}")
             leg_data = df[['Timestamp',f'Contact_{leg}']]
             leg_data=leg_data.values
-            elapsed_times = []
-            previous_timestamp = None
-            
+            stance_times = []
+            swing_times = []
+            phase = leg_data[0][1]
+            stance_start=None
+            swing_start=None
+            stance_times = np.array(stance_times)
+            swing_times = np.array(swing_times)
             for data in leg_data:
-                if data[1] == 1:
-                    if previous_timestamp is not None:
-                        elapsed_time = data[0] - previous_timestamp
-                        if(elapsed_time>0 and elapsed_time<0.1):
-                            elapsed_times.append(elapsed_time)
-                    previous_timestamp = data[0]
-            elapsed_times = np.array(elapsed_times)
-            data = pd.DataFrame(elapsed_times, columns=['elapsed_time'])
-            data.to_csv(fg.filename_clean(file[0], file[1], leg), index=False)
+                if (stance_start==None and data[1]==1):
+                    stance_start=data[0]
+                if (swing_start==None and data[1]==0):
+                    swing_start=data[0]
+                if data[1] != phase:
+                    if phase == 1:
+                        stance_times = np.append(stance_times, data[0] - stance_start)
+                        stance_start =data[0]
+                    else:
+                        swing_times = np.append(swing_times, data[0] - swing_start)
+                        swing_start = data[0]
+                    phase = data[1]
+            while len(stance_times) < len(swing_times):
+                stance_times = np.append(stance_times,0)
+            while len(swing_times) < len(stance_times):
+                swing_times = np.append(swing_times, 0)
+            
+            df_leg = pd.DataFrame({'stance': stance_times, 'swing': swing_times})
+            # Save the dataframe to a csv file
+            df_leg.to_csv(fg.filename_clean(file[0], file[1], leg), index=False)
 if __name__=="__main__":
    make_leg_files()

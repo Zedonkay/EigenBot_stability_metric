@@ -11,8 +11,8 @@ print("Running main.py")
 
 def main():
     # Set the values for various parameters
-    tau = 7  # Time delay for Lyapunov exponent calculation
-    m = 22  # Embedding dimension for Lyapunov exponent calculation
+    tau = 1  # Time delay for Lyapunov exponent calculation
+    m = 3  # Embedding dimension for Lyapunov exponent calculation
     delta_t = 0.01  # Time step for Lyapunov exponent calculation
     min_steps = 100  # Minimum number of steps for Lyapunov exponent calculation
     force_minsteps = False  # Flag to force minimum steps for Lyapunov exponent calculation
@@ -66,14 +66,14 @@ def main():
     # print("plotting psdss")
     # psd.plot_psd(psds_neural, psds_predefined, neural_terrains)
 
-    # Save the results to CSV files
-    print("saving data")
-    data = pd.DataFrame(np.column_stack((predefined_terrains, predefined_exponents)),
-                        columns=['frequency', 'exponent'])
-    data.to_csv("3_results/Flat/Flat_exponents.csv", index=False)
+    # # Save the results to CSV files
+    # print("saving data")
+    # data = pd.DataFrame(np.column_stack((predefined_terrains, predefined_exponents)),
+    #                     columns=['frequency', 'exponent'])
+    # data.to_csv("3_results/Flat/Flat_exponents.csv", index=False)
 
-    data = pd.DataFrame(np.column_stack((hill_trial, hill_exponents)))
-    data.to_csv("3_results/Hill/Hill_exponents.csv", index=False)
+    # data = pd.DataFrame(np.column_stack((hill_trial, hill_exponents)))
+    # data.to_csv("3_results/Hill/Hill_exponents.csv", index=False)
     
 
 

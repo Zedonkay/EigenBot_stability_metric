@@ -316,19 +316,24 @@ def plot_gait(pitch,roll, control_type,terrain,leg):
 def plot_time_differences(control_type,terrain,leg):
     # Create a 2D plot
     filename=fg.filename_clean(control_type,terrain,leg)
-    data = pd.read_csv(filename)
-    data = data.values
+    df = pd.read_csv(filename)
+    stance = df['stance'].values
+    swing = df['swing'].values
+    print(stance,swing)
     fig = plt.figure()
     ax = fig.add_subplot(111)
     
-    # Plot
-    ax.scatter(np.arange(len(data)), data)
+    # Create a scatter plot of stance and swing against indices
+    fig, ax = plt.subplots()
+    ax.scatter(range(len(stance)), stance, label='Stance')
+    ax.scatter(range(len(swing)), swing, label='Swing')
     ax.set_xlabel('Index')
-    ax.set_ylabel('Time Difference')
-    plt.title(f'Time Differences for {control_type} control on {terrain} terrain (leg {leg})')
-    
+    ax.set_ylabel('Value')
+    plt.title('Stance and Swing vs. Index')
+    plt.legend()
+
     # Save and close the plot
-    plt.savefig(fg.store_clean_data(control_type,terrain,leg) + "time_differences.png")
+    plt.savefig(fg.store_clean_data(control_type, terrain, leg) + "stance_swing_scatter.png")
     plt.clf()
     plt.close()
 

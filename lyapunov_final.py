@@ -102,7 +102,7 @@ def exponent(tau, m, min_steps, epsilon, plotting_0, plotting_final, delta_t, fo
     """
     filename = fg.filename_clean(control_type,terrain,leg)  # Generate the filename for clean data
     df = pd.read_csv(filename)  # Read the data from the file
-    pdata = df['elapsed_time']  # Extract the elapsed time data
+    pdata = df[['stance','swing']]
     data = pdata.values  # Convert the data to a numpy array
 
     if not force_minsteps:
