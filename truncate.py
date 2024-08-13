@@ -24,10 +24,10 @@ def find_end(data, tolerance):
             return i
 
 # Function to truncate the data based on start and end indices
-def retruncate(terrain,object,test, start, end):
+def retruncate(control_type,terrain,leg, start, end):
     if not (start==0 and end==9999):
         # Generate the filename based on the input parameters
-        filename = fg.filename_clean(terrain,object,test)
+        filename = fg.filename_clean(control_type,terrain,leg)
         
         # Read the raw data from the CSV file
         raw_test = pd.read_csv(filename)
@@ -81,9 +81,9 @@ def change_basis(positions,quaternions,terrain):
     return positions
 
 # Main function
-def main(terrain,object,test, tolerance):
+def main(control_type,terrain,leg, tolerance):
     # Generate the filename for the raw data
-    filename = fg.filename_raw_test(terrain,object,test)
+    filename = fg.filename_clean(control_type,terrain,leg)
     
     # Read the raw data from the CSV file
     df = pd.read_csv(filename)
@@ -94,22 +94,20 @@ def main(terrain,object,test, tolerance):
     df=pd.DataFrame(data,columns=df.columns)
     
     # Change the basis of the position coordinates
-    positions = df[['px', 'py', 'pz']].values
-    quaternion = df[['ox', 'oy', 'oz', 'ow']].values
-    positions= change_basis(positions,quaternion,terrain)
-    df['px'] = positions[:, 0]
-    df['py'] = positions[:, 1]
-    df['pz'] = positions[:, 2]
-
-    # Extract the 'pz' column as the data
-    data = df[['pz']].values
+    # positions = df[['px', 'py', 'pz']].values
+    # quaternion = df[['ox', 'oy', 'oz', 'ow']].values
+    # positions= change_basis(positions,quaternion,terrain)
+    # df['px'] = positions[:, 0]
+    # df['py'] = positions[:, 1]
+    # df['pz'] = positions[:, 2]
     
     # Uncomment the following lines to window the data according to the tolerance
+    #data = df[['pz']].values
     # start, end = find_start_and_end(data, tolerance)
     # df = df[start:end]
     
     # Subtract the first timestamp from all timestamps
-    df['timestamp'] = df['timestamp'] - df.iloc[0, 0]
+    df['timestamp'] = df['timestamp'] - df['timestamp'].values[0]
     
     # Extract the quaternion and timestamp columns
     timestamp = df['timestamp'].values
@@ -145,4 +143,4 @@ def main(terrain,object,test, tolerance):
     df['pitch'] = pitch
     df['yaw'] = yaw
     # Save the processed data to a new CSV file
-    df.to_csv(fg.filename_clean(terrain,object,test), index=False)
+    df.to_csv(fg.filename_clean(control_type,terrain,leg), index=False)

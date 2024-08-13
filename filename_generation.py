@@ -1,11 +1,11 @@
 
-def filename_clean(terrain,object,test):
-    return "1_clean_data/"+terrain+"/"+object+"/"+terrain+"_"+object+"_test"+str(test)+".csv"
-def filename_raw_test(terrain,object,test):
-    return "2_raw_data/"+terrain+"/"+object+"/eigenhub_"+object+"_data_"+terrain+"_"+str(test)+".csv"
-def filename_lyapunov(terrain,object,test):
-    return "3_results/"+terrain+"/"+object+"/test"+str(test)+"/"+object+"_test"+str(test)+"_lyapunov.csv"
-def filename_exponents(terrain,object,test):
-    return "3_results/"+terrain+"/"+object+"/"+terrain+"_"+object+"_exponents.csv"
-def store_clean_data(terrain,object,test):
-    return "3_results/"+terrain+"/"+object+"/test"+str(test)+"/"+terrain+"_"+object+"_test"+str(test)+"_"
+def filename_clean(control_type,terrain,leg):
+    return "1_clean_data/"+control_type+"/"+terrain+"/"+terrain+control_type+"_leg"+str(leg)+".csv"
+def filename_raw_test(terrain,control_type,test):
+    return "2_raw_data/"+control_type+"/"+"contact_data_"+terrain+"_"+control_type+".csv"
+def filename_raw_legs(control_type,terrain,leg):
+    return "2_raw_data/"+control_type+"/"+terrain+""+control_type+"_leg"+str(leg)+".csv"
+def filename_lyapunov(control_type,terrain,leg):
+    return store_clean_data(control_type,terrain,leg)+"lyapunovdata.csv"
+def store_clean_data(control_type,terrain,leg):
+    return "3_results/"+control_type+"/"+terrain+"/leg"+str(leg)+"/"+terrain+"_"+control_type+"_leg"+str(leg)+"_"

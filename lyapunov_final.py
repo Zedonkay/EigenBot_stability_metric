@@ -19,7 +19,7 @@ def set_axis_style(ax, labels):
     ax.set_xticks(np.arange(1, len(labels) + 1), labels=labels)
     ax.set_xlim(0.25, len(labels) + 0.75)
 
-def plot_growth_factors(times, lyap_exponents, fn, terrain, object, test, t_0, t_f, coef):
+def plot_growth_factors(times, lyap_exponents, fn, control_type,terrain,leg, t_0, t_f, coef):
     """
     Function to plot the growth factors of Lyapunov exponents.
     
@@ -39,29 +39,30 @@ def plot_growth_factors(times, lyap_exponents, fn, terrain, object, test, t_0, t
     plt.legend()
     plt.xlabel("Time")
     plt.ylabel("Log mean divergence")
-    plt.title(f"Log mean divergence vs time for {object} (test {test})")
-    plt.savefig(fg.store_clean_data(terrain, object, test) + "lyapunov_plot.png")
+    plt.title(f"Log mean divergence vs time for {control_type} control on {terrain} terrain (leg {leg})")
+    plt.savefig(fg.store_clean_data(control_type,terrain,leg) + "lyapunov_plot.png")
     plt.clf()
     plt.close()
 
-def plot_exponents(body_exponents, leg_exponents, body_trial, leg_trial):
+def plot_exponents(predefined_exponents, neural_exponents, disturbances):
     """
     Function to plot the Lyapunov exponents for predefined and neural control.
     
     Parameters:
-    - body_exponents: The Lyapunov exponents for predefined control.
-    - leg_exponents: The Lyapunov exponents for neural control.
-    - test: The types of test.
+    - predefined_exponents: The Lyapunov exponents for predefined control.
+    - neural_exponents: The Lyapunov exponents for neural control.
+    - disturbances: The types of disturbances.
     """
-    plt.scatter(body_trial, body_exponents, label="Predefined Control", color="blue")
-    plt.scatter(leg_trial, leg_exponents, label="Neural Control", color="red")
+    plt.scatter(disturbances, predefined_exponents, label="Predefined Control", color="blue")
+    plt.scatter(disturbances, neural_exponents, label="Neural Control", color="red")
     plt.xlabel("Disturbance")
     plt.ylabel("Lyapunov Exponent")
-    plt.title("Lyapunov Exponents for body")
+    plt.title("Lyapunov Exponents for Neural and Predefined Control")
     plt.legend()
     plt.savefig("3_results/lyapunov_exponents.png")
     plt.clf()
     plt.close()
+
 
 def welch_method(data):
     """
@@ -80,7 +81,7 @@ def welch_method(data):
     mean_frequency = np.average(f, weights=w)
     return 1 / mean_frequency
 
-def exponent(tau, m, min_steps, epsilon, plotting_0, plotting_final, delta_t, force_minsteps, flat_exponents, hill_exponents, terrain, object, test):
+def exponent(tau, m, min_steps, epsilon, plotting_0, plotting_final, delta_t, force_minsteps, flat_exponents, hill_exponents, control_type,terrain,leg):
     """
     Function to calculate the Lyapunov exponents.
     
@@ -99,9 +100,9 @@ def exponent(tau, m, min_steps, epsilon, plotting_0, plotting_final, delta_t, fo
     - object: The object being tested.
     - test: The test number.
     """
-    filename = fg.filename_clean(terrain, object, test)  # Generate the filename for clean data
+    filename = fg.filename_clean(control_type,terrain,leg)  # Generate the filename for clean data
     df = pd.read_csv(filename)  # Read the data from the file
-    pdata = df[['yaw']]  # Select the relevant columns
+    pdata = df['elapsed_time']  # Extract the elapsed time data
     data = pdata.values  # Convert the data to a numpy array
 
     if not force_minsteps:
@@ -115,7 +116,7 @@ def exponent(tau, m, min_steps, epsilon, plotting_0, plotting_final, delta_t, fo
 
     coef = np.polyfit(times[t_0:t_f], data[t_0:t_f], 1)  # Fit a least squares line to the Lyapunov exponents
     poly1d_fn = np.poly1d(coef)  # Create a function for the least squares line
-    plot_growth_factors(times, data, poly1d_fn, terrain, object, test, t_0, t_f, coef)  # Plot the growth factors
+    plot_growth_factors(times, data, poly1d_fn, control_type,terrain,leg, t_0, t_f, coef)  # Plot the growth factors
     # Check the type of terrain and append the Lyapunov exponent coefficient to the corresponding list
     if terrain == "flat":
         flat_exponents.append(coef[0])  # Append the Lyapunov exponent coefficient for flat terrain
@@ -123,4 +124,4 @@ def exponent(tau, m, min_steps, epsilon, plotting_0, plotting_final, delta_t, fo
         hill_exponents.append(coef[0])  # Append the Lyapunov exponent coefficient for hilly terrain
 
     data = pd.DataFrame(np.column_stack((times, data)), columns=['times', 'Mean Divergence'])  # Create a DataFrame with the times and mean divergence
-    data.to_csv(fg.store_clean_data(terrain, object, test) + 'lyapunovdata.csv', index=True)  # Save the DataFrame to a CSV file
+    data.to_csv(fg.store_clean_data(control_type,terrain,leg) + 'lyapunovdata.csv', index=True)  # Save the DataFrame to a CSV file
