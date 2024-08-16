@@ -50,6 +50,7 @@ def quaternion_to_euler(quaternion):
     pitch = np.arcsin(2 * (quaternion[:, 0] * quaternion[:, 2] - quaternion[:, 3] * quaternion[:, 1]))
     yaw = np.arctan2(2 * (quaternion[:, 0] * quaternion[:, 3] + quaternion[:, 1] * quaternion[:, 2]), 1 - 2 * (quaternion[:, 2] ** 2 + quaternion[:, 3] ** 2))
     return roll, pitch, yaw
+
 def plot_quaternion(quaternion,timestamps,control_type,terrain,leg):
     #plot quaternions vs time
     fig, axs = plt.subplots(4, 1, figsize=(18, 10))
@@ -319,7 +320,6 @@ def plot_time_differences(control_type,terrain,leg):
     df = pd.read_csv(filename)
     stance = df['stance'].values
     swing = df['swing'].values
-    print(stance,swing)
     fig = plt.figure()
     ax = fig.add_subplot(111)
     

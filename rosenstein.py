@@ -1,5 +1,23 @@
 import numpy as np
+import matplotlib.pyplot as plt
+def plot_reconstructed_data(data):  
+    
+    
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.scatter(data[:, 0], data[:, 1], data[:, 2])
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
 
+    ax.scatter(data[:, 3], data[:, 4], data[:, 5], color='red')
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+
+
+    
+    plt.show()
 def reconstruction(data, tau, m):
     """
     Reconstruct the data using time delay embedding.
@@ -113,6 +131,8 @@ def lyapunov(data, tau, m, min_steps, t_0, t_f, delta_t):
         ndarray: The mean log distances.
     """
     reconstructed_data = reconstruction(data, tau, m)
+    print(reconstructed_data.shape)
+    #plot_reconstructed_data(reconstructed_data)
     neighbors_index = find_closest_vectors(reconstructed_data, min_steps, t_f)
     mean_log_distance = []
     times = []
