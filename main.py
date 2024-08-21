@@ -1,9 +1,13 @@
 import pandas as pd
 import lyapunov_final as lyap
 import numpy as np
-import truncate as tr
+import process_data as tr
 import state_space as ss
 import psd as psd
+import filename_generation as fg
+import fft as fft
+import process_data as pr_d
+import create_directories as cd
 
 #!/path/to/venv python3
 
@@ -22,59 +26,60 @@ def main():
     tolerance = 0.05*np.pi  # Tolerance for truncation and re-truncation
 
     # Initialize lists to store results
-    neural_exponents = []  # List to store neural control Lyapunov exponents
-    predefined_exponents = []  # List to store predefined control Lyapunov exponents
-    neural_terrains= []  # List to store neural control terrains
-    predefined_terrains = []  # List to store predefined control terrains
+    lyapunov_exponents = []  # List to store Lyapunov exponents
+    legs = []  # List to store leg numbers
 
 
     # Keep track of PSDs (Power Spectral Densities)
-    psds_neural = []  # List to store neural control PSDs
-    psds_predefined = []  # List to store predefined control PSDs
+    psds=[]
 
-    # Read data from a CSV file
-    df = pd.read_csv("2_raw_data/running_info.csv")
-    data = df.to_numpy()
+    # # Read data from a CSV file
+    # df = pd.read_csv("1_clean_data/running_info.csv")
+    # data = df.to_numpy()
 
-    # Process each file in the data
+    data = list(range(1, 7))
+
+    #Process the data
     for file in data:
-        print(f"Processing data for {file[0]} control on {file[1]} terrain (leg {file[2]})")
-        
-        # Store frequencies
-        if file[1] == "Neural":
-            neural_terrains.append(file[0])
-        else:
-            predefined_terrains.append(file[0])
-        #truncate the data
-        tr.retruncate(file[0], file[1], file[2], file[3],file[4])
+        print("Processing Leg: ", file)
+        # Read data from a CSV file
+        df = pd.read_csv(fg.filename_clean(file))
+        data = df.to_numpy()
 
-        ss.plot_time_differences(file[0], file[1], file[2])
+        # Calculate the time differences between each timestamp
+        time_diff = np.diff(data[:, 0])
 
-        # Calculate Lyapunov exponents for the data
+        # Calculate the mean time difference
+        delta_t = np.mean(time_diff)
+        print("Mean time difference: ", delta_t)
 
-        lyap.exponent(tau, m, min_steps, epsilon, plotting_0, plotting_final,
-                      delta_t, force_minsteps, neural_exponents,predefined_exponents ,file[0], file[1], file[2])
-        
-        # # Calculate PSDs for the data
-        # psd.main(psds_neural,psds_predefined, file[0], file[1], file[2])
+        #Plotting Data
+        print("Plotting Data")
+        ss.plot_data(file)
+
+        # Calculate the Lyapunov exponents
+        print("Calculating Lyapunov Exponents")
+        lyap.exponent(tau, m, min_steps, epsilon, plotting_0, plotting_final, delta_t, force_minsteps, lyapunov_exponents, file)
+
+        # Calculate the PSD
+        print("Calculating PSD")
+        psd.main(psds, file)
+
+        # Calculate the FFT
+        print("Calculating FFT")
+        fft.main(file)
+
+        # Append the leg number to the list
+        legs.append(file)
 
     # Plot the Lyapunov exponents
-    print("plotting lyapunov exponents")
-    lyap.plot_exponents(predefined_exponents, neural_exponents, neural_terrains)
+    print("Plotting Lyapunov Exponents")
+    lyap.plot_exponents(lyapunov_exponents, legs)
 
-    # # Plot the PSDs
-    # print("plotting psdss")
-    # psd.plot_psd(psds_neural, psds_predefined, neural_terrains)
-
-    # # Save the results to CSV files
-    # print("saving data")
-    # data = pd.DataFrame(np.column_stack((predefined_terrains, predefined_exponents)),
-    #                     columns=['frequency', 'exponent'])
-    # data.to_csv("3_results/Flat/Flat_exponents.csv", index=False)
-
-    # data = pd.DataFrame(np.column_stack((hill_trial, hill_exponents)))
-    # data.to_csv("3_results/Hill/Hill_exponents.csv", index=False)
-    
+    #plot the PSDs
+    print("Plotting PSDs")
+    psd.plot_psd(psds, legs)
+        
 
 
 if __name__ == "__main__":

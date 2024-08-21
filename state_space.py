@@ -337,6 +337,20 @@ def plot_time_differences(control_type,terrain,leg):
     plt.clf()
     plt.close()
 
+def plot_data(leg):
+    df = pd.read_csv(fg.filename_clean(leg))
+    data = df.to_numpy()
+    times = data[:, 0]
+    values = data[:, 1]
+    plt.plot(times, values)
+    plt.xlabel('Time')
+    plt.ylabel('Force')
+    plt.title('Force vs. Time')
+    plt.savefig(fg.store_clean_data(leg) + 'force_vs_time.png')
+    plt.clf()
+    plt.close()
+    
+
 # Main function
 def main(control_type,terrain,leg):
     # Generate the file path based on the disturbance and control type

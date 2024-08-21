@@ -28,7 +28,7 @@ def set_axis_style(ax, labels):
     ax.set_xticks(np.arange(1, len(labels) + 1), labels=labels)  # Set the tick positions and labels for the x-axis
     ax.set_xlim(0.25, len(labels) + 0.75)  # Set the limits of the x-axis
 
-def plot_psd(psds_neural, psds_predefined, disturbances):
+def plot_psd(psds,legs):
     """
     Function to plot the PSD*Freq for Z-Acceleration vs Frequency.
     Args:
@@ -39,16 +39,15 @@ def plot_psd(psds_neural, psds_predefined, disturbances):
     fig, ax = plt.subplots(1, 1, figsize=(10, 5))  # Create a figure and axes object
     
     # Add violin plots for neural and predefined control
-    add_label(ax.violinplot(psds_neural, side='high', showmeans=False, showmedians=True, showextrema=False), "Neural")
-    add_label(ax.violinplot(psds_predefined, side='low', showmeans=False, showmedians=True, showextrema=False), "Predefined")
+    add_label(ax.violinplot(psds, side='high', showmeans=False, showmedians=True, showextrema=False), "Neural")
     
     ax.legend(*zip(*labels), loc=9)  # Add legend using the labels list
     ax.set_xlabel("Disturbance")  # Set x-axis label
     ax.set_ylabel("PSD*Freq")  # Set y-axis label
-    set_axis_style(ax, disturbances)  # xSet style for x-axis
+    set_axis_style(ax, legs)  # xSet style for x-axis
     ax.set_title("PSD*Freq for Z-Acceleration vs Frequency")  # Set title for the plot
     
-    fig.savefig("3_results/psd.png")  # Save the figure as an image
+    fig.savefig("2_results/psd.png")  # Save the figure as an image
     plt.clf()  # Clear the current figure
     plt.close()  # Close the figure
 
@@ -66,7 +65,7 @@ def calc(data):
     f, Pxx = welch(time_series)  # Calculate the PSD using Welch's method
     return f, Pxx  # Return the frequencies and PSD
 
-def main(psds_neural, psds_predefined, control_type,terrain,leg):
+def main(psds, leg):
     """
     Main function to process the data and generate the PSD plot.
     Args:
@@ -75,13 +74,10 @@ def main(psds_neural, psds_predefined, control_type,terrain,leg):
         disturbance (str): Disturbance label.
         control_type (str): Control type (either "Neural" or "Predefined").
     """
-    filename = fg.filename_clean(control_type,terrain,leg)  # Generate the filename based on disturbance and control type
+    filename = fg.filename_clean(leg)  # Generate the filename based on disturbance and control type
     df = pd.read_csv(filename)  # Read the data from the CSV file
-    pdata = df[['az']]  # Extract the 'az' column from the DataFrame
+    pdata = df['force']  # Extract the 'az' column from the DataFrame
     data = pdata.values  # Convert the DataFrame to a numpy array
     f, Pxx = calc(data)  # Calculate the PSD using Welch's method
     
-    if control_type == "Predefined":
-        psds_predefined.append(Pxx * f)  # Multiply the PSD by the frequencies and append to the predefined control list
-    else:
-        psds_neural.append(Pxx * f)  # Multiply the PSD by the frequencies and append to the neural control list
+    psds.append(Pxx*f)  # Append the PSD*Freq value to the list

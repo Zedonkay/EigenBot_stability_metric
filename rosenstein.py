@@ -131,7 +131,6 @@ def lyapunov(data, tau, m, min_steps, t_0, t_f, delta_t):
         ndarray: The mean log distances.
     """
     reconstructed_data = reconstruction(data, tau, m)
-    print(reconstructed_data.shape)
     #plot_reconstructed_data(reconstructed_data)
     neighbors_index = find_closest_vectors(reconstructed_data, min_steps, t_f)
     mean_log_distance = []
