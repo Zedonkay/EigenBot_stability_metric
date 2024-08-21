@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 def main(leg):
     """
-    Function to calculate the Power Spectral Density (PSD) for a given leg.
+    Function to calculate the FFT for a given leg.
     Args:
         leg (int): The leg number.
     """
