@@ -1,73 +1,135 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from scipy.signal import welch
 import filename_generation as fg
 import rosenstein
 import kantz
 
-def plot_growth_factors(times, lyap_exponents,fn,type,t_0,t_f):
-    """Plot Lyapunov exponents."""
-    ax = plt.plot(times,lyap_exponents,label="Average divergence", color="blue")
-    plt.plot(times[t_0:t_f], fn(times[t_0:t_f]),label=f"Least Squares Line", color="red")
+import matplotlib.pyplot as plt
+
+def plot_growth_factors(times, lyap_exponents, fn, date, terrain, trial, t_0, t_f):
+    """
+    Plot the growth factors of Lyapunov exponents over time.
+
+    Parameters:
+    - times: array-like, time values
+    - lyap_exponents: array-like, Lyapunov exponents
+    - fn: function, least squares line function
+    - date: str, date of the data
+    - terrain: str, type of terrain
+    - trial: int, trial number
+    - t_0: int, starting index for plotting
+    - t_f: int, ending index for plotting
+    """
+    ax = plt.plot(times, lyap_exponents, label="Average divergence", color="blue")
+    plt.plot(times[t_0:t_f], fn(times[t_0:t_f]), label=f"Least Squares Line", color="red")
     plt.legend()
     plt.xlabel("Time")
     plt.ylabel("Log mean divergence")
-    plt.title(f"Mean Divergence vs Time for {type}")
-    plt.savefig(fg.filename_store_data(type)+"lyapunov_plot.png")
+    plt.title(f"Mean Divergence vs time for {date} data on {terrain} terrain (trial {trial})")
+    plt.savefig(fg.filename_store_data(date, terrain, trial) + "lyapunov_plot.png")
     plt.clf()
     plt.close()
-def plot_exponents(types,exponents):
-    fig,ax=plt.subplots(1,1,figsize=(10,5))
-    ax.set_xticklabels(types)
-    ax.scatter(range(len(exponents)),exponents)
-    ax.set_xlabel("Type")
-    ax.set_ylabel("Exponent")
-    ax.set_title("Lyapunov Exponents for Z-Acceleration on Flat Terrain")
-    fig.savefig("3_Results/exponents.png")
 
+def plot_exponents(exponents, date, terrain, trial):
+    """
+    Plot the Lyapunov exponents for Z-Acceleration.
+
+    Parameters:
+    - trials: array-like, trial numbers
+    - exponents: array-like, Lyapunov exponents
+    - date: str, date of the data
+    - terrain: str, type of terrain
+    - trial: int, trial number
+    """
+    fig, ax = plt.subplots(1, 1, figsize=(10, 5))
+    print(np.shape(list(exponents.keys())), np.shape(list(exponents.values())))
+    ax.scatter(list(exponents.keys()), list(exponents.values()), label="Lyapunov Exponents", color="blue")
+    
+    ax.set_xlabel("Trial")
+    ax.set_ylabel("Exponent")
+    ax.set_title("Lyapunov Exponents for Z-Acceleration for " + date + " data on " + terrain + " terrain")
+    fig.savefig(fg.filename_big(date, terrain, trial) + "exponents.png")
 
 def welch_method(data):
-    data=np.reshape(data,(1,-1))
-    time_series= data[0]
+    """
+    Apply Welch's method to estimate the dominant frequency.
+
+    Parameters:
+    - data: array-like, input data
+
+    Returns:
+    - dominant frequency
+    """
+    # Reshape the data into a 1-dimensional array
+    data = np.reshape(data, (1, -1))
+    time_series = data[0]
+    
+    # Apply Welch's method to estimate the power spectral density
     f, Pxx = welch(time_series)
+    
+    # Calculate the normalized weights
     w = Pxx / np.sum(Pxx)
+    
+    # Calculate the mean frequency using the weighted average
     mean_frequency = np.average(f, weights=w)
+    
+    # Return the reciprocal of the mean frequency as the dominant frequency
     return 1 / mean_frequency
 
+def exponent(tau, m, min_steps, epsilon, plotting_0, plotting_final,
+             delta_t, force_minsteps, exponents, date, terrain, trial):
+    """
+    Calculate Lyapunov exponents.
 
-
-def exponent(tau,m,min_steps,epsilon,plotting_0,plotting_final,
-             delta_t, force_minsteps,types,exponents,type):
-    #load data and format
-    filename = fg.filename_clean_data(type)
+    Parameters:
+    - tau: int, time delay
+    - m: int, embedding dimension
+    - min_steps: int, minimum number of steps
+    - epsilon: float, threshold for divergence
+    - plotting_0: bool, whether to plot initial state
+    - plotting_final: bool, whether to plot final state
+    - delta_t: float, time step size
+    - force_minsteps: bool, whether to force minimum steps calculation
+    - trials: array-like, trial numbers
+    - exponents: array-like, Lyapunov exponents
+    - date: str, date of the data
+    - terrain: str, type of terrain
+    - trial: int, trial number
+    """
+    # Read the data from the file
+    filename = fg.filename_clean_data(date, terrain, trial)
     df = pd.read_csv(filename)
     pdata = df[['pz']]
-    data=pdata.values
-    #calculate lyapunov exponents with rosenstein method 
+    data = pdata.values
+    
+    # Calculate the minimum number of steps using Welch's method
     if not force_minsteps:
         min_steps = welch_method(data)
-    if min_steps%1 != 0:
-        min_steps = int(min_steps)+1
+    
+    # Round up the minimum number of steps
+    if min_steps % 1 != 0:
+        min_steps = int(min_steps) + 1
     else:
         min_steps = int(min_steps)
-    t_0 = 0
-    t_f = min_steps*2
-
-    times, data = rosenstein.lyapunov(data,tau,m,min_steps,plotting_0,plotting_final,delta_t)
-
-    # #calculate lyapunov exponents with kantz method
-    # times, data = kantz.lyapunov(data,tau,m,t_0,t_f,delta_t,epsilon)
     
-    #plot growth
-    coef=np.polyfit(times[t_0:t_f],data[t_0:t_f],1)
+    # Set the initial and final time indices for plotting
+    t_0 = 0
+    t_f = min_steps * 2
+    
+    # Calculate the Lyapunov exponents using Rosenstein's algorithm
+    times, data = rosenstein.lyapunov(data, tau, m, min_steps, plotting_0, plotting_final, delta_t)
+    
+    # Fit a least squares line to the Lyapunov exponents
+    coef = np.polyfit(times[t_0:t_f], data[t_0:t_f], 1)
     poly1d_fn = np.poly1d(coef)
-    plot_growth_factors(times, data,poly1d_fn,type,t_0,t_f)
-
-    #track exponents and frequencies
-    exponents.append(coef[0])
-    types.append(type)
-
-    #store times and data in csv
-    data = pd.DataFrame(np.column_stack((times,data)),columns=['times','Mean Divergence'])
-    data.to_csv(fg.filename_lyapunov(type),index=True)
+    
+    # Plot the growth factors of Lyapunov exponents over time
+    plot_growth_factors(times, data, poly1d_fn, date, terrain, trial, t_0, t_f)
+    
+    # Append the Lyapunov exponent and trial number to the respective lists
+    exponents.update({trial: coef[0]})
+    
+    # Save the Lyapunov exponents data to a CSV file
+    data = pd.DataFrame(np.column_stack((times, data)), columns=['times', 'Mean Divergence'])
+    data.to_csv(fg.filename_lyapunov(date, terrain, trial), index=True)

@@ -1,381 +1,352 @@
 import numpy as np
 import pandas as pd
 import filename_generation as fg
-import matplotlib.pyplot as plt
 from matplotlib import cm
 
+import matplotlib.pyplot as plt
 
-
-
+# Function to import data from a CSV file
 def import_data(file_path):
-    # Read CSV file
+    # Read the CSV file into a pandas DataFrame
     df = pd.read_csv(file_path, delimiter=',')
+    
+    
+    # Extract the columns for timestamps, position, quaternion, velocity, acceleration, angular velocity, and angular acceleration
+    timestamps = df['timestamp'] 
+    pos_x = df['px']
+    pos_y = df['py']
+    pos_z = df['pz']
+    quaternion = df[['ox', 'oy', 'oz', 'ow']].values
+    vel_x = df['vx']
+    vel_y = df['vy']
+    vel_z = df['vz']
+    acc_x = df['ax']
+    acc_y = df['ay']
+    acc_z = df['az']
+    wx = df['wx']
+    wy = df['wy']
+    wz = df['wz']
+    aa_x = df['aa_x']
+    aa_y = df['aa_y']
+    aa_z = df['aa_z']
+    roll = df['roll']
+    pitch = df['pitch']
+    yaw = df['yaw']
+    forward_velocity = df['fw']
+    forward_velocity2= df['fw2']
+    
+    return df, timestamps, pos_x, pos_y, pos_z, quaternion, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z, wx, wy, wz, aa_x, aa_y, aa_z, roll, pitch, yaw,forward_velocity,forward_velocity2
 
-    # Extract data columns
-    time_offset = df.iloc[0, 0]
-    raw_timestamps = df.iloc[:, 0]
-    timestamps = raw_timestamps - time_offset
-    pos_x = df.iloc[:, 1]
-    pos_y = df.iloc[:, 2]
-    pos_z = df.iloc[:, 3]
-    quaternion = df.iloc[:, 4:8].values
-    vel_x=df['vx']
-    vel_y=df['vy']
-    vel_z=df['vz']
-    acc_x=df['ax']
-    acc_y=df['ay']
-    acc_z=df['az']
-
-    return df, timestamps, pos_x, pos_y, pos_z, quaternion, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z
-def find_displacement(pos_x,pos_y):
+# Function to calculate displacement
+def find_displacement(pos_x, pos_y):
+    # Calculate the displacement at each timestamp
     displacements = []
     for i in range(len(pos_x)):
-        displacements.append(np.linalg.norm(pos_x[i]-pos_x[len(pos_x)-1])+np.linalg.norm(pos_y[i]-pos_y[len(pos_y)-1]))
-    return displacements 
+        displacements.append(np.linalg.norm(pos_x[i] - pos_x[len(pos_x) - 1]) + np.linalg.norm(pos_y[i] - pos_y[len(pos_y) - 1]))
+    return displacements
+
+# Function to convert quaternion to Euler angles
 def quaternion_to_euler(quaternion):
-    # Convert quaternion to roll, pitch, yaw angles
-    roll = np.arctan2(2*(quaternion[:, 0]*quaternion[:, 1] + quaternion[:, 2]*quaternion[:, 3]), 1 - 2*(quaternion[:, 1]**2 + quaternion[:, 2]**2))
-    pitch = np.arcsin(2*(quaternion[:, 0]*quaternion[:, 2] - quaternion[:, 3]*quaternion[:, 1]))
-    yaw = np.arctan2(2*(quaternion[:, 0]*quaternion[:, 3] + quaternion[:, 1]*quaternion[:, 2]), 1 - 2*(quaternion[:, 2]**2 + quaternion[:, 3]**2))
+    # Convert the quaternion representation to Euler angles (roll, pitch, yaw)
+    roll = np.arctan2(2 * (quaternion[:, 0] * quaternion[:, 1] + quaternion[:, 2] * quaternion[:, 3]), 1 - 2 * (quaternion[:, 1] ** 2 + quaternion[:, 2] ** 2))
+    pitch = np.arcsin(2 * (quaternion[:, 0] * quaternion[:, 2] - quaternion[:, 3] * quaternion[:, 1]))
+    yaw = np.arctan2(2 * (quaternion[:, 0] * quaternion[:, 3] + quaternion[:, 1] * quaternion[:, 2]), 1 - 2 * (quaternion[:, 2] ** 2 + quaternion[:, 3] ** 2))
     return roll, pitch, yaw
-def find_lines(pos_x,tolerance):
-    lines = []
-    i=0
-    while i<len(pos_x)-2:
-        if pos_x[i+1]-pos_x[i]>tolerance:
-            current_line = []
-            current_line.append(i)
-            for j in range(i+1,len(pos_x)-1):
-                if pos_x[j+1]-pos_x[j]<0:
-                    current_line.append(j)
-                    break
-            lines.append(current_line)
-            i = j
-        i+=1
-    if(len( lines[len(lines)-1])<2):
-        lines.pop()
-    p_1 = (lines[0][0]+lines[0][1])/2
-    p_2 = (lines[len(lines)-1][0]+lines[len(lines)-1][1])/2
-    return int(round(p_1)),int(round(p_2))
-def find_top_peaks(pos_z):
-    peaks = []
-    for i in range(1,len(pos_z)-1):
-        if pos_z[i]>pos_z[i-1] and pos_z[i]>pos_z[i+1]:
-            if(len(pos_z)-i>50):
-                next_positions = pos_z[i:i+50]
-            else:
-                next_positions = pos_z[i:]
-            if(i>50):
-                previous_positions = pos_z[i-50:i]
-            else:
-                previous_positions = pos_z[:i]
-            if len(next_positions[next_positions>pos_z[i]])==0 and len(previous_positions[previous_positions>pos_z[i]])==0:
-                peaks.append(i)
-    peaks.append(len(pos_z)-1)
-    return peaks  
-def find_bottom_peaks(pos_z):
-    peaks = []
-    for i in range(1,len(pos_z)-1):
-        if pos_z[i]<pos_z[i-1] or pos_z[i]<pos_z[i+1]:
-            if(len(pos_z)-i>50):
-                next_positions = pos_z[i:i+50]
-            else:
-                next_positions = pos_z[i:]
-            if(i>50):
-                previous_positions = pos_z[i-50:i]
-            else:
-                previous_positions = pos_z[:i]
-            if len(next_positions[next_positions<pos_z[i]])==0 and len(previous_positions[previous_positions<pos_z[i]])==0:
-                peaks.append(i)
-    return peaks
-def compute_midpoints(bottom_peaks,top_peaks,pos_z):
-    midpoints = []
-    for i in range(min(len(top_peaks)-1,len(bottom_peaks)-1)):
-        midpoints.append(int((top_peaks[i]+bottom_peaks[i])/2))
-    midpoints.append(len(pos_z)-1)
-    midpoints = np.array(midpoints)
-    np.insert(midpoints,0,0)
-    return midpoints
 
-def rotate_data(data,min,max,initial_x):
-    vector = [data[max][0]-data[min][0],
-              data[max][1]-data[min][1],
-              data[max][2]-data[min][2]]
-    angle = np.arctan2(vector[1],vector[0])
-    rotated_data = []
-    rotation_matrix = np.array([[np.cos(angle), -np.sin(angle), 0],
-                                [np.sin(angle), np.cos(angle), 0],
-                                [0, 0, 1]])
-    for i in range(min,max):
-        current_data= np.dot(rotation_matrix,np.array([data[i][0],data[i][1],data[i][2]]))
-        current_data[0] = current_data[0]-initial_x
-        rotated_data.append(current_data)
-    rotated_data = np.array(rotated_data)
-    return rotated_data    
-
-def compute_plotting_points(data,bottom_peaks):
-    initial_x = data[bottom_peaks[0]][0]
-    for i in range(len(bottom_peaks)-1):
-        if i == 0:
-            rotated_data = rotate_data(data,bottom_peaks[i],bottom_peaks[i+1],initial_x)
-        else:
-            rotated_data = np.concatenate((rotated_data,rotate_data(data,bottom_peaks[i],bottom_peaks[i+1],initial_x)))
-    rotated_data = np.array(rotated_data)
-    return rotated_data[:,0],rotated_data[:,1],rotated_data[:,2]
-
-def plot_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z,acc_x,acc_y,acc_z, 
-            roll, pitch, yaw,type,midpoints):
-    # Plot individual 2D plots for pos_x, pos_y, pos_z, roll, pitch, yaw
-    fig, axs = plt.subplots(4, 3, figsize=(18, 10))
-    fig.suptitle('2D State Space Plots for ' + type)
-
-
+# Function to plot 2D linear state space
+def plot_linear_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z, date, terrain, trial, delta_t):
+    # Create a 3x3 grid of subplots
+    fig, axs = plt.subplots(3, 3, figsize=(18, 10))
+    fig.suptitle(f"2D Linear State Space Plot for {date} data on {terrain} terrain (trial {trial})")
+    # Plot position X vs. timestamp
     axs[0, 0].plot(timestamps, pos_x)
-    axs[0, 0].set_xlabel('Timestamp')
+    axs[0, 0].set_xlabel('Time (s)')
     axs[0, 0].set_ylabel('Position X')
-    axs[0, 0].set_title('Position X vs. Timestamp')
+    axs[0, 0].set_title('Position X vs. Time')
 
+    # Plot position Y vs. timestamp
     axs[0, 1].plot(timestamps, pos_y)
-    axs[0, 1].set_xlabel('Timestamp')
+    axs[0, 1].set_xlabel('Time (s)')
     axs[0, 1].set_ylabel('Position Y')
-    axs[0, 1].set_title('Position Y vs. Timestamp')
+    axs[0, 1].set_title('Position Y vs. Time')
 
+    # Plot position Z vs. timestamp
     axs[0, 2].plot(timestamps, pos_z)
-    axs[0, 2].set_xlabel('Timestamp')
+    axs[0, 2].set_xlabel('Time (s)')
     axs[0, 2].set_ylabel('Position Z')
-    axs[0, 2].set_title('Position Z vs. Timestamp')
+    axs[0, 2].set_title('Position Z vs. Time')
 
+    # Plot velocity X vs. timestamp
     axs[1, 0].plot(timestamps, vel_x)
-    axs[1, 0].set_xlabel('Timestamp')
+    axs[1, 0].set_xlabel('Time (s)')
     axs[1, 0].set_ylabel('Velocity X')
-    axs[1, 0].set_title('Velocity X vs. Timestamp')
+    axs[1, 0].set_title('Velocity X vs. Time')
 
+    # Plot velocity Y vs. timestamp
     axs[1, 1].plot(timestamps, vel_y)
-    axs[1, 1].set_xlabel('Timestamp')
+    axs[1, 1].set_xlabel('Time (s)')
     axs[1, 1].set_ylabel('Velocity Y')
-    axs[1, 1].set_title('Velocity Y vs. Timestamp')
+    axs[1, 1].set_title('Velocity Y vs. Time')
 
+    # Plot velocity Z vs. timestamp
     axs[1, 2].plot(timestamps, vel_z)
-    axs[1, 2].set_xlabel('Timestamp')
+    axs[1, 2].set_xlabel('Time (s)')
     axs[1, 2].set_ylabel('Velocity Z')
-    axs[1, 2].set_title('Velocity Z vs. Timestamp')
+    axs[1, 2].set_title('Velocity Z vs. Time')
 
-    # plot 2D accelerations on the third row of the same plot
+    # Plot acceleration X vs. timestamp
     axs[2, 0].plot(timestamps, acc_x)
-    axs[2, 0].set_xlabel('Timestamp')
+    axs[2, 0].set_xlabel('Time (s)')
     axs[2, 0].set_ylabel('Acceleration X')
-    axs[2, 0].set_title('Acceleration X vs. Timestamp')
+    axs[2, 0].set_title('Acceleration X vs. Time')
 
+    # Plot acceleration Y vs. timestamp
     axs[2, 1].plot(timestamps, acc_y)
-    axs[2, 1].set_xlabel('Timestamp')
+    axs[2, 1].set_xlabel('Time (s)')
     axs[2, 1].set_ylabel('Acceleration Y')
-    axs[2, 1].set_title('Acceleration Y vs. Timestamp')
+    axs[2, 1].set_title('Acceleration Y vs. Time')
 
+    # Plot acceleration Z vs. timestamp
     axs[2, 2].plot(timestamps, acc_z)
-    axs[2, 2].set_xlabel('Timestamp')
+    axs[2, 2].set_xlabel('Time (s)')
     axs[2, 2].set_ylabel('Acceleration Z')
-    axs[2, 2].set_title('Acceleration Z vs. Timestamp')
+    axs[2, 2].set_title('Acceleration Z vs. Time')
 
-    # plot 2D angles on the fourth row of the same plot
-    axs[3, 0].plot(timestamps, roll)
-    axs[3, 0].set_xlabel('Timestamp')
-    axs[3, 0].set_ylabel('Roll (rad)')
-    axs[3, 0].set_title('Roll vs. Timestamp')
-
-    axs[3, 1].plot(timestamps, pitch)
-    axs[3, 1].set_xlabel('Timestamp')
-    axs[3, 1].set_ylabel('Pitch (rad)')
-    axs[3, 1].set_title('Pitch vs. Timestamp')
-
-    axs[3, 2].plot(timestamps, yaw)
-    axs[3, 2].set_xlabel('Timestamp')
-    axs[3, 2].set_ylabel('Yaw (rad)')
-    axs[3, 2].set_title('Yaw vs. Timestamp')
-
-
-
+    # Adjust the layout and save the plot
     plt.tight_layout()
-    plt.savefig(fg.filename_store_data(type) +"2d_state_space.png")
+    plt.savefig(fg.filename_store_data(date, terrain, trial) + "2d_linear_state_space.svg", format = "svg")
     plt.clf()
     plt.close()
 
+# Function to plot 2D angular state space
+def plot_angular_2d(timestamps, roll, pitch, yaw, wx, wy, wz, aa_x, aa_y, aa_z, date, terrain, trial, delta_t):
+    # Create a 3x3 grid of subplots
+    fig, axs = plt.subplots(3, 3, figsize=(18, 10))
+    fig.suptitle(f"2D Angular State Space Plot for {date} data on {terrain} terrain (trial {trial})")
+    # Plot roll vs. timestamp
+    axs[0, 0].plot(timestamps, roll)
+    axs[0, 0].set_xlabel('Time (s)')
+    axs[0, 0].set_ylabel('Roll')
+    axs[0, 0].set_title('Roll vs. Time')
 
-#plot 3D phase space plot for velocity
-def plot_3d_phase_space_vel(vel_x, vel_y, vel_z,frequency,test, control_type):
-    # Plot 3D phase space plot
+    # Plot pitch vs. timestamp
+    axs[0, 1].plot(timestamps, pitch)
+    axs[0, 1].set_xlabel('Time (s)')
+    axs[0, 1].set_ylabel('Pitch')
+    axs[0, 1].set_title('Pitch vs. Time')
+
+    # Plot yaw vs. timestamp
+    axs[0, 2].plot(timestamps, yaw)
+    axs[0, 2].set_xlabel('Time (s)')
+    axs[0, 2].set_ylabel('Yaw')
+    axs[0, 2].set_title('Yaw vs. Time')
+
+    # Plot angular velocity X vs. timestamp
+    axs[1, 0].plot(timestamps, wx)
+    axs[1, 0].set_xlabel('Time (s)')
+    axs[1, 0].set_ylabel('Angular Velocity X')
+    axs[1, 0].set_title('Angular Velocity X vs. Time')
+
+    # Plot angular velocity Y vs. timestamp
+    axs[1, 1].plot(timestamps, wy)
+    axs[1, 1].set_xlabel('Time (s)')
+    axs[1, 1].set_ylabel('Angular Velocity Y')
+    axs[1, 1].set_title('Angular Velocity Y vs. Time')
+
+    # Plot angular velocity Z vs. timestamp
+    axs[1, 2].plot(timestamps, wz)
+    axs[1, 2].set_xlabel('Time (s)')
+    axs[1, 2].set_ylabel('Angular Velocity Z')
+    axs[1, 2].set_title('Angular Velocity Z vs. Time')
+
+    # Plot angular acceleration X vs. timestamp
+    axs[2, 0].plot(timestamps, aa_x)
+    axs[2, 0].set_xlabel('Time (s)')
+    axs[2, 0].set_ylabel('Angular Acceleration X')
+    axs[2, 0].set_title('Angular Acceleration X vs. Time')
+
+    # Plot angular acceleration Y vs. timestamp
+    axs[2, 1].plot(timestamps, aa_y)
+    axs[2, 1].set_xlabel('Time (s)')
+    axs[2, 1].set_ylabel('Angular Acceleration Y')
+    axs[2, 1].set_title('Angular Acceleration Y vs. Time')
+
+    # Plot angular acceleration Z vs. timestamp
+    axs[2, 2].plot(timestamps, aa_z)
+    axs[2, 2].set_xlabel('Time (s)')
+    axs[2, 2].set_ylabel('Angular Acceleration Z')
+    axs[2, 2].set_title('Angular Acceleration Z vs. Time')
+
+    # Adjust the layout and save the plot
+    plt.tight_layout()
+    plt.savefig(fg.filename_store_data(date, terrain, trial) + "2d_angular_state_space.svg", format = "svg")
+    plt.clf()
+    plt.close()
+
+# Function to plot 3D phase space plot for velocity
+def plot_3d_phase_space_vel(vel_x, vel_y, vel_z, date, terrain, trial):
+    # Create a 3D plot
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
+    
+    # Plot the trajectory in 3D space
     ax.plot(vel_x, vel_y, vel_z)
     ax.set_xlabel('Velocity X')
     ax.set_ylabel('Velocity Y')
     ax.set_zlabel('Velocity Z')
-    if control_type == "centralised":
-        plt.title(f'3D Phase Space Plot for Centralised Control at {frequency} Hz')
-    else:
-        plt.title(f'3D Phase Space Plot for Distributed Control at {frequency} Hz')
-    plt.savefig(fg.filename_store_data(data)+ "3d_phase_space_vel.png")
+    plt.title(f'3D Phase Space Plot for {date} data on {terrain} terrain (trial {trial})')
+    
+    # Save and close the plot
+    plt.savefig(fg.filename_store_data(date, terrain, trial) + "3d_phase_space_vel.svg", format = "svg")
     plt.clf()
-    plt.close
+    plt.close()
 
-def plot_3d_phase_space_pos(pos_x, pos_y, pos_z,frequency, test,control_type,bottom_peaks,top_peaks):
-    # Plot 3D phase space plot
+# Function to plot 3D phase space plot for position
+def plot_3d_phase_space_pos(pos_x, pos_y, pos_z, date, terrain, trial):
+    # Create a 3D plot
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
+    
+    # Plot the trajectory in 3D space
     ax.plot(pos_x, pos_y, pos_z)
     ax.set_xlabel('Position X')
     ax.set_ylabel('Position Y')
     ax.set_zlabel('Position Z')
-    if control_type == "centralised":
-        plt.title(f'3D Phase Space Plot for Centralised Control at {frequency} Hz')
-    else:
-        plt.title(f'3D Phase Space Plot for Distributed Control at {frequency} Hz')
-    plt.savefig(fg.filename_store_data(type)+"3d_state_space.png")
+    plt.title(f'3D Phase Space Plot for {date} data on {terrain} terrain (trial {trial})')
+    
+    # Save and close the plot
+    plt.savefig(fg.filename_store_data(date, terrain, trial) + "3d_state_space.svg", format = "svg")
     plt.clf()
     plt.close()
-def plot_rotated_helix(pos_x, pos_y, pos_z,data,bottom_peaks):
-    # Plot 3D phase space plot
-    bottom_peaks = np.array(bottom_peaks)
-    bottom_peaks = bottom_peaks[bottom_peaks<min(len(pos_x),len(pos_y),len(pos_z))]
 
-    fig, axs = plt.subplots(2, 2, figsize=(18, 10))
-    fig.suptitle('Rotated Helix Plot')
-
-    axs[0, 0].plot(pos_x, pos_y)
-    axs[0, 0].scatter(pos_x[bottom_peaks],pos_y[bottom_peaks])
-    axs[0, 0].set_xlabel('Position X')
-    axs[0, 0].set_ylabel('Position Y')
-    axs[0, 0].set_title('Position X vs. Position Y')
-
-    axs[0, 1].plot(pos_x, pos_z)
-    axs[0,1].scatter(pos_x[bottom_peaks],pos_z[bottom_peaks])
-    axs[0, 1].set_xlabel('Position X')
-    axs[0, 1].set_ylabel('Position Z')
-    axs[0, 1].set_title('Position X vs. Position Z')
-
-    axs[1, 0].plot(pos_y, pos_z)
-    axs[1,0].scatter(pos_y[bottom_peaks],pos_z[bottom_peaks])
-    axs[1, 0].set_xlabel('Position Y')
-    axs[1, 0].set_ylabel('Position Z')
-    axs[1, 0].set_title('Position Y vs. Position Z')
-
-    axs[1,1]=plt.subplot(224,projection='3d')
-    axs[1,1].scatter(pos_x[bottom_peaks],pos_y[bottom_peaks],pos_z[bottom_peaks])
-    axs[1,1].plot(pos_x,pos_y,pos_z)
-    axs[1,1].set_xlabel('Position X')
-    axs[1,1].set_ylabel('Position Y')
-    axs[1,1].set_zlabel('Position Z')
-
-    plt.tight_layout()
-    plt.savefig(fg.filename_store_data(data)+"rotated_helix.png")
-
-def plot_original_helix(pos_x, pos_y, pos_z,data,bottom_peaks):
-    # Plot 3D phase space plot
-    point_1 = bottom_peaks[0]
-    point_2 = bottom_peaks[len(bottom_peaks)-3]
-    x_arrow = [pos_x[point_2],pos_x[point_1]]
-    y_arrow = [pos_y[point_2],pos_y[point_1]]
-    z_arrow = [pos_z[point_2],pos_z[point_1]]
-
-    fig, axs = plt.subplots(2, 2, figsize=(18, 10))
-    fig.suptitle('Original Helix Plot for '+data)
-
-    axs[0, 0].plot(pos_x, pos_y)
-    axs[0, 0].scatter(pos_x[bottom_peaks],pos_y[bottom_peaks])
-    axs[0, 0].set_xlabel('Position X')
-    axs[0, 0].set_ylabel('Position Y')
-    axs[0, 0].set_title('Position X vs. Position Y')
-
-    axs[0, 1].plot(pos_x, pos_z)
-    axs[0,1].scatter(pos_x[bottom_peaks],pos_z[bottom_peaks])
-    axs[0, 1].set_xlabel('Position X')
-    axs[0, 1].set_ylabel('Position Z')
-    axs[0, 1].set_title('Position X vs. Position Z')
-
-    axs[1, 0].plot(pos_y, pos_z)
-    axs[1,0].scatter(pos_y[bottom_peaks],pos_z[bottom_peaks])
-    axs[1, 0].set_xlabel('Position Y')
-    axs[1, 0].set_ylabel('Position Z')
-    axs[1, 0].set_title('Position Y vs. Position Z')
-
-    axs[1,1]=plt.subplot(224,projection='3d')
-    axs[1,1].scatter(pos_x[bottom_peaks],pos_y[bottom_peaks],pos_z[bottom_peaks])
-    axs[1,1].plot(pos_x,pos_y,pos_z)
-    axs[1,1].set_xlabel('Position X')
-    axs[1,1].set_ylabel('Position Y')
-    axs[1,1].set_zlabel('Position Z')
-
-    plt.tight_layout()
-    plt.savefig(fg.filename_store_data(data)+"original_helix.png")
-
-
-
-def plot_3d_euler_state_space(timestamps, roll, pitch, yaw,data):
-    # Plot 3D Euler state space plot
+# Function to plot 3D Euler state space
+def plot_3d_euler_state_space(timestamps, roll, pitch, yaw, date, terrain, trial):
+    # Create a 3D plot
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
+    
+    # Plot the trajectory in 3D space
     ax.plot(roll, pitch, yaw)
     ax.set_xlabel('Roll (rad)')
     ax.set_ylabel('Pitch (rad)')
     ax.set_zlabel('Yaw (rad)')
-    plt.title('3D Euler State Space Plot for ' + type)
-    plt.savefig(fg.filename_store_data(type)+"3d_euler_state_space.png")
+    plt.title(f'3D Euler State Space Plot for {date} data on {terrain} terrain (trial {trial})')
+    
+    # Save and close the plot
+    plt.savefig(fg.filename_store_data(date, terrain, trial) + "3d_euler_state_space.svg", format = "svg")
     plt.clf()
     plt.close()
 
-def plot_gait(plot_x,plot_y,plot_z,bottom_peaks,type):
+# Function to plot 3D angular velocities
+def plot_3d_angular_velocities(timestamps, ang_x, ang_y, ang_z, date, terrain, trial):
+    # Create a 3D plot
     fig = plt.figure()
-    ax = fig.add_subplot(111)
-
-    for i in range(len(bottom_peaks)-1):
-        color = cm.rainbow(np.linspace(0,1,bottom_peaks[i+1]-bottom_peaks[i]))
-        for j in range(bottom_peaks[i],bottom_peaks[i+1]-1,4):
-            ax.plot(plot_x[j:j+5],plot_y[j:j+5],color=color[j-bottom_peaks[i]])
-    ax.set_xlabel('Transverse Plane')
-    ax.set_ylabel('Frontal Plane')
-    plt.title(f"Gait Cycle for {type}")
+    ax = fig.add_subplot(111, projection='3d')
     
-    plt.savefig(fg.filename_store_data(type)+"gait.png")
+    # Plot the trajectory in 3D space
+    ax.plot(ang_x, ang_y, ang_z)
+    ax.set_xlabel('Angular Velocity X')
+    ax.set_ylabel('Angular Velocity Y')
+    ax.set_zlabel('Angular Velocity Z')
+    plt.title(f'3D Angular Velocity Plot for {date} data on {terrain} terrain (trial {trial})')
+    
+    # Save and close the plot
+    plt.savefig(fg.filename_store_data(date, terrain, trial) + "3d_angular_velocities.svg", format = "svg")
     plt.clf()
     plt.close()
 
-def main(type):
-    # Generate file path
-    file_path = fg.filename_clean_data(type)
-
-    # Import data
-    df, timestamps, pos_x, pos_y, pos_z, quaternion, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z = import_data(file_path)
-
-    # Convert quaternion to roll, pitch, yaw angles
-    roll, pitch, yaw = quaternion_to_euler(quaternion)
+# Function to plot 3D angular accelerations
+def plot_3d_angular_accelerations(timestamps, ang_x, ang_y, ang_z, date, terrain, trial):
+    # Create a 3D plot
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
     
-   
-
-    # find peaks
-    top_peaks = find_top_peaks(pos_z)
-    bottom_peaks = find_bottom_peaks(pos_z)
-    midpoints = compute_midpoints(bottom_peaks,top_peaks,pos_z)
-
-    #compute plotting points
-    plot_x,plot_y,plot_z = compute_plotting_points(np.column_stack((pos_x,pos_y,pos_z)),bottom_peaks)
-
+    # Plot the trajectory in 3D space
+    ax.plot(ang_x, ang_y, ang_z)
+    ax.set_xlabel('Angular Acceleration X')
+    ax.set_ylabel('Angular Acceleration Y')
+    ax.set_zlabel('Angular Acceleration Z')
+    plt.title(f'3D Angular Acceleration Plot for {date} data on {terrain} terrain (trial {trial})')
     
+    # Save and close the plot
+    plt.savefig(fg.filename_store_data(date, terrain, trial) + "3d_angular_accelerations.svg", format = "svg")
+    plt.clf()
+    plt.close()
 
-    # Plot 2D positions and angles
-    plot_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, 
-            acc_x,acc_y,acc_z,roll, pitch, yaw, type,midpoints)
+# Function to plot gait cycle
+def plot_gait(roll, yaw, date, terrain, trial):
+    plt.figure()
+    plt.plot(roll, yaw)
+    plt.xlabel('Roll')
+    plt.ylabel('Yaw')
+    plt.title(f"Gait for {date} data on {terrain} terrain (trial {trial})")
 
-    # Plot 3D phase space
-    plot_3d_phase_space_pos(pos_x, pos_y, pos_z,type,bottom_peaks,top_peaks)
-    plot_3d_phase_space_vel(vel_x, vel_y, vel_z,type)
+    plt.savefig(fg.filename_store_data(date, terrain, trial) + "gait.svg", format = "svg")
+    plt.clf()
+    plt.close()
 
+def plot_forward_velocity(timestamps,forward_velocity,date,terrain,trial):
+    plt.figure()
+    plt.plot(timestamps,forward_velocity)
+    plt.xlabel('Time (s)')
+    plt.ylabel('Forward Velocity')
+    plt.title(f'Forward Velocity for {date} data on {terrain} terrain (trial {trial}) (mean = {np.mean(forward_velocity):.2f})')
+    plt.savefig(fg.filename_store_data(date,terrain,trial)+"forward_velocity.svg", format = "svg")
+    plt.clf()
+    plt.close()
+
+
+def plot_forward_velocity2(timestamps,forward_velocity,date,terrain,trial):
+    plt.figure()
+    plt.plot(timestamps,forward_velocity)
+    plt.xlabel('Time (s)')
+    plt.ylabel('Forward Velocity')
+    plt.title(f'Forward Velocity for {date} data on {terrain} terrain (trial {trial}) (mean = {np.mean(forward_velocity):.2f})')
+    plt.savefig(fg.filename_store_data(date,terrain,trial)+"forward_velocity2.svg", format = "svg")
+    plt.clf()
+    plt.close()
+
+# Main function
+def main(date, terrain, trial, delta_t,forward_velocities,forward_velocities_2):
+    # Generate the file path based on the disturbance and control type
+    file_path = fg.filename_clean_data(date, terrain, trial)
+    
+    # Import data from the CSV file
+    df, timestamps, pos_x, pos_y, pos_z, quaternion, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z, wx, wy, wz, aa_x, aa_y, aa_z, roll, pitch, yaw,forward_velocity,forward_velocity2 = import_data(file_path)
+    
+    # Plot 2D linear state space
+    plot_linear_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z, date, terrain, trial, delta_t)
+    
+    # Plot 2D angular state space
+    plot_angular_2d(timestamps, roll, pitch, yaw, wx, wy, wz, aa_x, aa_y, aa_z, date, terrain, trial, delta_t)
+
+    # Plot 3D phase space for position
+    plot_3d_phase_space_pos(pos_x, pos_y, pos_z, date, terrain, trial)
+    
+    # Plot 3D phase space for velocity
+    plot_3d_phase_space_vel(vel_x, vel_y, vel_z, date, terrain, trial)
+    
     # Plot 3D Euler state space
-    plot_3d_euler_state_space(timestamps, roll, pitch, yaw,type)
+    plot_3d_euler_state_space(timestamps, roll, pitch, yaw, date, terrain, trial)
     
-    #plot 2d gait cycle
-    plot_gait(plot_x,plot_y,plot_z,bottom_peaks, type)
+    # Plot 3D angular velocities
+    plot_3d_angular_velocities(timestamps, wx, wy, wz, date, terrain, trial)
+    
+    # Plot 3D angular accelerations
+    plot_3d_angular_accelerations(timestamps, aa_x, aa_y, aa_z, date, terrain, trial)
 
-    #plot rotated data
-    plot_rotated_helix(plot_x,plot_y,plot_z,type,bottom_peaks)
+    # Plot gait
+    plot_gait(roll, yaw, date, terrain, trial)
 
-    #plot original type
-    plot_original_helix(pos_x, pos_y, pos_z,type,bottom_peaks)
+    #plot forward velocity
+    plot_forward_velocity(timestamps,forward_velocity,date,terrain,trial)
+
+    #plot forward velocity2
+    plot_forward_velocity2(timestamps,forward_velocity2,date,terrain,trial)
+
+    forward_velocities.update({trial:np.mean(forward_velocity)})
+    forward_velocities_2.update({trial:np.mean(forward_velocity2)})
+
+
+
+    
