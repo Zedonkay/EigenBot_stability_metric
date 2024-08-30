@@ -261,14 +261,13 @@ def calculate_forward_vector2(quaternion):
     Returns:
     - forward_vector (numpy.ndarray): The calculated forward vector.
     """
-    w, x, y, z = q
+    w, x, y, z = quaternion
     R = np.array([
         [1 - 2*y**2 - 2*z**2, 2*x*y - 2*z*w, 2*x*z + 2*y*w],
         [2*x*y + 2*z*w, 1 - 2*x**2 - 2*z**2, 2*y*z - 2*x*w],
         [2*x*z - 2*y*w, 2*y*z + 2*x*w, 1 - 2*x**2 - 2*y**2]
     ])
-    forward_vector = R[3]
-    print(forward_vector)
+    forward_vector = R[2]
 
     forward_vector = forward_vector / np.linalg.norm(forward_vector)
     

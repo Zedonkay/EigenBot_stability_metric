@@ -6,7 +6,7 @@
   <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
    <cc:Work>
     <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
-    <dc:date>2024-08-29T23:20:20.939119</dc:date>
+    <dc:date>2024-08-30T00:30:44.526420</dc:date>
     <dc:format>image/svg+xml</dc:format>
     <dc:creator>
      <cc:Agent>
@@ -3147,7 +3147,7 @@ L 265.502128 137.138554
 L 265.855672 136.943954 
 L 265.738308 136.522748 
 L 265.738308 136.522748 
-" clip-path="url(#pdfa9bf8fe5)" style="fill: none; stroke: #1f77b4; stroke-width: 1.5; stroke-linecap: square"/>
+" clip-path="url(#pff45e5048a)" style="fill: none; stroke: #1f77b4; stroke-width: 1.5; stroke-linecap: square"/>
    </g>
    <g id="text_22">
     <!-- 3D Euler State Space Plot for 27-Aug data on amputation_L3 terrain (trial 1) -->
@@ -3526,7 +3526,7 @@ z
   </g>
  </g>
  <defs>
-  <clipPath id="pdfa9bf8fe5">
+  <clipPath id="pff45e5048a">
    <rect x="103.104" y="41.472" width="266.112" height="266.112"/>
   </clipPath>
  </defs>
