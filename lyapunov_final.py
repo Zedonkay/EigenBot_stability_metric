@@ -7,7 +7,7 @@ import kantz
 
 import matplotlib.pyplot as plt
 
-def plot_growth_factors(times, lyap_exponents, fn, date, terrain, trial, t_0, t_f):
+def plot_growth_factors(times, lyap_exponents, fn, date, terrain, trial, t_0, t_f,coef):
     """
     Plot the growth factors of Lyapunov exponents over time.
 
@@ -22,12 +22,12 @@ def plot_growth_factors(times, lyap_exponents, fn, date, terrain, trial, t_0, t_
     - t_f: int, ending index for plotting
     """
     ax = plt.plot(times, lyap_exponents, label="Average divergence", color="blue")
-    plt.plot(times[t_0:t_f], fn(times[t_0:t_f]), label=f"Least Squares Line", color="red")
+    plt.plot(times[t_0:t_f], fn(times[t_0:t_f]), label=f"Least Squares Line (exponent = {coef})", color="red")
     plt.legend()
     plt.xlabel("Time")
     plt.ylabel("Log mean divergence")
     plt.title(f"Mean Divergence vs time for {date} data on {terrain} terrain (trial {trial})")
-    plt.savefig(fg.filename_store_data(date, terrain, trial) + "lyapunov_plot.png")
+    plt.savefig(fg.filename_store_data(date, terrain, trial) + "lyapunov_plot.svg", format="svg")
     plt.clf()
     plt.close()
 
@@ -49,7 +49,7 @@ def plot_exponents(exponents, date, terrain, trial):
     ax.set_xlabel("Trial")
     ax.set_ylabel("Exponent")
     ax.set_title("Lyapunov Exponents for Z-Acceleration for " + date + " data on " + terrain + " terrain")
-    fig.savefig(fg.filename_big(date, terrain, trial) + "exponents.png")
+    fig.savefig(fg.filename_big(date, terrain, trial) + "exponents.svg", format="svg")
 
 def welch_method(data):
     """
@@ -115,7 +115,8 @@ def exponent(tau, m, min_steps, epsilon, plotting_0, plotting_final,
     
     # Set the initial and final time indices for plotting
     t_0 = 0
-    t_f = min_steps * 2
+    t_f = min_steps
+    plotting_final = min_steps * 2
     
     # Calculate the Lyapunov exponents using Rosenstein's algorithm
     times, data = rosenstein.lyapunov(data, tau, m, min_steps, plotting_0, plotting_final, delta_t)
@@ -125,7 +126,7 @@ def exponent(tau, m, min_steps, epsilon, plotting_0, plotting_final,
     poly1d_fn = np.poly1d(coef)
     
     # Plot the growth factors of Lyapunov exponents over time
-    plot_growth_factors(times, data, poly1d_fn, date, terrain, trial, t_0, t_f)
+    plot_growth_factors(times, data, poly1d_fn, date, terrain, trial, t_0, t_f,coef[0])
     
     # Append the Lyapunov exponent and trial number to the respective lists
     exponents.update({trial: coef[0]})

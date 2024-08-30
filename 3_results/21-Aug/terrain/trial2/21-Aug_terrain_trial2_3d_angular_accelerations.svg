@@ -6,7 +6,7 @@
   <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
    <cc:Work>
     <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
-    <dc:date>2024-08-30T00:02:33.254969</dc:date>
+    <dc:date>2024-08-30T10:28:34.650954</dc:date>
     <dc:format>image/svg+xml</dc:format>
     <dc:creator>
      <cc:Agent>
@@ -3934,7 +3934,7 @@ L 259.699357 169.967098
 L 261.374634 170.880212 
 L 259.658583 169.945543 
 L 259.690345 169.959305 
-" clip-path="url(#p9431cf9292)" style="fill: none; stroke: #1f77b4; stroke-width: 1.5; stroke-linecap: square"/>
+" clip-path="url(#p9bbad096fd)" style="fill: none; stroke: #1f77b4; stroke-width: 1.5; stroke-linecap: square"/>
    </g>
    <g id="text_20">
     <!-- 3D Angular Acceleration Plot for 21-Aug data on terrain terrain (trial 2) -->
@@ -4171,7 +4171,7 @@ z
   </g>
  </g>
  <defs>
-  <clipPath id="p9431cf9292">
+  <clipPath id="p9bbad096fd">
    <rect x="103.104" y="41.472" width="266.112" height="266.112"/>
   </clipPath>
  </defs>

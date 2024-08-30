@@ -178,16 +178,16 @@ def main(date, terrain, trial, tolerance):
     
     #calculate forward velocity
     positions = df[['px', 'py', 'pz']].values
-    forward_velocities = calculate_forward_velocity(positions,quaternions,1)
+    forward_velocities = calculate_forward_velocity(positions,quaternions,1,times,date,terrain,trial)
     df['fw'] = forward_velocities
 
-    forward_velocities2= calculate_forward_velocity(positions,quaternions,2)
+    forward_velocities2= calculate_forward_velocity(positions,quaternions,2,times,date,terrain,trial)
     df['fw2'] = forward_velocities2
     
     # Save the processed data to a new CSV file
     df.to_csv(fg.filename_clean_data(date, terrain, trial), index=False)
 
-def calculate_forward_velocity(positions, quaternions,trial):
+def calculate_forward_velocity(positions, quaternions,version,times,date,terrain,trial):
     """
     Calculate the forward velocity of the robot based on positions and quaternions.
 
@@ -199,9 +199,13 @@ def calculate_forward_velocity(positions, quaternions,trial):
     - forward_velocities (numpy.ndarray): The calculated forward velocities.
     """
     forward_velocities = []
+    forward_vectors=[]
+    forward_vectors2=[]
     for i in range(len(positions)):
         if i == 0:
             forward_velocities.append(0)
+            forward_vectors.append(np.array([0, 0, 0]))
+            forward_vectors2.append(np.array([0, 0, 0]))
             continue
         # Get the current position and quaternion
         current_position = positions[i]
@@ -210,20 +214,41 @@ def calculate_forward_velocity(positions, quaternions,trial):
         # Get the previous position and quaternion
         previous_position = positions[i-1]
         previous_quaternion = quaternions[i-1]
+
+        # Get the current time
+        current_time = times[i]
+
+        # Get the previous time
+        previous_time = times[i-1]
         
         # Calculate the forward vector of the current orientation
-        if trial == 1:
+        if version == 1:
             forward_vector = calculate_forward_vector(current_quaternion)
+            forward_vectors.append(forward_vector)
         else:
             forward_vector = calculate_forward_vector2(current_quaternion)
+            forward_vectors2.append(forward_vector)
+
+        
+
         
         # Calculate the displacement vector between the current and previous positions
         displacement_vector = current_position - previous_position
         
         # Calculate the forward velocity by projecting the displacement vector onto the forward vector
-        forward_velocity = np.dot(displacement_vector, forward_vector)
+        forward_displacement = np.dot(displacement_vector, forward_vector)
+
+        #Calculate the forward velocity
+        forward_velocity = forward_displacement / (current_time - previous_time)
+
         
         forward_velocities.append(forward_velocity)
+    if version == 1:
+        df = pd.DataFrame(np.column_stack([times, forward_vectors]), columns=['timestamp', 'fx', 'fy', 'fz'])
+        df.to_csv(fg.filename_store_data(date,terrain,trial)+'forward_vectors.csv', index=False)
+    else:
+        df = pd.DataFrame(np.column_stack([times, forward_vectors2]), columns=['timestamp', 'fx', 'fy', 'fz'])
+        df.to_csv(fg.filename_store_data(date,terrain,trial)+'forward_vectors2.csv', index=False)
     
     return np.array(forward_velocities)
 
@@ -246,7 +271,8 @@ def calculate_forward_vector(quaternion):
         2 * (qy * qz - qw * qx),
         1 - 2 * (qx**2 + qy**2)
         ])
-
+    
+    # Normalize the forward vector
     forward_vector = forward_vector / np.linalg.norm(forward_vector)
     
     return forward_vector
