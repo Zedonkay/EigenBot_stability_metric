@@ -133,7 +133,7 @@ def main(date, terrain, trial, tolerance):
     - tolerance (float): The tolerance value.
     """
     # Generate the filename based on the input parameters
-    filename = fg.filename_raw_data(date, terrain, trial)
+    filename = fg.filename_clean_data(date, terrain, trial)
     
     # Read the raw data from the CSV file
     df = pd.read_csv(filename)
@@ -160,7 +160,7 @@ def main(date, terrain, trial, tolerance):
     df['roll'] = euler_angles[:, 0]
     df['pitch'] = euler_angles[:, 1]
     df['yaw'] = euler_angles[:, 2]
-    
+
     # Calculate the velocity components (vx, vy, vz) using gradient
     df['vx'] = np.gradient(df['px'], df['timestamp'])
     df['vy'] = np.gradient(df['py'], df['timestamp'])
@@ -176,36 +176,30 @@ def main(date, terrain, trial, tolerance):
     df['jy'] = np.gradient(df['ay'], df['timestamp'])
     df['jz'] = np.gradient(df['az'], df['timestamp'])
     
-    #calculate forward velocity
+    # Calculate forward velocity
     positions = df[['px', 'py', 'pz']].values
-    forward_velocities = calculate_forward_velocity(positions,quaternions,1,times,date,terrain,trial)
-    df['fw'] = forward_velocities
-
-    forward_velocities2= calculate_forward_velocity(positions,quaternions,2,times,date,terrain,trial)
-    df['fw2'] = forward_velocities2
+    forward_velocities = calculate_forward_velocity(positions, quaternions, times)
+    df['forward_velocity'] = forward_velocities
     
     # Save the processed data to a new CSV file
     df.to_csv(fg.filename_clean_data(date, terrain, trial), index=False)
 
-def calculate_forward_velocity(positions, quaternions,version,times,date,terrain,trial):
+def calculate_forward_velocity(positions, quaternions, times):
     """
     Calculate the forward velocity of the robot based on positions and quaternions.
 
     Parameters:
     - positions (numpy.ndarray): The positions of the robot.
     - quaternions (numpy.ndarray): The quaternions representing the orientation of the robot.
+    - times (numpy.ndarray): The corresponding times.
 
     Returns:
     - forward_velocities (numpy.ndarray): The calculated forward velocities.
     """
     forward_velocities = []
-    forward_vectors=[]
-    forward_vectors2=[]
     for i in range(len(positions)):
         if i == 0:
             forward_velocities.append(0)
-            forward_vectors.append(np.array([0, 0, 0]))
-            forward_vectors2.append(np.array([0, 0, 0]))
             continue
         # Get the current position and quaternion
         current_position = positions[i]
@@ -222,62 +216,22 @@ def calculate_forward_velocity(positions, quaternions,version,times,date,terrain
         previous_time = times[i-1]
         
         # Calculate the forward vector of the current orientation
-        if version == 1:
-            forward_vector = calculate_forward_vector(current_quaternion)
-            forward_vectors.append(forward_vector)
-        else:
-            forward_vector = calculate_forward_vector2(current_quaternion)
-            forward_vectors2.append(forward_vector)
-
-        
-
+        forward_vector = calculate_forward_vector(current_quaternion)
         
         # Calculate the displacement vector between the current and previous positions
         displacement_vector = current_position - previous_position
         
-        # Calculate the forward velocity by projecting the displacement vector onto the forward vector
+        # Calculate the forward displacement by projecting the displacement vector onto the forward vector
         forward_displacement = np.dot(displacement_vector, forward_vector)
 
-        #Calculate the forward velocity
+        # Calculate the forward velocity
         forward_velocity = forward_displacement / (current_time - previous_time)
 
-        
         forward_velocities.append(forward_velocity)
-    if version == 1:
-        df = pd.DataFrame(np.column_stack([times, forward_vectors]), columns=['timestamp', 'fx', 'fy', 'fz'])
-        df.to_csv(fg.filename_store_data(date,terrain,trial)+'forward_vectors.csv', index=False)
-    else:
-        df = pd.DataFrame(np.column_stack([times, forward_vectors2]), columns=['timestamp', 'fx', 'fy', 'fz'])
-        df.to_csv(fg.filename_store_data(date,terrain,trial)+'forward_vectors2.csv', index=False)
     
     return np.array(forward_velocities)
 
 def calculate_forward_vector(quaternion):
-    """
-    Calculate the forward vector based on a quaternion representing the orientation.
-
-    Parameters:
-    - quaternion (numpy.ndarray): The quaternion representing the orientation.
-
-    Returns:
-    - forward_vector (numpy.ndarray): The calculated forward vector.
-    """
-    # Extract the components of the quaternion
-    qw, qx, qy, qz = quaternion
-    
-    # Calculate the forward vector
-    forward_vector = np.array([
-        2 * (qx * qz + qw * qy),
-        2 * (qy * qz - qw * qx),
-        1 - 2 * (qx**2 + qy**2)
-        ])
-    
-    # Normalize the forward vector
-    forward_vector = forward_vector / np.linalg.norm(forward_vector)
-    
-    return forward_vector
-
-def calculate_forward_vector2(quaternion):
     """
     Calculate the forward vector based on a quaternion representing the orientation.
 
@@ -293,8 +247,8 @@ def calculate_forward_vector2(quaternion):
         [2*x*y + 2*z*w, 1 - 2*x**2 - 2*z**2, 2*y*z - 2*x*w],
         [2*x*z - 2*y*w, 2*y*z + 2*x*w, 1 - 2*x**2 - 2*y**2]
     ])
-    forward_vector = R[2]
-
+   
+    forward_vector = R[:, 0]
     forward_vector = forward_vector / np.linalg.norm(forward_vector)
     
     return forward_vector
@@ -314,12 +268,13 @@ def retruncate(date, terrain, trial, start, end):
     filename = fg.filename_clean_data(date, terrain, trial)
     
     # Read the clean data from the CSV file
-    raw_test = pd.read_csv(filename)
+    raw_test = pd.read_csv(fg.filename_raw_data(date, terrain, trial))
     
     # Truncate the data based on the start and end indices
     if end != 9999:
         raw_test = raw_test.iloc[start:end]
     else:
         raw_test = raw_test.iloc[start:]
+    
     # Save the truncated data back to the CSV file
     raw_test.to_csv(filename, index=False)

@@ -32,10 +32,9 @@ def import_data(file_path):
     roll = df['roll']
     pitch = df['pitch']
     yaw = df['yaw']
-    forward_velocity = df['fw']
-    forward_velocity2= df['fw2']
+    forward_velocity = df['forward_velocity']
     
-    return df, timestamps, pos_x, pos_y, pos_z, quaternion, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z, wx, wy, wz, aa_x, aa_y, aa_z, roll, pitch, yaw,forward_velocity,forward_velocity2
+    return df, timestamps, pos_x, pos_y, pos_z, quaternion, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z, wx, wy, wz, aa_x, aa_y, aa_z, roll, pitch, yaw,forward_velocity
 
 # Function to calculate displacement
 def find_displacement(pos_x, pos_y):
@@ -280,39 +279,49 @@ def plot_gait(roll, yaw, date, terrain, trial):
     plt.xlabel('Roll')
     plt.ylabel('Yaw')
     plt.title(f"Gait for {date} data on {terrain} terrain (trial {trial})")
-
     plt.savefig(fg.filename_store_data(date, terrain, trial) + "gait.svg", format = "svg")
     plt.clf()
     plt.close()
 
-def plot_forward_velocity(timestamps,forward_velocity,date,terrain,trial):
+def plot_forward_velocity(timestamps,forward_velocity,date,terrain,trial,forward_velocities,trial_data):
     plt.figure()
     plt.plot(timestamps,forward_velocity)
     plt.xlabel('Time (s)')
-    plt.ylabel('Forward Velocity')
+    plt.ylabel('Forward Velocity (m/s)')
     plt.title(f'Forward Velocity for {date} data on {terrain} terrain (trial {trial}) (mean = {np.mean(forward_velocity):.2f})')
-    plt.savefig(fg.filename_store_data(date,terrain,trial)+"forward_velocity.svg", format = "svg")
+    plt.savefig(fg.filename_store_data(date,terrain,trial)+f"forward_velocity.svg", format = "svg")
+    forward_velocities.update({trial:np.mean(forward_velocity)})
+    trial_data.append(np.mean(forward_velocity))
     plt.clf()
     plt.close()
 
 
-def plot_forward_velocity2(timestamps,forward_velocity,date,terrain,trial):
-    plt.figure()
-    plt.plot(timestamps,forward_velocity)
-    plt.xlabel('Time (s)')
-    plt.ylabel('Forward Velocity')
-    plt.title(f'Forward Velocity for {date} data on {terrain} terrain (trial {trial}) (mean = {np.mean(forward_velocity):.2f})')
-    plt.savefig(fg.filename_store_data(date,terrain,trial)+"forward_velocity2.svg", format = "svg")
-    plt.clf()
-    plt.close()
+def plot_forward_velocities(forward_velocities, date, terrain, trial):
+    """
+    Plot the Lyapunov forward_velocities for Z-Acceleration.
+
+    Parameters:
+    - trials: array-like, trial numbers
+    - forward_velocities: array-like, forward_velocities
+    - date: str, date of the data
+    - terrain: str, type of terrain
+    - trial: int, trial number
+    """
+    fig, ax = plt.subplots(1, 1, figsize=(10, 5))
+    ax.scatter(list(forward_velocities.keys()), list(forward_velocities.values()), label="Lyapunov Exponents", color="blue")
+    
+    ax.set_xlabel("Trial")
+    ax.set_ylabel("Forward velocity (mm/s)")
+    ax.set_title("Forward velocities for " + date + " data on " + terrain + " terrain")
+    fig.savefig(fg.filename_big(date, terrain, trial) + "forward_velocities.svg", format="svg")
 
 # Main function
-def main(date, terrain, trial, delta_t,forward_velocities,forward_velocities_2):
+def main(date, terrain, trial, delta_t,forward_velocities,trial_data):
     # Generate the file path based on the disturbance and control type
     file_path = fg.filename_clean_data(date, terrain, trial)
     
     # Import data from the CSV file
-    df, timestamps, pos_x, pos_y, pos_z, quaternion, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z, wx, wy, wz, aa_x, aa_y, aa_z, roll, pitch, yaw,forward_velocity,forward_velocity2 = import_data(file_path)
+    df, timestamps, pos_x, pos_y, pos_z, quaternion, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z, wx, wy, wz, aa_x, aa_y, aa_z, roll, pitch, yaw,forward_velocity = import_data(file_path)
     
     # Plot 2D linear state space
     plot_linear_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z, date, terrain, trial, delta_t)
@@ -338,15 +347,8 @@ def main(date, terrain, trial, delta_t,forward_velocities,forward_velocities_2):
     # Plot gait
     plot_gait(roll, yaw, date, terrain, trial)
 
-    #plot forward velocity
-    plot_forward_velocity(timestamps,forward_velocity,date,terrain,trial)
-
-    #plot forward velocity2
-    plot_forward_velocity2(timestamps,forward_velocity2,date,terrain,trial)
-
-    forward_velocities.update({trial:np.mean(forward_velocity)})
-    forward_velocities_2.update({trial:np.mean(forward_velocity2)})
-
+    plot_forward_velocity(timestamps,forward_velocity,date,terrain,trial,forward_velocities,trial_data)
+   
 
 
     

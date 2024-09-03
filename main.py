@@ -28,6 +28,7 @@ def main():
     dates = np.unique(dates)  # Get the unique dates
     terrains = {}  # Initialize an empty dictionary to store terrains
     trials = {}  # Initialize an empty dictionary to store trials
+    data_store =[]
 
     for date in dates:
         terrains.update({date: np.unique(data[data[:, 0] == date][:, 1])})  # Get the unique terrains for each date
@@ -38,43 +39,48 @@ def main():
             trials.get(date).update({terrain: np.unique(data[(data[:, 0] == date) & (data[:, 1] == terrain)][:, 2])})  # Get the unique trials for each date and terrain
     for date in dates:
         for terrain in terrains.get(date):
-            exponents = {}  # Initialize an empty list to store Lyapunov exponents
-            psds = {}  # Initialize an empty list to store power spectral densities
-            forward_velocities = {}  # Initialize an empty list to store forward velocities
-            forward_velocities2 = {}  # Initialize an empty list to store forward velocities (for the second method)
-
+            if("terrain" in terrain):
+                continue
+            exponents = {}  # Initialize an empty dictionary to store Lyapunov exponents
+            psds = {}  # Initialize an empty dictionary to store power spectral densities
+            forward_velocities={} # Initialize an empty dictionary to store forward velocities
             for trial in trials.get(date).get(terrain):
+                trial_data=[date,terrain,trial]
                 print("Running for date:", date, ", terrain:", terrain, ", trial:", trial)
                 row = df[(df['Date'] == date) & (df['Terrain'] == terrain) & (df['Trial'] == trial)]  # Get the row corresponding to the current date, terrain, and trial
                 row_array = row.values[0]  # Convert the row to a numpy array
                 tr_start = row_array[3]  # Get the start time for truncation
                 tr_end = row_array[4]  # Get the end time for truncation
-
-                tr.main(date, terrain, trial, tolerance)  # Call the main function from the truncate module
                 tr.retruncate(date, terrain, trial, tr_start, tr_end)  # Call the retruncate function from the truncate module
+                tr.main(date, terrain, trial, tolerance)  # Call the main function from the truncate module
+                
 
                 info = pd.read_csv(fg.filename_clean_data(date, terrain, trial))  # Read the cleaned data from the CSV file
                 delta_t = np.mean(np.diff(info['timestamp'])) # Calculate the mean time step
 
-                ss.main(date, terrain, trial, delta_t,forward_velocities,forward_velocities2)  # Call the main function from the state_space module
-                lyap.exponent(tau, m, min_steps, epsilon, plotting_0, plotting_final,
-                              delta_t, force_minsteps, exponents, date, terrain, trial)  # Call the exponent function from the lyapunov_final module
+                ss.main(date, terrain, trial, delta_t,forward_velocities,trial_data)  # Call the main function from the state_space module
+                lyap.exponent(tau, m, min_steps, plotting_0, plotting_final,
+                              delta_t, force_minsteps, exponents, date, terrain, trial,trial_data)  # Call the exponent function from the lyapunov_final module
                 psd.main(psds, date, terrain, trial)  # Call the main function from the psd module
+                print("Trial data:",trial_data)
+                data_store.append(trial_data)
 
             lyap.plot_exponents(exponents, date, terrain, 0)  # Call the plot_exponents function from the lyapunov_final module
             psd.plot_psd(psds, date, terrain, 0)  # Call the plot_psd function from the psd module
-
-            forward_velocities_df = pd.DataFrame.from_dict(forward_velocities, orient='index')
-            forward_velocities_df.to_csv(fg.filename_big(date, terrain, 0) + "forward_velocities.csv")  # Save the DataFrame to a CSV file
-
-            forward_velocities_df2 = pd.DataFrame.from_dict(forward_velocities2, orient='index')
-            forward_velocities_df2.to_csv(fg.filename_big(date, terrain, 0) + "forward_velocities2.csv")  # Save the DataFrame to a CSV file
+            ss.plot_forward_velocities(forward_velocities, date, terrain, 0)
 
             exponents_df = pd.DataFrame.from_dict(exponents, orient='index')
             exponents_df.to_csv(fg.filename_big(date, terrain, 0) + "exponents.csv")  # Save the DataFrame to a CSV file
 
             psds_df = pd.DataFrame.from_dict(psds, orient='index')
             psds_df.to_csv(fg.filename_big(date, terrain, 0) + "psds.csv")  # Save the DataFrame to a CSV file
+
+            forward_velocities_df = pd.DataFrame.from_dict(forward_velocities, orient='index')
+            forward_velocities_df.to_csv(fg.filename_big(date, terrain, 0) + "forward_velocities.csv")
+
+    data_store_df = pd.DataFrame(data_store, columns=['Date', 'Terrain', 'Trial','Forward Velocities' ,'Exponent'])
+    data_store_df.to_csv("3_results/data.csv", index=False)  # Save the DataFrame to a CSV file
+            
 
 
 if __name__ == "__main__":

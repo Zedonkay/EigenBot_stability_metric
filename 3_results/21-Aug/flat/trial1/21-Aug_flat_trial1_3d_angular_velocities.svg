@@ -6,7 +6,7 @@
   <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
    <cc:Work>
     <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
-    <dc:date>2024-08-30T10:25:21.516447</dc:date>
+    <dc:date>2024-09-02T22:37:06.344344</dc:date>
     <dc:format>image/svg+xml</dc:format>
     <dc:creator>
      <cc:Agent>
@@ -262,7 +262,7 @@ L 184.031879 263.664345
     </g>
     <g id="text_3">
      <!-- −50 -->
-     <g transform="translate(167.484116 285.998666) scale(0.1 -0.1)">
+     <g transform="translate(167.484115 285.998666) scale(0.1 -0.1)">
       <use xlink:href="#DejaVuSans-2212"/>
       <use xlink:href="#DejaVuSans-35" x="83.789062"/>
       <use xlink:href="#DejaVuSans-30" x="147.412109"/>
@@ -974,12 +974,12 @@ z
   </g>
   <g id="axes_1">
    <g id="line2d_22">
-    <path d="M 259.056844 165.055262 
+    <path d="M 259.011984 165.069435 
 L 258.988406 165.047912 
 L 258.8494 165.140393 
 L 259.008671 165.017431 
 L 258.995732 165.042887 
-L 258.993542 165.503385 
+L 258.993542 165.503386 
 L 260.056263 165.72558 
 L 259.011607 165.021949 
 L 258.988315 165.094271 
@@ -1638,7 +1638,7 @@ L 257.833223 165.932813
 L 259.239793 165.084702 
 L 259.067039 165.278064 
 L 258.738296 165.397422 
-L 259.0448 165.112768 
+L 259.0448 165.112769 
 L 259.107321 165.311378 
 L 258.815841 165.191097 
 L 259.051716 164.940884 
@@ -1999,7 +1999,7 @@ L 259.194721 165.569879
 L 259.197992 162.728759 
 L 257.787527 161.124428 
 L 259.706788 159.124496 
-L 254.387931 160.140063 
+L 254.387932 160.140063 
 L 252.049692 159.28316 
 L 259.113903 164.99005 
 L 257.518847 161.221726 
@@ -3157,7 +3157,7 @@ L 259.068321 165.118918
 L 259.500375 177.78234 
 L 258.43026 166.286064 
 L 258.43026 166.286064 
-" clip-path="url(#p84d24aeda7)" style="fill: none; stroke: #1f77b4; stroke-width: 1.5; stroke-linecap: square"/>
+" clip-path="url(#p57e806e15d)" style="fill: none; stroke: #1f77b4; stroke-width: 1.5; stroke-linecap: square"/>
    </g>
    <g id="text_22">
     <!-- 3D Angular Velocity Plot for 21-Aug data on flat terrain (trial 1) -->
@@ -3355,7 +3355,7 @@ z
   </g>
  </g>
  <defs>
-  <clipPath id="p84d24aeda7">
+  <clipPath id="p57e806e15d">
    <rect x="103.104" y="41.472" width="266.112" height="266.112"/>
   </clipPath>
  </defs>
