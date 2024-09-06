@@ -15,7 +15,7 @@ def import_data(file_path):
     timestamps = df['timestamp'] 
     pos_x = df['px']
     pos_y = df['py']
-    pos_z = df['pz']
+    pos_z = df['lyap_z']
     quaternion = df[['ox', 'oy', 'oz', 'ow']].values
     vel_x = df['vx']
     vel_y = df['vy']
@@ -33,8 +33,10 @@ def import_data(file_path):
     pitch = df['pitch']
     yaw = df['yaw']
     forward_velocity = df['forward_velocity']
+    forward_velocity_2 = df['forward_velocity_1']
     
-    return df, timestamps, pos_x, pos_y, pos_z, quaternion, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z, wx, wy, wz, aa_x, aa_y, aa_z, roll, pitch, yaw,forward_velocity
+    
+    return df, timestamps, pos_x, pos_y, pos_z, quaternion, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z, wx, wy, wz, aa_x, aa_y, aa_z, roll, pitch, yaw,forward_velocity,forward_velocity_2
 
 # Function to calculate displacement
 def find_displacement(pos_x, pos_y):
@@ -313,7 +315,7 @@ def plot_forward_velocities(forward_velocities, date, terrain, trial):
     ax.set_xlabel("Trial")
     ax.set_ylabel("Forward velocity (mm/s)")
     ax.set_title("Forward velocities for " + date + " data on " + terrain + " terrain")
-    fig.savefig(fg.filename_big(date, terrain, trial) + "forward_velocities.svg", format="svg")
+    fig.savefig(fg.filename_big(date, terrain, trial) + f"forward_velocities_{trial}.svg", format="svg")
 
 # Main function
 def main(date, terrain, trial, delta_t,forward_velocities,trial_data):
@@ -321,7 +323,7 @@ def main(date, terrain, trial, delta_t,forward_velocities,trial_data):
     file_path = fg.filename_clean_data(date, terrain, trial)
     
     # Import data from the CSV file
-    df, timestamps, pos_x, pos_y, pos_z, quaternion, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z, wx, wy, wz, aa_x, aa_y, aa_z, roll, pitch, yaw,forward_velocity = import_data(file_path)
+    df, timestamps, pos_x, pos_y, pos_z, quaternion, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z, wx, wy, wz, aa_x, aa_y, aa_z, roll, pitch, yaw,forward_velocity_1,forward_velocity_2 = import_data(file_path)
     
     # Plot 2D linear state space
     plot_linear_2d(timestamps, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z, date, terrain, trial, delta_t)
@@ -347,7 +349,7 @@ def main(date, terrain, trial, delta_t,forward_velocities,trial_data):
     # Plot gait
     plot_gait(roll, yaw, date, terrain, trial)
 
-    plot_forward_velocity(timestamps,forward_velocity,date,terrain,trial,forward_velocities,trial_data)
+    plot_forward_velocity(timestamps,forward_velocity_1,date,terrain,trial,forward_velocities,trial_data)
    
 
 

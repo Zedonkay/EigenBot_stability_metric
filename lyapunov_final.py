@@ -101,7 +101,7 @@ def exponent(tau, m, min_steps, plotting_0, plotting_final,
     # Read the data from the file
     filename = fg.filename_clean_data(date, terrain, trial)
     df = pd.read_csv(filename)
-    pdata = df[['pz']]
+    pdata = df[['lyap_z']]
     data = pdata.values
      # Calculate the minimum number of steps using Welch's method
     if not force_minsteps:

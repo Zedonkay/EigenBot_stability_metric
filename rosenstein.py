@@ -36,7 +36,7 @@ def find_lag(data, min_steps):
     lag = np.argmax(correlation)+1
     correlation = correlation[int(min_steps*.08):int(min_steps*.55)]
     used_lag= np.argmax(correlation)+1+int(min_steps*.08)
-    print(f"true lag: {lag}, used lag: {used_lag}, min_steps: {min_steps}")
+    print("True lag: ",lag, "Used lag: ",used_lag)
     return used_lag
 
 
