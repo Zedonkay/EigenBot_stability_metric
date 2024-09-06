@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import filename_generation as fg
 import pickle
+import scipy
 
 def angular_velocities(q1, q2, dt):
     """
@@ -280,15 +281,16 @@ def terrain_fit(date,terrain,trial, positions,timestamps):
     pd.DataFrame(terrain_timestamps).to_csv(fg.filename_store_data(date,terrain,trial)+'terrain_timestamps.csv',index=False)
     return positions[:,2]
 
-    
 
 def terrain_fit_sim(date,terrain,trial,positions,timestamps):
-    model = load_model('4_models/rbf_model_sim.pkl')
+    data = np.loadtxt('sim_terrain.csv', delimiter=',')
+    points = data[:, :2]
+    values = data[:, 2]
     terrain_timestamps = []
     for i in range(len(positions)):
         x = positions[i][0]
         y = positions[i][1]
-        z = predict_z(model, x, y)
+        z=scipy.interpolate.griddata(points, values, (x, y), method='linear')
         positions[i][2] =positions[i][2] - z
         terrain_timestamps.append(timestamps[i])
     pd.DataFrame(terrain_timestamps).to_csv(fg.filename_store_data(date,terrain,trial)+'terrain_timestamps.csv',index=False)
