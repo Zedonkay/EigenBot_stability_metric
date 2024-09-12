@@ -39,7 +39,7 @@ def main():
         for terrain in terrains.get(date):
             trials.get(date).update({terrain: np.unique(data[(data[:, 0] == date) & (data[:, 1] == terrain)][:, 2])})  # Get the unique trials for each date and terrain
     for date in dates:
-        if date !="Simulation":
+        if date =="Simulation":
             continue
         for terrain in terrains.get(date):
             exponents = {}  # Initialize an empty dictionary to store Lyapunov exponents
@@ -57,10 +57,12 @@ def main():
                 
                 info = pd.read_csv(fg.filename_clean_data(date, terrain, trial))  # Read the cleaned data from the CSV file
                 delta_t = np.mean(np.diff(info['timestamp'])) # Calculate the mean time step
+                # if terrain.startswith('predefined'):
+                #     delta_t = .05*np.pi
+                # else:
+                #     delta_t = .05
 
                 ss.main(date, terrain, trial, delta_t,forward_velocities,trial_data)  # Call the main function from the state_space module
-
-                
                 if ((filtered_df['Date'] == date) & (filtered_df['Terrain'] == terrain) & (filtered_df['Trial'] == trial)).any():
                     lyap.exponent(tau, m, min_steps, plotting_0, plotting_final,
                               delta_t, force_minsteps, exponents, date, terrain, trial,trial_data)  # Call the exponent function from the lyapunov_final module

@@ -90,7 +90,7 @@ def main(date, terrain, trial, tolerance):
 
     if 'terrain' in terrain and date!="Simulation":
         df['lyap_z']=terrain_fit(date,terrain,trial, positions,df['timestamp'].values)
-    elif date=="Simulation":
+    elif date=="Simulation" and 'terrain' in terrain:
         df['lyap_z'] = terrain_fit_sim(date,terrain,trial, positions,df['timestamp'].values)
     else:
         df['lyap_z'] = positions[:, 2]
@@ -181,11 +181,11 @@ def calculate_forward_velocity(positions, quaternions, times,attempt):
         # Calculate the displacement vector between the current and previous positions
         displacement_vector = current_position - previous_position
         
-        # Calculate the forward displacement by projecting the displacement vector onto the forward vector
+        # # Calculate the forward displacement by projecting the displacement vector onto the forward vector
         forward_displacement = np.dot(displacement_vector, forward_vector)
-
         # Calculate the forward velocity
         forward_velocity = forward_displacement / (current_time - previous_time)
+            
 
         forward_velocities.append(forward_velocity)
     
@@ -283,7 +283,7 @@ def terrain_fit(date,terrain,trial, positions,timestamps):
 
 
 def terrain_fit_sim(date,terrain,trial,positions,timestamps):
-    data = np.loadtxt('sim_terrain.csv', delimiter=',')
+    data = np.loadtxt('4_models/sim_terrain.csv', delimiter=',')
     points = data[:, :2]
     values = data[:, 2]
     terrain_timestamps = []
