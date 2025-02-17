@@ -6,11 +6,11 @@
   <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
    <cc:Work>
     <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
-    <dc:date>2024-09-10T00:52:31.374508</dc:date>
+    <dc:date>2025-02-16T19:54:48.461760</dc:date>
     <dc:format>image/svg+xml</dc:format>
     <dc:creator>
      <cc:Agent>
-      <dc:title>Matplotlib v3.9.2, https://matplotlib.org/</dc:title>
+      <dc:title>Matplotlib v3.9.4, https://matplotlib.org/</dc:title>
      </cc:Agent>
     </dc:creator>
    </cc:Work>
@@ -3093,7 +3093,7 @@ L 221.299023 172.703042
 L 221.282138 172.853286 
 L 221.638983 174.03674 
 L 221.638983 174.03674 
-" clip-path="url(#pfc1e2be1e1)" style="fill: none; stroke: #1f77b4; stroke-width: 1.5; stroke-linecap: square"/>
+" clip-path="url(#pa69624e301)" style="fill: none; stroke: #1f77b4; stroke-width: 1.5; stroke-linecap: square"/>
    </g>
    <g id="text_24">
     <!-- 3D Phase Space Plot for 29-Aug data on predefined_amputate_L3 terrain (trial 4) -->
@@ -3660,7 +3660,7 @@ z
   </g>
  </g>
  <defs>
-  <clipPath id="pfc1e2be1e1">
+  <clipPath id="pa69624e301">
    <rect x="103.104" y="41.472" width="266.112" height="266.112"/>
   </clipPath>
  </defs>

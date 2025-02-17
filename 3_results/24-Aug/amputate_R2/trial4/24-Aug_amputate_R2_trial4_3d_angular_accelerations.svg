@@ -6,11 +6,11 @@
   <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
    <cc:Work>
     <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
-    <dc:date>2024-09-10T00:46:26.902630</dc:date>
+    <dc:date>2025-02-16T19:49:11.576723</dc:date>
     <dc:format>image/svg+xml</dc:format>
     <dc:creator>
      <cc:Agent>
-      <dc:title>Matplotlib v3.9.2, https://matplotlib.org/</dc:title>
+      <dc:title>Matplotlib v3.9.4, https://matplotlib.org/</dc:title>
      </cc:Agent>
     </dc:creator>
    </cc:Work>
@@ -2405,7 +2405,7 @@ L 238.859129 177.92076
 L 230.956713 175.668683 
 L 239.262865 178.027363 
 L 238.869491 177.921012 
-" clip-path="url(#pcfd9282d11)" style="fill: none; stroke: #1f77b4; stroke-width: 1.5; stroke-linecap: square"/>
+" clip-path="url(#p6c4fa04974)" style="fill: none; stroke: #1f77b4; stroke-width: 1.5; stroke-linecap: square"/>
    </g>
    <g id="text_19">
     <!-- 3D Angular Acceleration Plot for 24-Aug data on amputate_R2 terrain (trial 4) -->
@@ -2780,7 +2780,7 @@ z
   </g>
  </g>
  <defs>
-  <clipPath id="pcfd9282d11">
+  <clipPath id="p6c4fa04974">
    <rect x="103.104" y="41.472" width="266.112" height="266.112"/>
   </clipPath>
  </defs>

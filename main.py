@@ -13,7 +13,7 @@ print("Running main.py")
 def main():
     # Set the values for various parameters
     tau = 11  # Time delay for Lyapunov exponent calculation (replaced in function)
-    m = 11  # Embedding dimension for Lyapunov exponent calculation
+    m = 13  # Embedding dimension for Lyapunov exponent calculation
     delta_t = 0.01  # Time step for Lyapunov exponent calculation
     min_steps = 100  # Minimum number of steps for Lyapunov exponent calculation
     force_minsteps = False  # Flag to force minimum steps for Lyapunov exponent calculation
@@ -26,6 +26,7 @@ def main():
     filtered_df = pd.read_csv("1_raw_data/running_info.csv")  # Read the CSV file into a pandas DataFrame
     data = df.values  # Convert the DataFrame to a numpy array
     dates = df['Date'].values  # Get the dates from the 'Date' column
+    taus = filtered_df['tau'].values  # Get the tau values from the 'tau' column
     dates = np.unique(dates)  # Get the unique dates
     terrains = {}  # Initialize an empty dictionary to store terrains
     trials = {}  # Initialize an empty dictionary to store trials
@@ -64,8 +65,9 @@ def main():
 
                 ss.main(date, terrain, trial, delta_t,forward_velocities,trial_data)  # Call the main function from the state_space module
                 if ((filtered_df['Date'] == date) & (filtered_df['Terrain'] == terrain) & (filtered_df['Trial'] == trial)).any():
+                    tau = filtered_df[(filtered_df['Date'] == date) & (filtered_df['Terrain'] == terrain) & (filtered_df['Trial'] == trial)]["tau"].values[0]  # Get the tau value for the current date, terrain, and trial
                     lyap.exponent(tau, m, min_steps, plotting_0, plotting_final,
-                              delta_t, force_minsteps, exponents, date, terrain, trial,trial_data)  # Call the exponent function from the lyapunov_final module
+                              delta_t, force_minsteps, exponents, date, terrain, trial,trial_data,False)  # Call the exponent function from the lyapunov_final module
                 else:
                     trial_data.append(np.nan)
                 

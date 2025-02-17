@@ -6,11 +6,11 @@
   <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
    <cc:Work>
     <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
-    <dc:date>2024-09-10T00:52:46.745239</dc:date>
+    <dc:date>2025-02-16T19:55:06.571591</dc:date>
     <dc:format>image/svg+xml</dc:format>
     <dc:creator>
      <cc:Agent>
-      <dc:title>Matplotlib v3.9.2, https://matplotlib.org/</dc:title>
+      <dc:title>Matplotlib v3.9.4, https://matplotlib.org/</dc:title>
      </cc:Agent>
     </dc:creator>
    </cc:Work>
@@ -2838,7 +2838,7 @@ L 202.551581 204.049998
 L 200.675802 206.743627 
 L 196.379656 208.612256 
 L 196.379656 208.612256 
-" clip-path="url(#p95aaee37dd)" style="fill: none; stroke: #1f77b4; stroke-width: 1.5; stroke-linecap: square"/>
+" clip-path="url(#pc4cb1aa13a)" style="fill: none; stroke: #1f77b4; stroke-width: 1.5; stroke-linecap: square"/>
    </g>
    <g id="text_23">
     <!-- 3D Euler State Space Plot for 29-Aug data on predefined_amputate_R3_L3 terrain (trial 5) -->
@@ -3281,7 +3281,7 @@ z
   </g>
  </g>
  <defs>
-  <clipPath id="p95aaee37dd">
+  <clipPath id="pc4cb1aa13a">
    <rect x="103.104" y="41.472" width="266.112" height="266.112"/>
   </clipPath>
  </defs>

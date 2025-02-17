@@ -80,7 +80,7 @@ def plot_exponents(exponents, date, terrain, trial):
 
 
 def exponent(tau, m, min_steps, plotting_0, plotting_final,
-             delta_t, force_minsteps, exponents, date, terrain, trial,trial_data):
+             delta_t, force_minsteps, exponents, date, terrain, trial,trial_data,force_tau):
     """
     Calculate Lyapunov exponents.
 
@@ -101,7 +101,7 @@ def exponent(tau, m, min_steps, plotting_0, plotting_final,
     # Read the data from the file
     filename = fg.filename_clean_data(date, terrain, trial)
     df = pd.read_csv(filename)
-    pdata = df[['lyap_z']]
+    pdata = df[['pitch']]
     data = pdata.values
      # Calculate the minimum number of steps using Welch's method
     if not force_minsteps:
@@ -119,7 +119,7 @@ def exponent(tau, m, min_steps, plotting_0, plotting_final,
     plotting_final = min_steps * 2
     
     # Calculate the Lyapunov exponents using Rosenstein's algorithm
-    times, data = rosenstein.lyapunov(data, tau, m, min_steps, plotting_0, plotting_final, delta_t)
+    times, data = rosenstein.lyapunov(data, tau, m, min_steps, plotting_0, plotting_final, delta_t,force_tau)
     # Fit a least squares line to the Lyapunov exponents
     coef = np.polyfit(times[t_0:t_f], data[t_0:t_f], 1)
     poly1d_fn = np.poly1d(coef)

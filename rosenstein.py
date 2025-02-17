@@ -130,7 +130,7 @@ def log_distance(reconstructed_data, neighbors_index, i) -> float:
     return np.mean(np.log(d_ji))
 
 
-def lyapunov(data, tau, m, min_steps, t_0, t_f, delta_t):
+def lyapunov(data, tau, m, min_steps, t_0, t_f, delta_t,force_tau):
     '''
     Calculate the Lyapunov exponents using the Rosenstein method.
 
@@ -147,8 +147,8 @@ def lyapunov(data, tau, m, min_steps, t_0, t_f, delta_t):
     - times: numpy array, time values corresponding to the calculated mean log distances
     - mean_log_distance: numpy array, mean log distances for each time value
     '''
-
-    tau=find_lag(data, min_steps)
+    if not force_tau:
+        tau=find_lag(data, min_steps)
     
     # Reconstruction through time delay
     reconstructed_data = reconstruction(data, tau, m)

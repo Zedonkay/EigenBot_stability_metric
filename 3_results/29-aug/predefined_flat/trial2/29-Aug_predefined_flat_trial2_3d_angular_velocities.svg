@@ -6,11 +6,11 @@
   <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
    <cc:Work>
     <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
-    <dc:date>2024-09-10T00:52:48.979166</dc:date>
+    <dc:date>2025-02-16T19:55:09.122726</dc:date>
     <dc:format>image/svg+xml</dc:format>
     <dc:creator>
      <cc:Agent>
-      <dc:title>Matplotlib v3.9.2, https://matplotlib.org/</dc:title>
+      <dc:title>Matplotlib v3.9.4, https://matplotlib.org/</dc:title>
      </cc:Agent>
     </dc:creator>
    </cc:Work>
@@ -5379,7 +5379,7 @@ L 260.24797 174.681335
 L 260.78409 174.970566 
 L 260.962745 174.729719 
 L 260.962745 174.729719 
-" clip-path="url(#p2e0c350bcf)" style="fill: none; stroke: #1f77b4; stroke-width: 1.5; stroke-linecap: square"/>
+" clip-path="url(#pce4b8cba68)" style="fill: none; stroke: #1f77b4; stroke-width: 1.5; stroke-linecap: square"/>
    </g>
    <g id="text_23">
     <!-- 3D Angular Velocity Plot for 29-Aug data on predefined_flat terrain (trial 2) -->
@@ -5651,7 +5651,7 @@ z
   </g>
  </g>
  <defs>
-  <clipPath id="p2e0c350bcf">
+  <clipPath id="pce4b8cba68">
    <rect x="103.104" y="41.472" width="266.112" height="266.112"/>
   </clipPath>
  </defs>
