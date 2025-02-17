@@ -6,7 +6,7 @@
   <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
    <cc:Work>
     <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
-    <dc:date>2025-02-16T19:54:56.672296</dc:date>
+    <dc:date>2025-02-16T20:48:56.889596</dc:date>
     <dc:format>image/svg+xml</dc:format>
     <dc:creator>
      <cc:Agent>
@@ -4320,7 +4320,7 @@ L 240.193009 181.600918
 L 232.468006 175.836871 
 L 228.49609 177.969454 
 L 228.51889 177.976045 
-" clip-path="url(#pc1f58a07ae)" style="fill: none; stroke: #1f77b4; stroke-width: 1.5; stroke-linecap: square"/>
+" clip-path="url(#p60cfb7865e)" style="fill: none; stroke: #1f77b4; stroke-width: 1.5; stroke-linecap: square"/>
    </g>
    <g id="text_26">
     <!-- 3D Phase Space Plot for 29-Aug data on predefined_amputate_R2_L2 terrain (trial 1) -->
@@ -4886,7 +4886,7 @@ z
   </g>
  </g>
  <defs>
-  <clipPath id="pc1f58a07ae">
+  <clipPath id="p60cfb7865e">
    <rect x="103.104" y="41.472" width="266.112" height="266.112"/>
   </clipPath>
  </defs>

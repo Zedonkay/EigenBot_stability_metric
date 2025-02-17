@@ -157,9 +157,6 @@ def lyapunov(data, tau, m, min_steps, t_0, t_f, delta_t,force_tau):
     # Calculate mean distance
     mean_log_distance = []
     times = []
-
-    
-
     for i in range(t_0, t_f):
         mean_log_distance.append(log_distance(reconstructed_data, neighbors_index, i))
         times.append(i * delta_t)

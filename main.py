@@ -13,7 +13,7 @@ print("Running main.py")
 def main():
     # Set the values for various parameters
     tau = 11  # Time delay for Lyapunov exponent calculation (replaced in function)
-    m = 13  # Embedding dimension for Lyapunov exponent calculation
+    m = 11  # Embedding dimension for Lyapunov exponent calculation
     delta_t = 0.01  # Time step for Lyapunov exponent calculation
     min_steps = 100  # Minimum number of steps for Lyapunov exponent calculation
     force_minsteps = False  # Flag to force minimum steps for Lyapunov exponent calculation
@@ -75,9 +75,9 @@ def main():
                 print("Trial Data:", trial_data)
                 data_store.append(trial_data)
 
-            lyap.plot_exponents(exponents, date, terrain, 0)  # Call the plot_exponents function from the lyapunov_final module
-            ss.plot_forward_velocities(forward_velocities, date, terrain, 1)
-            ss.plot_forward_velocities(forward_velocities, date, terrain, 2)
+            # lyap.plot_exponents(exponents, date, terrain, 0)  # Call the plot_exponents function from the lyapunov_final module
+            # ss.plot_forward_velocities(forward_velocities, date, terrain, 1)
+            # ss.plot_forward_velocities(forward_velocities, date, terrain, 2)
 
             exponents_df = pd.DataFrame.from_dict(exponents, orient='index')
             exponents_df.to_csv(fg.filename_big(date, terrain, 0) + "exponents.csv")  # Save the DataFrame to a CSV file
