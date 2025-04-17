@@ -5,7 +5,7 @@ import process_data as tr  # Import the truncate module
 import state_space as ss  # Import the state_space module
 import psd as psd  # Import the psd module
 import filename_generation as fg  # Import the filename_generation module
-
+import filter  # Import the filter module
 #!/path/to/venv python3
 
 print("Running main.py")
@@ -13,9 +13,9 @@ print("Running main.py")
 def main():
     # Set the values for various parameters
     tau = 11  # Time delay for Lyapunov exponent calculation (replaced in function)
-    m = 11  # Embedding dimension for Lyapunov exponent calculation
+    m = 15  # Embedding dimension for Lyapunov exponent calculation
     delta_t = 0.01  # Time step for Lyapunov exponent calculation
-    min_steps = 100  # Minimum number of steps for Lyapunov exponent calculation
+    min_steps = 150  # Minimum number of steps for Lyapunov exponent calculation
     force_minsteps = False  # Flag to force minimum steps for Lyapunov exponent calculation
     epsilon = 10  # Tolerance for truncation
     plotting_0 = 0  # Starting point for plotting
@@ -65,13 +65,13 @@ def main():
 
                 ss.main(date, terrain, trial, delta_t,forward_velocities,trial_data)  # Call the main function from the state_space module
                 if ((filtered_df['Date'] == date) & (filtered_df['Terrain'] == terrain) & (filtered_df['Trial'] == trial)).any():
-                    tau = filtered_df[(filtered_df['Date'] == date) & (filtered_df['Terrain'] == terrain) & (filtered_df['Trial'] == trial)]["tau"].values[0]  # Get the tau value for the current date, terrain, and trial
                     lyap.exponent(tau, m, min_steps, plotting_0, plotting_final,
                               delta_t, force_minsteps, exponents, date, terrain, trial,trial_data,False)  # Call the exponent function from the lyapunov_final module
                 else:
                     trial_data.append(np.nan)
                 
                 psd.main(psds, date, terrain, trial)  # Call the main function from the psd module
+                trial_data.append(info['deviation'][0])
                 print("Trial Data:", trial_data)
                 data_store.append(trial_data)
 
@@ -86,10 +86,11 @@ def main():
             forward_velocities_df.to_csv(fg.filename_big(date, terrain, 0) + "forward_velocities.csv")
 
 
-    data_store_df = pd.DataFrame(data_store, columns=['Date', 'Terrain', 'Trial','Forward Velocities' ,'Exponent'])
+    data_store_df = pd.DataFrame(data_store, columns=['Date', 'Terrain', 'Trial','Forward Velocities' ,'Exponent','Deviation'])
     data_store_df.to_csv("3_results/velocities.csv", index=False)  # Save the DataFrame to a CSV file
             
 
 
 if __name__ == "__main__":
     main()  # Call the main function if the script is run directly
+    filter.main()

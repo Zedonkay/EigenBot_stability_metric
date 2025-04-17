@@ -1,14 +1,18 @@
 import pandas as pd
+def main():
+    # Read the CSV files
+    df_to_filter = pd.read_csv("3_results/velocities.csv")
+    df_filter = pd.read_csv("1_raw_data/running_info.csv")
 
-# Read the CSV files
-df_to_filter = pd.read_csv("3_results/velocities.csv")
-df_filter = pd.read_csv("1_raw_data/running_info.csv")
+    # Merge the DataFrames on 'Date', 'Terrain', and 'Trial' columns
+    df_merged = pd.merge(df_to_filter, df_filter, on=['Date', 'Terrain', 'Trial'], how='inner')
 
-# Merge the DataFrames on 'Date', 'Terrain', and 'Trial' columns
-df_merged = pd.merge(df_to_filter, df_filter, on=['Date', 'Terrain', 'Trial'], how='inner')
+    # Select only the columns from df_to_filter
+    df_filtered = df_merged[df_to_filter.columns]
 
-# Select only the columns from df_to_filter
-df_filtered = df_merged[df_to_filter.columns]
+    # Save the filtered DataFrame to a CSV file
+    df_filtered.to_csv("3_results/exponents.csv", index=False)
+    df_to_filter.to_csv("3_results/deviation.csv", index=False)
 
-# Save the filtered DataFrame to a CSV file
-df_filtered.to_csv("3_results/exponents.csv", index=False)
+if __name__ == "__main__":
+    main()

@@ -140,8 +140,21 @@ def main(date, terrain, trial, tolerance):
     positions = df[['px', 'py', 'pz']].values
     df['forward_velocity'] = calculate_forward_velocity(positions, quaternions, times,1)
     df['forward_velocity_1']=calculate_forward_velocity(positions, quaternions, times,2)
-    
+
+    data_np = df[['roll', 'pitch']].to_numpy()
+
+    # Define mean values
+    mean_values = np.zeros((1, 2))
+
+    # Compute standard deviation using NumPy (ensuring mean is passed correctly)
+    deviation_values = np.std(data_np, axis=0, mean=mean_values)
+
+    # Compute norm of deviation values
+    deviation = np.linalg.norm(deviation_values)
+    df['deviation'] = deviation
+    print("deviation:", deviation)
     # Save the processed data to a new CSV file
+
     df.to_csv(fg.filename_clean_data(date, terrain, trial), index=False)
 
 def calculate_forward_velocity(positions, quaternions, times,attempt):
@@ -190,7 +203,24 @@ def calculate_forward_velocity(positions, quaternions, times,attempt):
         forward_velocities.append(forward_velocity)
     
     return np.array(forward_velocities)
+def calculate_deviation(positions, quaternions, times):
+    """
+    Calculate the deviation of the robots orientation from its median orientation.
+    Parameters:
+    - positions (numpy.ndarray): The positions of the robot.
+    - quaternions (numpy.ndarray): The quaternions representing the orientation of the robot.
+    - times (numpy.ndarray): The corresponding times.
+    Returns:
+    - deviation (numpy.ndarray): The calculated deviation of the robots orientation.
+    """
+    # Calculate the median quaternion
+    median_quaternion = np.median(quaternions, axis=0)
 
+    # Calculate the deviation of each quaternion from the median quaternion
+    deviation = np.linalg.norm(quaternions - median_quaternion, axis=1)
+    # Normalize the deviation by the median quaternion
+    deviation = deviation / np.linalg.norm(median_quaternion)
+    return deviation
 def calculate_forward_vector(quaternion,attempt):
     """
     Calculate the forward vector based on a quaternion representing the orientation.
